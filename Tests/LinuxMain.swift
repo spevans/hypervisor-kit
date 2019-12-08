@@ -1,7 +1,7 @@
 import XCTest
 
-import MultiPlatformTestTests
+import HypervisorKitTests
 
 var tests = [XCTestCaseEntry]()
-tests += MultiPlatformTestTests.allTests()
+tests += HypervisorKitTests.allTests()
 XCTMain(tests)

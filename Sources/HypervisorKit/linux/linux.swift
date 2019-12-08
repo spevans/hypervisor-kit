@@ -12,6 +12,9 @@ let KVM_DEVICE = "/dev/kvm"
 enum HVError: Error {
     case vmSubsystemFail
     case badIOCTL(Int)
+    case setRegisters
+    case getRegisters
+    case run
 }
 public struct VCPU {
 
@@ -27,99 +30,99 @@ public struct VCPU {
     private let kvmRun: UnsafeMutablePointer<kvm_run>
     private let kvm_run_mmap_size: Int32
 
+    struct SegmentRegister {
+        var kvmSegment = kvm_segment()
+
+        var selector: UInt16 {
+            get { kvmSegment.selector }
+            set { kvmSegment.selector = newValue }
+        }
+
+        var base: UInt {
+            get { UInt(kvmSegment.base) }
+            set { kvmSegment.base = UInt64(newValue) }
+        }
+
+        var limit: UInt32 {
+            get { kvmSegment.limit }
+            set { kvmSegment.limit = newValue }
+        }
+
+        var accessRights: UInt32 {
+            get {
+                print("Addess rights: ")
+                var bitArray = BitArray32(0)
+                bitArray[0...3] = UInt32(kvmSegment.type)
+                bitArray[4] = Int(kvmSegment.s)
+                bitArray[5...6] = UInt32(kvmSegment.dpl)
+                bitArray[7] = Int(kvmSegment.present)
+                bitArray[8...11] = 0 // reserverd
+                bitArray[12] = Int(kvmSegment.avl)
+                bitArray[13] = Int(kvmSegment.l)
+                bitArray[14] = Int(kvmSegment.db)
+                bitArray[15] = Int(kvmSegment.g)
+                bitArray[16] = 0 // usable
+                return bitArray.rawValue
+            }
+            set {
+                let bitArray = BitArray32(newValue)
+                kvmSegment.type = UInt8(bitArray[0...3])
+                kvmSegment.s = UInt8(bitArray[4])
+                kvmSegment.dpl = UInt8(bitArray[5...6])
+                kvmSegment.present = UInt8(bitArray[7])
+                kvmSegment.avl = UInt8(bitArray[12])
+                kvmSegment.l = UInt8(bitArray[13])
+                kvmSegment.db = UInt8(bitArray[14])
+                kvmSegment.g = UInt8(bitArray[15])
+            }
+        }
+    }
+
 
     struct Registers {
         fileprivate var regs = kvm_regs()
         fileprivate var sregs = kvm_sregs()
 
-        var csSelector: UInt16 {
-            get { sregs.cs.selector }
-            set { sregs.cs.selector = newValue }
+        var cs: SegmentRegister = SegmentRegister()
+        var ss: SegmentRegister = SegmentRegister()
+        var ds: SegmentRegister = SegmentRegister()
+        var es: SegmentRegister = SegmentRegister()
+        var fs: SegmentRegister = SegmentRegister()
+        var gs: SegmentRegister = SegmentRegister()
+        var tr: SegmentRegister = SegmentRegister()
+        var ldtr: SegmentRegister = SegmentRegister()
+
+
+        init(regs: kvm_regs, sregs: kvm_sregs) {
+            self.regs = regs
+            self.sregs = sregs
+            self.cs = SegmentRegister(kvmSegment: sregs.cs)
+            self.ss = SegmentRegister(kvmSegment: sregs.ss)
+            self.ds = SegmentRegister(kvmSegment: sregs.ds)
+            self.es = SegmentRegister(kvmSegment: sregs.es)
+            self.fs = SegmentRegister(kvmSegment: sregs.fs)
+            self.gs = SegmentRegister(kvmSegment: sregs.gs)
+            self.tr = SegmentRegister(kvmSegment: sregs.tr)
+            self.ldtr = SegmentRegister(kvmSegment: sregs.ldt)
         }
 
-        var csBase: UInt64 {
-            get { sregs.cs.base }
-            set { sregs.cs.base = newValue }
+        init() {
         }
 
-        var csLimit: UInt32 {
-            get { sregs.cs.limit }
-            set { sregs.cs.limit = newValue }
-        }
 
-        var ssSelector: UInt16 {
-            get { sregs.ss.selector }
-            set { sregs.ss.selector = newValue }
-        }
-
-        var ssBase: UInt64 {
-            get { sregs.ss.base }
-            set { sregs.ss.base = newValue }
-        }
-
-        var ssLimit: UInt32 {
-            get { sregs.ss.limit }
-            set { sregs.ss.limit = newValue }
-        }
-
-        var dsSelector: UInt16 {
-            get { sregs.ds.selector }
-            set { sregs.ds.selector = newValue }
-        }
-
-        var dsBase: UInt64 {
-            get { sregs.ds.base }
-            set { sregs.ds.base = newValue }
-        }
-
-        var dsLimit: UInt32 {
-            get { sregs.ds.limit }
-            set { sregs.ds.limit = newValue }
-        }
-
-        var esSelector: UInt16 {
-            get { sregs.es.selector }
-            set { sregs.es.selector = newValue }
-        }
-
-        var esBase: UInt64 {
-            get { sregs.es.base }
-            set { sregs.es.base = newValue }
-        }
-
-        var esLimit: UInt32 {
-            get { sregs.es.limit }
-            set { sregs.es.limit = newValue }
-        }
-
-        var fsSelector: UInt16 {
-            get { sregs.fs.selector }
-            set { sregs.fs.selector = newValue }
-        }
-
-        var fsBase: UInt64 {
-            get { sregs.fs.base }
-            set { sregs.fs.base = newValue }
-        }
-
-        var fsLimit: UInt32 {
-            get { sregs.fs.limit }
-            set { sregs.fs.limit = newValue }
-        }
-
-        var gsSelector: UInt16 {
-            get { sregs.gs.selector }
-            set { sregs.gs.selector = newValue }
-        }
-
-        var gsBase: UInt64 {
-            get { sregs.gs.base }
-            set { sregs.gs.base = newValue }
-        }
-
-        var gsLimit: UInt32 {
-            get { sregs.gs.limit }
-            set { sregs.gs.limit = newValue }
+        mutating func updateSRegs() {
+            sregs.cs = cs.kvmSegment
+            sregs.ds = ds.kvmSegment
+            sregs.es = es.kvmSegment
+            sregs.fs = fs.kvmSegment
+            sregs.gs = gs.kvmSegment
+            sregs.ss = ss.kvmSegment
+            sregs.tr = tr.kvmSegment
+            sregs.cr0 = sregs.cr0
+            sregs.cr2 = sregs.cr2
+            sregs.cr3 = sregs.cr3
+            sregs.cr4 = sregs.cr4
+            sregs.cr8 = sregs.cr8
         }
 
         var rax: UInt64 {
@@ -242,12 +245,23 @@ public struct VCPU {
             set { sregs.efer = newValue }
         }
 
-        init(regs: kvm_regs, sregs: kvm_sregs) {
-            self.regs = regs
-            self.sregs = sregs
+        var gdtrBase: UInt64 {
+            get { sregs.gdt.base }
+            set { sregs.gdt.base = newValue }
         }
 
-        init() {
+        var gdtrLimit: UInt32 {
+            get { UInt32(sregs.gdt.limit) }
+            set { sregs.gdt.limit = UInt16(newValue) }
+        }
+
+        var idtrBase: UInt64  {
+            get { sregs.idt.base }
+            set { sregs.idt.base = newValue }
+        }
+        var idtrLimit:  UInt32 {
+            get { UInt32(sregs.idt.limit) }
+            set { sregs.idt.limit = UInt16(newValue) }
         }
     }
 
@@ -279,32 +293,35 @@ public struct VCPU {
     }
 
 
-    mutating func run() throws {
+    mutating func run() throws -> VMXExit {
 
+        registers.updateSRegs()
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &registers.regs) >= 0 else {
-            fatalError("Cant set sregs")
+            throw HVError.setRegisters
         }
 
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &registers.sregs) >= 0 else {
-            fatalError("Cant set sregs")
+            throw HVError.setRegisters
         }
 
         let ret = ioctl2arg(vcpu_fd, _IOCTL_KVM_RUN)
         guard ret >= 0 else {
-            fatalError("Cant run vcpu")
+            throw HVError.run
         }
 
 
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
-            fatalError("Cant get regs")
+            throw HVError.getRegisters
         }
 
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &registers.sregs) >= 0 else {
-            fatalError("Cant get sregs")
+            throw HVError.getRegisters
         }
+        if kvmRun.pointee.exit_reason == KVM_EXIT_HLT {
+            return VMXExit(12)
+        } 
+        return VMXExit(kvmRun.pointee.exit_reason)
     }
-
-    var exitReason: UInt32 { kvmRun.pointee.exit_reason }
 
 
     var io: IO_OP {
@@ -344,35 +361,34 @@ class VirtualMachine {
 
     class MemRegion {
         internal let region: kvm_userspace_memory_region
-        private let pointer: UnsafeMutableRawPointer
+        internal let pointer: UnsafeMutableRawPointer
 
         var guestAddress: UInt64 { region.guest_phys_addr }
-        var size: UInt64 { region.size }
-        var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(region.size)) }
+        var size: UInt64 { region.memory_size }
+        var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(region.memory_size)) }
 
         init?(size: UInt64, at address: UInt64, slot: Int) {
-            guard let ptr = mmap(nil, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0),
+            guard let ptr = mmap(nil, Int(size), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0),
                 ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
                     return nil
             }
             pointer = ptr
 
-            region = kvm_userspace_memory_region()
-            region.slot = UInt32(slot)
-            region.guest_phys_addr = address
-            region.memory_size = UInt64(size)
-            region.userspace_addr = UInt64(UInt(bitPattern: ptr))
+            region = kvm_userspace_memory_region(slot: UInt32(slot), flags: 0,
+                                                 guest_phys_addr: address,
+                                                 memory_size: UInt64(size),
+                                                 userspace_addr: UInt64(UInt(bitPattern: ptr)))
         }
 
         deinit {
-            munmap(pointer, size)
+            munmap(pointer, Int(region.memory_size))
         }
     }
 
 
     private let vm_fd: Int32
     private var vcpus: [VCPU] = []
-    private var memRegions: [kvm_userspace_memory_region] = []
+    private var memRegions: [MemRegion] = []
 
 
     static var apiVersion: Int32? = {
@@ -396,23 +412,29 @@ class VirtualMachine {
     }
 
 
-    init?() {
-        guard let dev_fd = try? Self.vmFD() else { return nil }
+    init() throws {
+        guard let dev_fd = try? Self.vmFD() else {
+            throw HVError.vmSubsystemFail
+        }
         guard let apiVersion =  VirtualMachine.apiVersion, apiVersion >= 0 else {
             fatalError("Bad API version")
         }
         vm_fd = ioctl2arg(dev_fd, _IOCTL_KVM_CREATE_VM)
         guard vm_fd >= 0 else {
-            return nil
+            throw HVError.vmSubsystemFail
+
         }
     }
 
     func addMemory(at guestAddress: UInt64, size: Int) -> MemRegion? {
         print("Adding \(size) bytes at address \(String(guestAddress, radix: 16))")
 
-        let memRegion = MemRegion(size: UInt64(size), at: guestAddress, slot: memRegions.count)
+        guard let memRegion = MemRegion(size: UInt64(size), at: guestAddress, slot: memRegions.count) else {
+            return nil
+        }
 
-        guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, memRegion.region) >= 0 else {
+        var kvmRegion = memRegion.region
+        guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
             return nil
         }
         memRegions.append(memRegion)
@@ -421,8 +443,8 @@ class VirtualMachine {
     }
 
 
-    func createVCPU() -> VCPU? {
-        guard let vcpu = VCPU(vm_fd: vm_fd) else { return nil }
+    func createVCPU() throws -> VCPU {
+        guard let vcpu = VCPU(vm_fd: vm_fd) else { throw HVError.vmSubsystemFail }
         vcpus.append(vcpu)
         return vcpu
     }
@@ -438,25 +460,11 @@ class VirtualMachine {
         var statInfo = stat()
         guard fstat(fd, &statInfo) >= 0 else { return false }
         let size = statInfo.st_size
-        guard size <= memRegions[0].memory_size else { return false }
-        guard let buffer = UnsafeMutableRawPointer(bitPattern: UInt(memRegions[0].userspace_addr)) else { return false }
-        guard read(fd, buffer, size) == size else { return false }
+        guard size <= Int(memRegions[0].size) else { return false }
+        guard read(fd, memRegions[0].pointer, size) == size else { return false }
         return true
     }
 
-
-    func runVCPU(vcpu: inout VCPU) throws {
-    }
-
-    func runVM() throws  {
-        if let vcpu = vcpus.first {
-            var vcpu = vcpu
-            print("running vcpu")
-            try runVCPU(vcpu: &vcpu)
-        } else {
-            print("have no vcpus!")
-        }
-    }
 
     deinit {
         print("Shutting down VM - deinit")
@@ -464,9 +472,7 @@ class VirtualMachine {
             vcpu.shutdown()
         }
         for memRegion in memRegions {
-            if let region = UnsafeMutableRawPointer(bitPattern: UInt(memRegions[0].userspace_addr)) {
-                munmap(region, Int(memRegion.memory_size))
-            }
+            munmap(memRegion.pointer, Int(memRegion.size))
         }
         vcpus = []
         memRegions = []

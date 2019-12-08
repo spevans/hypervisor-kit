@@ -1,0 +1,6 @@
+# ignore all files by default
+*
+# Files to copy, as exceptions to the wildcard above
+!Package.swift
+!Sources
+!Tests

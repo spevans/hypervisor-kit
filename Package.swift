@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "MultiPlatformTest",
+    name: "HypervisorKit",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "MultiPlatformTest",
-            targets: ["MultiPlatformTest"]),
+            name: "HypervisorKit",
+            targets: ["HypervisorKit"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -19,14 +19,14 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "MultiPlatformTest",
+            name: "HypervisorKit",
             dependencies: [],
             swiftSettings: [
-                .unsafeFlags(["-import-objc-header", "Sources/MultiPlatformTest/linux.h"], .when(platforms: [.linux]))
+                .unsafeFlags(["-import-objc-header", "Sources/HypervisorKit/linux/linux.h"], .when(platforms: [.linux]))
             ]
         ),
         .testTarget(
-            name: "MultiPlatformTestTests",
-            dependencies: ["MultiPlatformTest"]),
+            name: "HypervisorKitTests",
+            dependencies: ["HypervisorKit"]),
     ]
 )
