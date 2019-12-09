@@ -55,23 +55,58 @@ final class VMCS {
     }
 
 
-
     /* read VMCS field */
-    func vmread( _ field: UInt32, _ value: inout UInt64) -> UInt64 {
-        //var value: UInt64 = 0
-        let x = hv_vmx_vcpu_read_vmcs(vcpu, field, &value)
-        if x < 0 {
-            return 1
-        } else {
-            return 0
-        }
+    private func vmread( _ field: UInt32) throws -> UInt64 {
+        var value: UInt64 = 0
+        try hvError(hv_vmx_vcpu_read_vmcs(vcpu, field, &value))
+        return value
     }
 
     /* write VMCS field */
-    func vmwrite(_ field: UInt32, _ value: UInt64) -> UInt64 {
-        return UInt64(hv_vmx_vcpu_write_vmcs(vcpu, field, value))
+    private func vmwrite(_ field: UInt32, _ value: UInt64) throws {
+        try hvError(hv_vmx_vcpu_write_vmcs(vcpu, field, value))
     }
 
+    private func vmread16(_ index: UInt32) throws -> UInt16 {
+        return UInt16(try vmread(index))
+    }
+
+    private func vmread32(_ index: UInt32) throws -> UInt32 {
+        return UInt32(try vmread(index))
+    }
+
+    private func vmread64(_ index: UInt32) throws -> UInt64 {
+        return try vmread(index)
+    }
+
+    private func vmreadNatural(_ index: UInt32) throws -> UInt {
+        #if arch(x86_64)
+        return UInt(try vmread64(index))
+        #else
+        return UInt(try vmread32(index))
+        #endif
+    }
+
+    private func vmwrite16(_ index: UInt32, _ data: UInt16) throws {
+        try vmwrite(index, UInt64(data))
+    }
+
+
+    private func vmwrite32(_ index: UInt32, _ data: UInt32) throws {
+        try vmwrite(index, UInt64(data))
+    }
+
+    private func vmwrite64(_ index: UInt32, _ data: UInt64) throws {
+        try vmwrite(index, data)
+    }
+
+    private func vmwriteNatural(_ index: UInt32, _ data: UInt) throws {
+        #if arch(x86_64)
+        try vmwrite64(index, UInt64(data))
+        #else
+        try vmwrite32(index, UInt32(data))
+        #endif
+    }
 
 
     /*
@@ -1535,63 +1570,6 @@ final class VMCS {
      }
      *****/
 
-    func vmread16(_ index: UInt32) throws -> UInt16 {
-        var data: UInt64 = 0
-        let error = VMXError(vmread(index, &data))
-        guard error == .vmSucceed else { throw error }
-        return UInt16(data)
-    }
-
-
-    func vmread32(_ index: UInt32) throws -> UInt32 {
-        var data: UInt64 = 0
-        let error = VMXError(vmread(index, &data))
-        guard error == .vmSucceed else { throw error }
-        return UInt32(data)
-    }
-
-
-    func vmread64(_ index: UInt32) throws -> UInt64 {
-        var data: UInt64 = 0
-        let error = VMXError(vmread(index, &data))
-        guard error == .vmSucceed else { throw error }
-        return data
-    }
-
-
-    func vmreadNatural(_ index: UInt32) throws -> UInt {
-#if arch(x86_64)
-            return UInt(try vmread64(index))
-#else
-            return UInt(try vmread32(index))
-#endif
-    }
-
-
-    func vmwrite16(_ index: UInt32, _ data: UInt16) throws {
-        let error = VMXError(vmwrite(index, UInt64(data)))
-        guard error == .vmSucceed else { throw error }
-    }
-
-
-    func vmwrite32(_ index: UInt32, _ data: UInt32) throws {
-        let error = VMXError(vmwrite(index, UInt64(data)))
-        guard error == .vmSucceed else { throw error }
-    }
-
-
-    func vmwrite64(_ index: UInt32, _ data: UInt64) throws {
-        let error = VMXError(vmwrite(index, data))
-        guard error == .vmSucceed else { throw error }
-    }
-
-    func vmwriteNatural(_ index: UInt32, _ data: UInt) throws {
-#if arch(x86_64)
-        try vmwrite64(index, UInt64(data))
-#else
-        try vmwrite32(index, UInt32(data))
-#endif
-    }
 }
 
 #endif
