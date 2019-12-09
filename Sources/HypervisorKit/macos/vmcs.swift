@@ -87,132 +87,202 @@ final class VMCS {
      }
      */
 
-    var vpid: UInt16? {
-        get { _vmread16(0x0) }
-        set { _vmwrite16(0x0, newValue) }
+    func vpid() throws -> UInt16 {
+        try vmread16(0x0)
     }
 
-    var postedInterruptNotificationVector: UInt16? {
-        get { _vmread16(0x2) }
-        set { _vmwrite16(0x2, newValue) }
+    func vpid(_ data: UInt16) throws {
+        try vmwrite16(0x0, data)
     }
 
-    var eptpIndex: UInt16? {
-        get { _vmread16(0x4) }
-        set { _vmwrite16(0x4, newValue) }
+    func postedInterruptNotificationVector() throws-> UInt16 {
+        try vmread16(0x2)
+    }
+
+    func postedInterruptNotificationVector(_ data: UInt16) throws {
+        try vmwrite16(0x2, data)
+    }
+
+    func eptpIndex() throws -> UInt16 {
+        try vmread16(0x4)
+    }
+
+    func eptpIndex(_ data: UInt16) throws {
+        try vmwrite16(0x4, data)
     }
 
 
     // Guest Selectors
-    var guestESSelector: UInt16? {
-        get { _vmread16(0x800) }
-        set { _vmwrite16(0x800, newValue) }
+    func guestESSelector() throws -> UInt16 {
+        try vmread16(0x800)
     }
 
-    var guestCSSelector: UInt16? {
-        get { _vmread16(0x802) }
-        set { _vmwrite16(0x802, newValue) }
+    func guestESSelector(_ data: UInt16) throws {
+        try vmwrite16(0x800, data)
     }
 
-    var guestSSSelector: UInt16? {
-        get { _vmread16(0x804) }
-        set { _vmwrite16(0x804, newValue) }
+    func guestCSSelector() throws -> UInt16 {
+        try vmread16(0x802)
     }
 
-    var guestDSSelector: UInt16? {
-        get { _vmread16(0x806) }
-        set { _vmwrite16(0x806, newValue) }
+    func guestCSSelector(_ data: UInt16) throws {
+        try vmwrite16(0x802, data)
     }
 
-    var guestFSSelector: UInt16? {
-        get { _vmread16(0x808) }
-        set { _vmwrite16(0x808, newValue) }
+    func guestSSSelector() throws -> UInt16 {
+        try vmread16(0x804)
     }
 
-    var guestGSSelector: UInt16? {
-        get { _vmread16(0x80A) }
-        set { _vmwrite16(0x80A, newValue) }
+    func guestSSSelector(_ data: UInt16) throws {
+        try vmwrite16(0x804, data)
     }
 
-    var guestLDTRSelector: UInt16? {
-        get { _vmread16(0x80C) }
-        set { _vmwrite16(0x80C, newValue) }
+    func guestDSSelector() throws -> UInt16 {
+        try vmread16(0x806)
     }
 
-    var guestTRSelector: UInt16? {
-        get { _vmread16(0x80E) }
-        set { _vmwrite16(0x80E, newValue) }
+    func guestDSSelector(_ data: UInt16) throws {
+        try vmwrite16(0x806, data)
     }
 
-    var guestInterruptStatus: UInt16? {
-        get { _vmread16(0x810) }
-        set { _vmwrite16(0x810, newValue) }
+    func guestFSSelector() throws -> UInt16 {
+        try vmread16(0x808)
     }
 
-    var pmlIndex: UInt16? {
-        get { _vmread16(0x812) }
-        set { _vmwrite16(0x812, newValue) }
+    func guestFSSelector(_ data: UInt16) throws {
+        try vmwrite16(0x808, data)
+    }
+
+    func guestGSSelector() throws -> UInt16 {
+        try vmread16(0x80A)
+    }
+
+    func guestGSSelector(_ data: UInt16) throws {
+        try vmwrite16(0x80A, data)
+    }
+
+    func guestLDTRSelector() throws -> UInt16 {
+        try vmread16(0x80C)
+    }
+
+    func guestLDTRSelector(_ data: UInt16) throws {
+        try vmwrite16(0x80C, data)
+    }
+
+    func guestTRSelector() throws -> UInt16 {
+        try vmread16(0x80E)
+    }
+
+    func guestTRSelector(_ data: UInt16) throws {
+        try vmwrite16(0x80E, data)
+    }
+
+    func guestInterruptStatus() throws -> UInt16 {
+        try vmread16(0x810)
+    }
+
+    func guestInterruptStatus(_ data: UInt16) throws {
+        try vmwrite16(0x810, data)
+    }
+
+    func pmlIndex() throws -> UInt16 {
+        try vmread16(0x812)
+    }
+
+    func pmlIndex(_ data: UInt16) throws {
+        try vmwrite16(0x812, data)
     }
 
 
     // Host Selectors
-    var hostESSelector: UInt16? {
-        get { _vmread16(0xC00) }
-        set { _vmwrite16(0xC00, newValue) }
+    func hostESSelector() throws -> UInt16 {
+        try vmread16(0xC00)
     }
 
-    var hostCSSelector: UInt16? {
-        get { _vmread16(0xC02) }
-        set { _vmwrite16(0xC02, newValue) }
+    func hostESSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC00, data)
     }
 
-    var hostSSSelector: UInt16? {
-        get { _vmread16(0xC04) }
-        set { _vmwrite16(0xC04, newValue) }
+    func hostCSSelector() throws -> UInt16? {
+        try vmread16(0xC02)
     }
 
-    var hostDSSelector: UInt16? {
-        get { _vmread16(0xC06) }
-        set { _vmwrite16(0xC06, newValue) }
+    func hostCSSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC02, data)
     }
 
-    var hostFSSelector: UInt16? {
-        get { _vmread16(0xC08) }
-        set { _vmwrite16(0xC08, newValue) }
+    func hostSSSelector() throws -> UInt16 {
+        try vmread16(0xC04)
     }
 
-    var hostGSSelector: UInt16? {
-        get { _vmread16(0xC0A) }
-        set { _vmwrite16(0xC0A, newValue) }
+    func hostSSSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC04, data)
     }
 
-    var hostTRSelector: UInt16? {
-        get { _vmread16(0xC0C) }
-        set { _vmwrite16(0xC0C, newValue) }
+    func hostDSSelector() throws -> UInt16 {
+        try vmread16(0xC06)
+    }
+
+    func hostDSSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC06, data)
+    }
+
+    func hostFSSelector() throws -> UInt16 {
+        try vmread16(0xC08)
+    }
+
+    func hostFSSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC08, data)
+    }
+
+    func hostGSSelector() throws -> UInt16 {
+        try vmread16(0xC0A)
+    }
+
+    func hostGSSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC0A, data)
+    }
+
+    func hostTRSelector() throws -> UInt16 {
+        try vmread16(0xC0C)
+    }
+
+    func hostTRSelector(_ data: UInt16) throws {
+        try vmwrite16(0xC0C, data)
     }
 
     // 64Bit Control Fields
-    var ioBitmapAAddress: UInt64? {
-        get { _vmread64(0x2000) }
-        set { _vmwrite64(0x2000, newValue) }
+    func ioBitmapAAddress() throws -> UInt64 {
+        try vmread64(0x2000)
     }
 
-    var ioBitmapBAddress: UInt64? {
-        get { _vmread64(0x2002) }
-        set { _vmwrite64(0x2002, newValue) }
+    func ioBitmapAAddress(_ data: UInt64) throws {
+        try vmwrite64(0x2000, data)
     }
 
-    var msrBitmapAddress: UInt64? {
-        get { _vmread64(0x2004) }
-        set { _vmwrite64(0x2004, newValue) }
+    func ioBitmapBAddress() throws -> UInt64 {
+        try vmread64(0x2002)
     }
+
+    func ioBitmapBAddress(_ data: UInt64) throws {
+        try vmwrite64(0x2002, data)
+    }
+
+    func msrBitmapAddress() throws -> UInt64 {
+        try vmread64(0x2004)
+    }
+
+    func msrBitmapAddress(_ data: UInt64) throws {
+        try vmwrite64(0x2004, data)
+    }
+
     /****
      var vmExitMSRStoreAddress: PhysAddress? {
      get {
      if let addr = _vmread64(0x2006) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2006, UInt64(newValue!.value)) }
+     try vmwrite64(0x2006, UInt64(newValue!.value)) }
      }
 
      var vmExitMSRLoadAddress: PhysAddress? {
@@ -220,7 +290,7 @@ final class VMCS {
      if let addr = _vmread64(0x2008) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2008, UInt64(newValue!.value)) }
+     try vmwrite64(0x2008, UInt64(newValue!.value)) }
      }
 
      var vmEntryMSRLoadAddress: PhysAddress? {
@@ -228,12 +298,12 @@ final class VMCS {
      if let addr = _vmread64(0x200A) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x200A, UInt64(newValue!.value)) }
+     try vmwrite64(0x200A, UInt64(newValue!.value)) }
      }
 
-     var executiveVMCSPtr: UInt64? {
-     get { _vmread64(0x200C) }
-     set { _vmwrite64(0x200C, newValue) }
+     func executiveVMCSPtr() throws -> UInt64 {
+     try vmread64(0x200C) }
+     try vmwrite64(0x200C, data)
      }
 
      var pmlAddress: PhysAddress? {
@@ -241,12 +311,12 @@ final class VMCS {
      if let addr = _vmread64(0x200E) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x200E, UInt64(newValue!.value)) }
+     try vmwrite64(0x200E, UInt64(newValue!.value)) }
      }
 
-     var tscOffset: UInt64? {
-     get { _vmread64(0x2010) }
-     set { _vmwrite64(0x2010, newValue) }
+     func tscOffset() throws -> UInt64 {
+     try vmread64(0x2010) }
+     try vmwrite64(0x2010, data)
      }
 
      var virtualAPICAddress: PhysAddress? {
@@ -254,7 +324,7 @@ final class VMCS {
      if let addr = _vmread64(0x2012) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2012, UInt64(newValue!.value)) }
+     try vmwrite64(0x2012, UInt64(newValue!.value)) }
      }
 
      var apicAccessAddress: PhysAddress? {
@@ -262,7 +332,7 @@ final class VMCS {
      if let addr = _vmread64(0x2014) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2014, UInt64(newValue!.value)) }
+     try vmwrite64(0x2014, UInt64(newValue!.value)) }
      }
 
      var postedInterruptDescAddress: PhysAddress? {
@@ -270,37 +340,55 @@ final class VMCS {
      if let addr = _vmread64(0x2016) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2016, UInt64(newValue!.value)) }
+     try vmwrite64(0x2016, UInt64(newValue!.value)) }
      }
      ****/
-    var vmFunctionControls: UInt64? {
-        get { _vmread64(0x2018) }
-        set { _vmwrite64(0x2018, newValue) }
+    func vmFunctionControls() throws -> UInt64 {
+        try vmread64(0x2018)
     }
 
-    var eptp: UInt64? {
-        get { _vmread64(0x201A) }
-        set { _vmwrite64(0x201A, newValue) }
+    func vmFunctionControl(_ data: UInt64) throws {
+        try vmwrite64(0x2018, data)
     }
 
-    var eoiExitBitmap0: UInt64? {
-        get { _vmread64(0x201C) }
-        set { _vmwrite64(0x201C, newValue) }
+    func eptp() throws -> UInt64 {
+        try vmread64(0x201A)
     }
 
-    var eoiExitBitmap1: UInt64? {
-        get { _vmread64(0x201E) }
-        set { _vmwrite64(0x201E, newValue) }
+    func eptp(_ data: UInt64) throws {
+        try vmwrite64(0x201A, data)
     }
 
-    var eoiExitBitmap2: UInt64? {
-        get { _vmread64(0x2020) }
-        set { _vmwrite64(0x2020, newValue) }
+    func eoiExitBitmap0() throws -> UInt64 {
+        try vmread64(0x201C)
     }
 
-    var eoiExitBitmap3: UInt64? {
-        get { _vmread64(0x2022) }
-        set { _vmwrite64(0x2022, newValue) }
+    func eoiExitBitmap0(_ data: UInt64) throws {
+        try vmwrite64(0x201C, data)
+    }
+
+    func eoiExitBitmap1() throws -> UInt64 {
+        try vmread64(0x201E)
+    }
+
+    func eoiExitBitmap1(_ data: UInt64) throws {
+        try vmwrite64(0x201E, data)
+    }
+
+    func eoiExitBitmap2() throws -> UInt64 {
+        try vmread64(0x2020)
+    }
+
+    func eoiExitBitmap2(_ data: UInt64) throws {
+        try vmwrite64(0x2020, data)
+    }
+
+    func eoiExitBitmap3() throws -> UInt64 {
+        try vmread64(0x2022)
+    }
+
+    func eoiExitBitmap3(_ data: UInt64) throws {
+        try vmwrite64(0x2022, data)
     }
     /****
      var eptpListAddress: PhysAddress? {
@@ -308,7 +396,7 @@ final class VMCS {
      if let addr = _vmread64(0x2024) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2024, UInt64(newValue!.value)) }
+     try vmwrite64(0x2024, UInt64(newValue!.value)) }
      }
 
      var vmreadBitmapAddress: PhysAddress? {
@@ -316,7 +404,7 @@ final class VMCS {
      if let addr = _vmread64(0x2026) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2026, UInt64(newValue!.value)) }
+     try vmwrite64(0x2026, UInt64(newValue!.value)) }
      }
 
      var vmwriteBitmapAddress: PhysAddress? {
@@ -324,7 +412,7 @@ final class VMCS {
      if let addr = _vmread64(0x2028) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2028, UInt64(newValue!.value)) }
+     try vmwrite64(0x2028, UInt64(newValue!.value)) }
      }
 
      var vExceptionInfoAddress: PhysAddress? {
@@ -332,17 +420,17 @@ final class VMCS {
      if let addr = _vmread64(0x202A) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x202A, UInt64(newValue!.value)) }
+     try vmwrite64(0x202A, UInt64(newValue!.value)) }
      }
 
-     var xssExitingBitmap: UInt64? {
-     get { _vmread64(0x202C) }
-     set { _vmwrite64(0x202C, newValue) }
+     func xssExitingBitmap() throws -> UInt64 {
+     try vmread64(0x202C) }
+     try vmwrite64(0x202C, data)
      }
 
-     var enclsExitingBitmap: UInt64? {
-     get { _vmread64(0x202E) }
-     set { _vmwrite64(0x202E, newValue) }
+     func enclsExitingBitmap() throws -> UInt64 {
+     try vmread64(0x202E) }
+     try vmwrite64(0x202E, data)
      }
 
      var subPagePermissionTablePtr: PhysAddress? {
@@ -350,143 +438,221 @@ final class VMCS {
      if let addr = _vmread64(0x2030) { return PhysAddress(RawAddress(addr)) }
      return nil
      }
-     set { _vmwrite64(0x2030, UInt64(newValue!.value)) }
+     try vmwrite64(0x2030, UInt64(newValue!.value)) }
      }
      *****/
-    var tscMultiplier: UInt64? {
-        get { _vmread64(0x2032) }
-        set { _vmwrite64(0x2032, newValue) }
+    func tscMultiplier() throws -> UInt64 {
+        try vmread64(0x2032)
+    }
+
+    func tscMultiplier(_ data: UInt64) throws {
+        try vmwrite64(0x2032, data)
     }
 
     // 64-Bit Read-Only Data Field
-    var guestPhysAddress: UInt64? { _vmread64(0x2400) }
+    func guestPhysAddress() throws -> UInt64 { try vmread64(0x2400) }
 
     // 64-Bit Guest-State Fields
-    var vmcsLinkPointer: UInt64? {
-        get { _vmread64(0x2800) }
-        set { _vmwrite64(0x2800, newValue) }
+    func vmcsLinkPointer() throws -> UInt64 {
+        try vmread64(0x2800)
     }
 
-    var guestIA32DebugCtl: UInt64? {
-        get { _vmread64(0x2802) }
-        set { _vmwrite64(0x2802, newValue) }
+    func vmcsLinkPointer(_ data: UInt64) throws {
+        try vmwrite64(0x2800, data)
     }
 
-    var guestIA32PAT: UInt64? {
-        get { _vmread64(0x2804) }
-        set { _vmwrite64(0x2804, newValue) }
+    func guestIA32DebugCtl() throws -> UInt64 {
+        try vmread64(0x2802)
     }
 
-    var guestIA32EFER: UInt64? {
-        get { _vmread64(0x2806) }
-        set { _vmwrite64(0x2806, newValue) }
+    func guestIA32DebugCtl(_ data: UInt64) throws {
+        try vmwrite64(0x2802, data)
     }
 
-    var guestIA32PerfGlobalCtrl: UInt64? {
-        get { _vmread64(0x2808) }
-        set { _vmwrite64(0x2808, newValue) }
+    func guestIA32PAT() throws -> UInt64 {
+        try vmread64(0x2804)
     }
 
-    var guestPDPTE0: UInt64? {
-        get { _vmread64(0x280A) }
-        set { _vmwrite64(0x280A, newValue) }
+    func guestIA32PAT(_ data: UInt64) throws {
+        try vmwrite64(0x2804, data)
     }
 
-    var guestPDPTE1: UInt64? {
-        get { _vmread64(0x280C) }
-        set { _vmwrite64(0x280C, newValue) }
+    func guestIA32EFER() throws -> UInt64 {
+        try vmread64(0x2806)
     }
 
-    var guestPDPTE2: UInt64? {
-        get { _vmread64(0x280E) }
-        set { _vmwrite64(0x280E, newValue) }
+    func guestIA32EFER(_ data: UInt64) throws {
+        try vmwrite64(0x2806, data)
     }
 
-    var guestPDPTE3: UInt64? {
-        get { _vmread64(0x2810) }
-        set { _vmwrite64(0x2810, newValue) }
+    func guestIA32PerfGlobalCtrl() throws -> UInt64 {
+        try vmread64(0x2808)
     }
 
-    var guestIA32bndcfgs: UInt64? {
-        get { _vmread64(0x2812) }
-        set { _vmwrite64(0x2812, newValue) }
+    func guestIA32PerGlobalCtrl(_ data: UInt64) throws {
+        try vmwrite64(0x2808, data)
     }
 
-    var guestIA32RtitCtl: UInt64? {
-        get { _vmread64(0x2814) }
-        set { _vmwrite64(0x2814, newValue) }
+    func guestPDPTE0() throws -> UInt64 {
+        try vmread64(0x280A)
+    }
+
+    func guestPDPTE0(_ data: UInt64) throws {
+        try vmwrite64(0x280A, data)
+    }
+
+    func guestPDPTE1() throws -> UInt64 {
+        try vmread64(0x280C)
+    }
+
+    func guestPDPTE1(_ data: UInt64) throws {
+        try vmwrite64(0x280C, data)
+    }
+
+    func guestPDPTE2() throws -> UInt64 {
+        try vmread64(0x280E)
+    }
+
+    func guestPDPTE2(_ data: UInt64) throws {
+        try vmwrite64(0x280E, data)
+    }
+
+    func guestPDPTE3() throws -> UInt64 {
+        try vmread64(0x2810)
+    }
+
+    func guestPDPTE3(_ data: UInt64) throws {
+        try vmwrite64(0x2810, data)
+    }
+
+    func guestIA32bndcfgs() throws -> UInt64 {
+        try vmread64(0x2812)
+    }
+
+    func guestIA32bndcfgs(_ data: UInt64) throws {
+        try vmwrite64(0x2812, data)
+    }
+
+    func guestIA32RtitCtl() throws -> UInt64 {
+        try vmread64(0x2814)
+    }
+
+    func guestIS32RtitCtl(_ data: UInt64) throws {
+        try vmwrite64(0x2814, data)
     }
 
     // 64-Bit Host-State Fields
-    var hostIA32PAT: UInt64? {
-        get { _vmread64(0x2C00) }
-        set { _vmwrite64(0x2C00, newValue) }
+    func hostIA32PAT() throws -> UInt64 {
+        try vmread64(0x2C00)
     }
 
-    var hostIA32EFER: UInt64? {
-        get { _vmread64(0x2C02) }
-        set { _vmwrite64(0x2C02, newValue) }
+    func hostIS32PAT(_ data: UInt64) throws {
+        try vmwrite64(0x2C00, data)
     }
 
-    var hostIA32PerfGlobalCtrl: UInt64? {
-        get { _vmread64(0x2C04) }
-        set { _vmwrite64(0x2C04, newValue) }
+    func hostIA32EFER() throws -> UInt64 {
+        try vmread64(0x2C02)
+    }
+
+    func hostIA32EFER(_ data: UInt64) throws {
+        try vmwrite64(0x2C02, data)
+    }
+
+    func hostIA32PerfGlobalCtrl() throws -> UInt64 {
+        try vmread64(0x2C04)
+    }
+
+    func hostIS32PerfGlobalCtrl(_ data: UInt64) throws {
+        try vmwrite64(0x2C04, data)
     }
 
     // 32Bit Control Fields
-    var pinBasedVMExecControls: UInt32? {
-        get { _vmread32(0x4000) }
-        set { _vmwrite32(0x4000, newValue) }
+    func pinBasedVMExecControls() throws -> UInt32 {
+        try vmread32(0x4000)
     }
 
-    var primaryProcVMExecControls: UInt32? {
-        get { _vmread32(0x4002) }
-        set { _vmwrite32(0x4002, newValue) }
+    func pinBasedVMExecControls(_ data: UInt32) throws {
+        try vmwrite32(0x4000, data)
     }
 
-    var exceptionBitmap: UInt32? {
-        get { _vmread32(0x4004) }
-        set { _vmwrite32(0x4004, newValue) }
+    func primaryProcVMExecControls() throws -> UInt32 {
+        try vmread32(0x4002)
     }
 
-    var pagefaultErrorCodeMask: UInt32? {
-        get { _vmread32(0x4006) }
-        set { _vmwrite32(0x4006, newValue) }
+    func primaryProcVMExecControls(_ data: UInt32) throws {
+        try vmwrite32(0x4002, data)
     }
 
-    var pagefaultErrorCodeMatch: UInt32? {
-        get { _vmread32(0x4008) }
-        set { _vmwrite32(0x4008, newValue) }
+    func exceptionBitmap() throws -> UInt32 {
+        try vmread32(0x4004)
     }
 
-    var cr3TargetCount: UInt32? {
-        get { _vmread32(0x400A) }
-        set { _vmwrite32(0x400A, newValue) }
+    func exceptionBitmap(_ data: UInt32) throws {
+        try vmwrite32(0x4004, data)
     }
 
-    var vmExitControls: UInt32? {
-        get { _vmread32(0x400C) }
-        set { _vmwrite32(0x400C, newValue) }
+    func pagefaultErrorCodeMask() throws -> UInt32 {
+        try vmread32(0x4006)
     }
 
-    var vmExitMSRStoreCount: UInt32? {
-        get { _vmread32(0x400E) }
-        set { _vmwrite32(0x400E, newValue) }
+    func pagefaultErrorCodeMask(_ data: UInt32) throws {
+        try vmwrite32(0x4006, data)
     }
 
-    var vmExitMSRLoadCount: UInt32? {
-        get { _vmread32(0x4010) }
-        set { _vmwrite32(0x4010, newValue) }
+    func pagefaultErrorCodeMatch() throws -> UInt32 {
+        try vmread32(0x4008)
     }
 
-    var vmEntryControls: UInt32? {
-        get { _vmread32(0x4012) }
-        set { _vmwrite32(0x4012, newValue) }
+    func pagefaultErrorCodeMatch(_ data: UInt32) throws {
+        try vmwrite32(0x4008, data)
     }
 
-    var vmEntryMSRLoadCount: UInt32? {
-        get { _vmread32(0x4014) }
-        set { _vmwrite32(0x4014, newValue) }
+    func cr3TargetCount() throws -> UInt32 {
+        try vmread32(0x400A)
+    }
+
+    func cr3TargetCount(_ data: UInt32) throws {
+        try vmwrite32(0x400A, data)
+    }
+
+    func vmExitControls() throws -> UInt32 {
+        try vmread32(0x400C)
+    }
+
+    func vmExitControsl(_ data: UInt32) throws {
+        try vmwrite32(0x400C, data)
+    }
+
+    func vmExitMSRStoreCount() throws -> UInt32 {
+        try vmread32(0x400E)
+    }
+
+    func vmExitMSRStoreCount(_ data: UInt32) throws {
+        try vmwrite32(0x400E, data)
+    }
+
+    func vmExitMSRLoadCount() throws -> UInt32 {
+        try vmread32(0x4010)
+    }
+
+    func vmExitMSRLoadCount(_ data: UInt32) throws {
+        try vmwrite32(0x4010, data)
+    }
+
+    func vmEntryControls() throws -> UInt32 {
+        try vmread32(0x4012)
+    }
+
+    func vmEntryControls(_ data: UInt32) throws {
+        try vmwrite32(0x4012, data)
+    }
+
+    func vmEntryMSRLoadCount() throws -> UInt32 {
+        try vmread32(0x4014)
+    }
+
+    func vmEntryMSRLoadCount(_ data: UInt32) throws {
+        try vmwrite32(0x4014, data)
     }
 
 
@@ -512,36 +678,50 @@ final class VMCS {
         var reserved: Int { Int(bits[12...30]) }
         var valid: Bool { bits[31] == 1}
 
-        init?(_ rawValue: UInt32?) {
-            guard let rawValue = rawValue else { return nil }
+        init(_ rawValue: UInt32) {
             bits = BitArray32(rawValue)
         }
     }
 
 
-    var vmEntryInterruptInfo: VMEntryInterruptionInfoField? {
-        get { VMEntryInterruptionInfoField(_vmread32(0x4016)) }
-        set { _vmwrite32(0x4016, newValue?.rawValue) }
+    func vmEntryInterruptInfo() throws -> VMEntryInterruptionInfoField {
+        VMEntryInterruptionInfoField(try vmread32(0x4016))
     }
 
-    var vmEntryExceptionErrorCode: UInt32? {
-        get { _vmread32(0x4018) }
-        set { _vmwrite32(0x4018, newValue) }
+    func vmEntryInerruptInfo(_ data: VMEntryInterruptionInfoField) throws {
+        try vmwrite32(0x4016, data.rawValue)
     }
 
-    var vmEntryInstructionLength: UInt32? {
-        get { _vmread32(0x401A) }
-        set { _vmwrite32(0x401A, newValue) }
+    func vmEntryExceptionErrorCode() throws -> UInt32 {
+        try vmread32(0x4018)
     }
 
-    var tprThreshold: UInt32? {
-        get { _vmread32(0x401C) }
-        set { _vmwrite32(0x401C, newValue) }
+    func vmEntryExceptionErrorCode(_ data: UInt32) throws {
+        try vmwrite32(0x4018, data)
     }
 
-    var secondaryProcVMExecControls: UInt32? {
-        get { _vmread32(0x401E) }
-        set { _vmwrite32(0x401E, newValue) }
+    func vmEntryInstructionLength() throws -> UInt32 {
+        try vmread32(0x401A)
+    }
+
+    func vmEntryInstructionLength(_ data: UInt32) throws {
+        try vmwrite32(0x401A, data)
+    }
+
+    func tprThreshold() throws -> UInt32 {
+        try vmread32(0x401C)
+    }
+
+    func tprThreshold(_ data: UInt32) throws {
+        try vmwrite32(0x401C, data)
+    }
+
+    func secondaryProcVMExecControls() throws -> UInt32 {
+        try vmread32(0x401E)
+    }
+
+    func secondaryProcVMExecControls(_ data: UInt32) throws {
+        try vmwrite32(0x401E, data)
     }
 
     /*
@@ -552,7 +732,7 @@ final class VMCS {
      return false
      }
 
-     var pleGap: UInt32? {
+     func pleGap() throws -> UInt32 {
      get { return supportsPLE ? _vmread32(0x4020) : nil }
      set {
      if supportsPLE {
@@ -561,7 +741,7 @@ final class VMCS {
      }
      }
 
-     var pleWindow: UInt32? {
+     func pleWindow() throws -> UInt32 {
      get { return supportsPLE ? _vmread32(0x4022) : nil }
      set {
      if supportsPLE {
@@ -571,100 +751,181 @@ final class VMCS {
      }
      */
     // Read only Data fields
-    var vmInstructionError: UInt32? { _vmread32(0x4400) }
-    var exitReason:         VMXExit? {
-        guard let reason = _vmread32(0x4402) else { return nil }
-        return VMXExit(reason)
+    func vmInstructionError() throws -> UInt32 {
+        try vmread32(0x4400)
     }
-    var vmExitIntInfo:      UInt32? { _vmread32(0x4404) }
-    var vmExitIntErrorCode: UInt32? { _vmread32(0x4406) }
-    var idtVectorInfoField: UInt32? { _vmread32(0x4408) }
-    var idtVectorErrorCode: UInt32? { _vmread32(0x440A) }
-    var vmExitInstrLen:     UInt32? { _vmread32(0x440C) }
-    var vmExitInstrInfo:    UInt32? { _vmread32(0x440E) }
+
+    func exitReason() throws -> VMXExit {
+        VMXExit(try vmread32(0x4402))
+    }
+
+    func vmExitIntInfo() throws -> UInt32 {
+        try vmread32(0x4404)
+    }
+
+    func vmExitIntErrorCode() throws -> UInt32 {
+        try vmread32(0x4406)
+    }
+
+    func idtVectorInfoField() throws -> UInt32 {
+        try vmread32(0x4408)
+    }
+
+    func idtVectorErrorCode() throws -> UInt32 {
+        try vmread32(0x440A)
+    }
+
+    func vmExitInstructionLength() throws -> UInt32 {
+        try vmread32(0x440C)
+    }
+
+    func vmExitInstructionInfo() throws -> UInt32 {
+        try vmread32(0x440E)
+    }
 
     // 32bit Guest State Fields
-    var guestESLimit: UInt32? {
-        get { _vmread32(0x4800) }
-        set { _vmwrite32(0x4800, newValue) }
+    func guestESLimit() throws -> UInt32 {
+        try vmread32(0x4800)
     }
 
-    var guestCSLimit: UInt32? {
-        get { _vmread32(0x4802) }
-        set { _vmwrite32(0x4802, newValue) }
-    }
-    var guestSSLimit: UInt32? {
-        get { _vmread32(0x4804) }
-        set { _vmwrite32(0x4804, newValue) }
-    }
-    var guestDSLimit: UInt32? {
-        get { _vmread32(0x4806) }
-        set { _vmwrite32(0x4806, newValue) }
-    }
-    var guestFSLimit: UInt32? {
-        get { _vmread32(0x4808) }
-        set { _vmwrite32(0x4808, newValue) }
-    }
-    var guestGSLimit: UInt32? {
-        get { _vmread32(0x480A) }
-        set { _vmwrite32(0x480A, newValue) }
-    }
-    var guestLDTRLimit: UInt32? {
-        get { _vmread32(0x480C) }
-        set { _vmwrite32(0x480C, newValue) }
-    }
-    var guestTRLimit: UInt32? {
-        get { _vmread32(0x480E) }
-        set { _vmwrite32(0x480E, newValue) }
-    }
-    var guestGDTRLimit: UInt32? {
-        get { _vmread32(0x4810) }
-        set { _vmwrite32(0x4810, newValue) }
+    func guestESLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4800, data)
     }
 
-    var guestIDTRLimit: UInt32? {
-        get { _vmread32(0x4812) }
-        set { _vmwrite32(0x4812, newValue) }
+    func guestCSLimit() throws -> UInt32 {
+        try vmread32(0x4802)
     }
 
-    var guestESAccessRights: UInt32? {
-        get { _vmread32(0x4814) }
-        set { _vmwrite32(0x4814, newValue) }
+    func guestCSLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4802, data)
     }
 
-    var guestCSAccessRights: UInt32? {
-        get { _vmread32(0x4816) }
-        set { _vmwrite32(0x4816, newValue) }
+    func guestSSLimit() throws -> UInt32 {
+        try vmread32(0x4804)
     }
 
-    var guestSSAccessRights: UInt32? {
-        get { _vmread32(0x4818) }
-        set { _vmwrite32(0x4818, newValue) }
+    func guestSSLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4804, data)
     }
 
-    var guestDSAccessRights: UInt32? {
-        get { _vmread32(0x481A) }
-        set { _vmwrite32(0x481A, newValue) }
+    func guestDSLimit() throws -> UInt32 {
+        try vmread32(0x4806)
     }
 
-    var guestFSAccessRights: UInt32? {
-        get { _vmread32(0x481C) }
-        set { _vmwrite32(0x481C, newValue) }
+    func guestDSLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4806, data)
     }
 
-    var guestGSAccessRights: UInt32? {
-        get { _vmread32(0x481E) }
-        set { _vmwrite32(0x481E, newValue) }
+    func guestFSLimit() throws -> UInt32 {
+        try vmread32(0x4808)
     }
 
-    var guestLDTRAccessRights: UInt32? {
-        get { _vmread32(0x4820) }
-        set { _vmwrite32(0x4820, newValue) }
+    func guestFSLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4808, data)
     }
 
-    var guestTRAccessRights: UInt32? {
-        get { _vmread32(0x4822) }
-        set { _vmwrite32(0x4822, newValue) }
+    func guestGSLimit() throws -> UInt32 {
+        try vmread32(0x480A)
+    }
+
+    func guestGSLimit(_ data: UInt32) throws {
+        try vmwrite32(0x480A, data)
+    }
+
+    func guestLDTRLimit() throws -> UInt32 {
+        try vmread32(0x480C)
+    }
+
+    func guestLDTRLimit(_ data: UInt32) throws {
+        try vmwrite32(0x480C, data)
+    }
+
+    func guestTRLimit() throws -> UInt32 {
+        try vmread32(0x480E)
+    }
+
+    func guestTRLimit(_ data: UInt32) throws {
+        try vmwrite32(0x480E, data)
+    }
+
+    func guestGDTRLimit() throws -> UInt32 {
+        try vmread32(0x4810)
+    }
+
+    func guestGDTRLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4810, data)
+    }
+
+    func guestIDTRLimit() throws -> UInt32 {
+        try vmread32(0x4812)
+    }
+
+    func guestIDTRLimit(_ data: UInt32) throws {
+        try vmwrite32(0x4812, data)
+    }
+
+    func guestESAccessRights() throws -> UInt32 {
+        try vmread32(0x4814)
+    }
+
+    func guestESAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x4814, data)
+    }
+
+    func guestCSAccessRights() throws -> UInt32 {
+        try vmread32(0x4816)
+    }
+
+    func guestCSAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x4816, data)
+    }
+
+    func guestSSAccessRights() throws -> UInt32 {
+        try vmread32(0x4818)
+    }
+
+    func guestSSAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x4818, data)
+    }
+
+    func guestDSAccessRights() throws -> UInt32 {
+        try vmread32(0x481A)
+    }
+
+    func guestDSAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x481A, data)
+    }
+
+    func guestFSAccessRights() throws -> UInt32 {
+        try vmread32(0x481C)
+    }
+
+    func guestFSAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x481C, data)
+    }
+
+    func guestGSAccessRights() throws -> UInt32 {
+        try vmread32(0x481E)
+    }
+
+    func guestGSAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x481E, data)
+    }
+
+    func guestLDTRAccessRights() throws -> UInt32 {
+        try vmread32(0x4820)
+    }
+
+    func guestLDTRAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x4820, data)
+    }
+
+    func guestTRAccessRights() throws -> UInt32 {
+        try vmread32(0x4822)
+    }
+
+    func guestTRAccessRights(_ data: UInt32) throws {
+        try vmwrite32(0x4822, data)
     }
 
     struct InterruptibilityState {
@@ -678,175 +939,284 @@ final class VMCS {
         var enclaveInterruption: Bool   { bits[4] == 1 }
         var reserved: Int               { Int(bits[5...31]) }
 
-        init?(_ rawValue: UInt32?) {
-            guard let rawValue = rawValue else { return nil }
+        init(_ rawValue: UInt32) {
             bits = BitArray32(rawValue)
         }
     }
 
 
-    var guestInterruptibilityState: InterruptibilityState? {
-        get { InterruptibilityState(_vmread32(0x4824)) }
-        set { _vmwrite32(0x4824, newValue?.rawValue) }
+    func guestInterruptibilityState() throws -> InterruptibilityState {
+        InterruptibilityState(try vmread32(0x4824))
     }
 
-    var guestActivityState: UInt32? {
-        get { _vmread32(0x4826) }
-        set { _vmwrite32(0x4826, newValue) }
+    func guestInterruptibilityState(_ data: InterruptibilityState) throws {
+        try vmwrite32(0x4824, data.rawValue)
     }
 
-    var guestSMBASE: UInt32? {
-        get { _vmread32(0x4828) }
-        set { _vmwrite32(0x4828, newValue) }
+    func guestActivityState() throws -> UInt32 {
+        try vmread32(0x4826)
     }
 
-    var guestIA32SysenterCS: UInt32? {
-        get { _vmread32(0x482A) }
-        set { _vmwrite32(0x482A, newValue) }
+    func guestActivityState(_ data: UInt32) throws {
+        try vmwrite32(0x4826, data)
     }
 
-    var vmxPreemptionTimerValue: UInt32? {
-        get { _vmread32(0x482E) }
-        set { _vmwrite32(0x482E, newValue) }
+    func guestSMBASE() throws -> UInt32 {
+        try vmread32(0x4828)
     }
 
-    var hostIA32SysenterCS: UInt32? {
-        get { _vmread32(0x4C00) }
-        set { _vmwrite32(0x4C00, newValue) }
+    func guestSMBASE(_ data: UInt32) throws {
+        try vmwrite32(0x4828, data)
     }
 
-    var cr0mask: UInt? {
-        get { _vmreadNatural(0x6000) }
-        set { _vmwriteNatural(0x6000, newValue) }
+    func guestIA32SysenterCS() throws -> UInt32 {
+        try vmread32(0x482A)
     }
 
-    var cr4mask: UInt? {
-        get { _vmreadNatural(0x6002) }
-        set { _vmwriteNatural(0x6002, newValue) }
+    func guestIA32SysencterCS(_ data: UInt32) throws {
+        try vmwrite32(0x482A, data)
     }
 
-    var cr0ReadShadow: CPU.CR0Register? {
-        get { return _vmread64(0x6004).map { CPU.CR0Register($0) } }
-        set { _vmwrite64(0x6004, newValue?.value) }
+    func vmxPreemptionTimerValue() throws -> UInt32 {
+        try vmread32(0x482E)
     }
 
-    var cr4ReadShadow: CPU.CR4Register? {
-        get { return _vmread64(0x6006).map { CPU.CR4Register($0) } }
-        set { _vmwrite64(0x6006, newValue?.value) }
+    func vmxPremptionTimerValue(_ data: UInt32) throws {
+        try vmwrite32(0x482E, data)
     }
 
-    var cr3TargetValue0: UInt? {
-        get { _vmreadNatural(0x6008) }
-        set { _vmwriteNatural(0x6008, newValue) }
+    func hostIA32SysenterCS() throws -> UInt32 {
+        try vmread32(0x4C00)
     }
 
-    var cr3TargetValue1: UInt? {
-        get { _vmreadNatural(0x600A) }
-        set { _vmwriteNatural(0x600A, newValue) }
+    func hostIA32SysenterCS(_ data: UInt32) throws {
+        try vmwrite32(0x4C00, data)
     }
 
-    var cr3TargetValue2: UInt? {
-        get { _vmreadNatural(0x600C) }
-        set { _vmwriteNatural(0x600C, newValue) }
+    func cr0mask() throws -> UInt {
+        try vmreadNatural(0x6000)
     }
 
-    var cr3TargetValue3: UInt? {
-        get { _vmreadNatural(0x600E) }
-        set { _vmwriteNatural(0x600E, newValue) }
+    func cr0mask(_ data: UInt) throws {
+        try vmwriteNatural(0x6000, data)
+    }
+
+    func cr4mask() throws -> UInt {
+        try vmreadNatural(0x6002)
+    }
+
+    func cr4mask(_ data: UInt) throws {
+        try vmwriteNatural(0x6002, data)
+    }
+
+    func cr0ReadShadow() throws -> CPU.CR0Register {
+        CPU.CR0Register(try vmread64(0x6004))
+    }
+
+    func cr0ReadShadow(_ data: CPU.CR0Register) throws {
+        try vmwrite64(0x6004, data.value)
+    }
+
+    func cr4ReadShadow() throws -> CPU.CR4Register {
+        CPU.CR4Register(try vmread64(0x6006))
+    }
+
+    func cr4ReadShadow(_ data: CPU.CR4Register) throws {
+        try vmwrite64(0x6006, data.value)
+    }
+
+    func cr3TargetValue0() throws -> UInt {
+        try vmreadNatural(0x6008)
+    }
+
+    func cr3TargetValue0(_ data: UInt) throws {
+        try vmwriteNatural(0x6008, data)
+    }
+
+    func cr3TargetValue1() throws -> UInt {
+        try vmreadNatural(0x600A)
+    }
+
+    func cr3TargetValue1(_ data: UInt) throws {
+        try vmwriteNatural(0x600A, data)
+    }
+
+    func cr3TargetValue2() throws -> UInt {
+        try vmreadNatural(0x600C)
+    }
+
+    func cr3TargetValue2(_ data: UInt) throws {
+        try vmwriteNatural(0x600C, data)
+    }
+
+    func cr3TargetValue3() throws -> UInt {
+        try vmreadNatural(0x600E)
+    }
+
+    func cr3TargetValue3(_ data: UInt) throws {
+        try vmwriteNatural(0x600E, data)
     }
 
     // Natural width Read-Only data fields
-    var exitQualification: UInt? { _vmreadNatural(0x6400) }
-    var ioRCX: UInt? { _vmreadNatural(0x6402) }
-    var ioRSI: UInt? { _vmreadNatural(0x6404) }
-    var ioRDI: UInt? { _vmreadNatural(0x6406) }
-    var ioRIP: UInt? { _vmreadNatural(0x6408) }
-    var guestLinearAddress: UInt? { _vmreadNatural(0x640A) }
+    func exitQualification() throws -> UInt {
+        try vmreadNatural(0x6400)
+    }
+
+    func ioRCX() throws -> UInt {
+        try vmreadNatural(0x6402)
+    }
+
+    func ioRSI() throws -> UInt {
+        try vmreadNatural(0x6404)
+    }
+
+    func ioRDI() throws -> UInt {
+        try vmreadNatural(0x6406)
+    }
+
+    func ioRIP() throws -> UInt {
+        try vmreadNatural(0x6408)
+    }
+
+    func guestLinearAddress() throws -> UInt {
+        try vmreadNatural(0x640A)
+    }
 
     // Natural width Guest state fields
-    var guestCR0: CPU.CR0Register? {
-        get { return _vmread64(0x6800).map { CPU.CR0Register($0) } }
-        set { _vmwrite64(0x6800, newValue?.value) }
+    func guestCR0() throws -> CPU.CR0Register {
+        CPU.CR0Register(try vmread64(0x6800))
     }
 
-    var guestCR3: CPU.CR3Register? {
-        get { return _vmread64(0x6802).map { CPU.CR3Register($0) } }
-        set { _vmwrite64(0x6802, newValue?.value) }
+    func guestCR0(_ data: CPU.CR0Register) throws {
+        try vmwrite64(0x6800, data.value)
     }
 
-    var guestCR4: CPU.CR4Register? {
-        get { return _vmread64(0x6804).map { CPU.CR4Register($0) } }
-        set { _vmwrite64(0x6804, newValue?.value) }
+    func guestCR3() throws -> CPU.CR3Register {
+        CPU.CR3Register(try vmread64(0x6802))
     }
 
-    var guestESBase: UInt? {
-        get { _vmreadNatural(0x6806) }
-        set { _vmwriteNatural(0x6806, newValue) }
+    func guestCR3(_ data: CPU.CR3Register) throws {
+        try vmwrite64(0x6802, data.value)
     }
 
-    var guestCSBase: UInt? {
-        get { _vmreadNatural(0x6808) }
-        set { _vmwriteNatural(0x6808, newValue) }
+    func guestCR4() throws -> CPU.CR4Register {
+        CPU.CR4Register(try vmread64(0x6804))
     }
 
-    var guestSSBase: UInt? {
-        get { _vmreadNatural(0x680A) }
-        set { _vmwriteNatural(0x680A, newValue) }
+    func guestCR4(_ data: CPU.CR4Register) throws {
+        try vmwrite64(0x6804, data.value)
     }
 
-    var guestDSBase: UInt? {
-        get { _vmreadNatural(0x680C) }
-        set { _vmwriteNatural(0x680C, newValue) }
+    func guestESBase() throws -> UInt {
+        try vmreadNatural(0x6806)
     }
 
-    var guestFSBase: UInt? {
-        get { _vmreadNatural(0x680E) }
-        set { _vmwriteNatural(0x680E, newValue) }
+    func guestESBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6806, data)
     }
 
-    var guestGSBase: UInt? {
-        get { _vmreadNatural(0x6810) }
-        set { _vmwriteNatural(0x6810, newValue) }
+    func guestCSBase() throws -> UInt {
+        try vmreadNatural(0x6808)
     }
 
-    var guestLDTRBase: UInt? {
-        get { _vmreadNatural(0x6812) }
-        set { _vmwriteNatural(0x6812, newValue) }
+    func guestCSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6808, data)
     }
 
-    var guestTRBase: UInt? {
-        get { _vmreadNatural(0x6814) }
-        set { _vmwriteNatural(0x6814, newValue) }
+    func guestSSBase() throws -> UInt {
+        try vmreadNatural(0x680A)
     }
 
-    var guestGDTRBase: UInt? {
-        get { _vmreadNatural(0x6816) }
-        set { _vmwriteNatural(0x6816, newValue) }
+    func guestSSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x680A, data)
     }
 
-    var guestIDTRBase: UInt? {
-        get { _vmreadNatural(0x6818) }
-        set { _vmwriteNatural(0x6818, newValue) }
+    func guestDSBase() throws -> UInt {
+        try vmreadNatural(0x680C)
     }
 
-    var guestDR7: UInt? {
-        get { _vmreadNatural(0x681A) }
-        set { _vmwriteNatural(0x681A, newValue) }
+    func guestDSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x680C, data)
     }
 
-    var guestRSP: UInt? {
-        get { _vmreadNatural(0x681C) }
-        set { _vmwriteNatural(0x681C, newValue) }
+    func guestFSBase() throws -> UInt {
+        try vmreadNatural(0x680E)
     }
 
-    var guestRIP: UInt? {
-        get { _vmreadNatural(0x681E) }
-        set { _vmwriteNatural(0x681E, newValue) }
+    func guestFSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x680E, data)
     }
 
-    var guestRFlags: UInt? {
-        get { _vmreadNatural(0x6820) }
-        set { _vmwriteNatural(0x6820, newValue) }
+    func guestGSBase() throws -> UInt {
+        try vmreadNatural(0x6810)
+    }
+
+    func guestGSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6810, data)
+    }
+
+    func guestLDTRBase() throws -> UInt {
+        try vmreadNatural(0x6812)
+    }
+
+    func guestLDTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6812, data)
+    }
+
+    func guestTRBase() throws -> UInt {
+        try vmreadNatural(0x6814)
+    }
+
+    func guestTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6814, data)
+    }
+
+    func guestGDTRBase() throws -> UInt {
+        try vmreadNatural(0x6816)
+    }
+
+    func guestGDTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6816, data)
+    }
+
+    func guestIDTRBase() throws -> UInt {
+        try vmreadNatural(0x6818)
+    }
+
+    func guestIDTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6818, data)
+    }
+
+    func guestDR7() throws -> UInt {
+        try vmreadNatural(0x681A)
+    }
+
+    func guestDR7(_ data: UInt) throws {
+        try vmwriteNatural(0x681A, data)
+    }
+
+    func guestRSP() throws -> UInt {
+        try vmreadNatural(0x681C)
+    }
+
+    func guestRSP(_ data: UInt) throws {
+        try vmwriteNatural(0x681C, data)
+    }
+
+    func guestRIP() throws -> UInt {
+        try vmreadNatural(0x681E)
+    }
+
+    func guestRIP(_ data: UInt) throws {
+        try vmwriteNatural(0x681E, data)
+    }
+
+    func guestRFlags() throws -> UInt {
+        try vmreadNatural(0x6820)
+    }
+
+    func guestRFlags(_ data: UInt) throws {
+        try vmwriteNatural(0x6820, data)
     }
 
     struct PendingDebugExceptions {
@@ -866,397 +1236,362 @@ final class VMCS {
         var reserved4: Int { Int(bits[17...63]) }
         var reserved: Int { reserved1 + reserved2 + reserved3 + reserved4 }
 
-        init?(_ rawValue: UInt?) {
-            guard let rawValue = rawValue else { return nil }
+        init(_ rawValue: UInt) {
             bits = BitArray64(rawValue)
         }
     }
 
-    var guestPendingDebugExceptions: PendingDebugExceptions? {
-        get { PendingDebugExceptions(_vmreadNatural(0x6822)) }
-        set { _vmwriteNatural(0x6822, newValue?.rawValue) }
+    func guestPendingDebugExceptions() throws -> PendingDebugExceptions {
+        PendingDebugExceptions(try vmreadNatural(0x6822))
     }
 
-    var guestIA32SysenterESP: UInt? {
-        get { _vmreadNatural(0x6824) }
-        set { _vmwriteNatural(0x6824, newValue) }
+    func guestPendingDebugException(_ data: PendingDebugExceptions) throws {
+        try vmwriteNatural(0x6822, data.rawValue)
     }
 
-    var guestIA32SysenterEIP: UInt? {
-        get { _vmreadNatural(0x6826) }
-        set { _vmwriteNatural(0x6826, newValue) }
+    func guestIA32SysenterESP() throws -> UInt {
+        try vmreadNatural(0x6824)
+    }
+
+    func guestIA32SysenterESP(_ data: UInt) throws {
+        try vmwriteNatural(0x6824, data)
+    }
+
+    func guestIA32SysenterEIP() throws -> UInt {
+        try vmreadNatural(0x6826)
+    }
+
+    func guestIA32SysenterEIP(_ data: UInt) throws {
+        try vmwriteNatural(0x6826, data)
     }
 
     // Natural-Width Host-State Fields
-    var hostCR0: CPU.CR0Register? {
-        get { return _vmread64(0x6C00).map { CPU.CR0Register($0) } }
-        set { _vmwrite64(0x6C00, newValue?.value) }
+    func hostCR0() throws -> CPU.CR0Register {
+        CPU.CR0Register(try vmread64(0x6C00))
     }
 
-    var hostCR3: CPU.CR3Register? {
-        get { return _vmread64(0x6C02).map { CPU.CR3Register($0) } }
-        set { _vmwrite64(0x6C02, newValue?.value) }
+    func hostCR0(_ data: CPU.CR0Register) throws {
+        try vmwrite64(0x6C00, data.value)
     }
 
-    var hostCR4: CPU.CR4Register? {
-        get { return _vmread64(0x6C04).map{ CPU.CR4Register($0) } }
-        set { _vmwrite64(0x6C04, newValue?.value) }
+    func hostCR3() throws -> CPU.CR3Register {
+        CPU.CR3Register(try vmread64(0x6C02))
     }
 
-    var hostFSBase: UInt? {
-        get { _vmreadNatural(0x6C06) }
-        set { _vmwriteNatural(0x6C06, newValue) }
+    func hostCR3(_ data: CPU.CR3Register) throws {
+        try vmwrite64(0x6C02, data.value)
     }
 
-    var hostGSBase: UInt? {
-        get { _vmreadNatural(0x6C08) }
-        set { _vmwriteNatural(0x6C08, newValue) }
+    func hostCR4() throws -> CPU.CR4Register {
+        CPU.CR4Register(try vmread64(0x6C04))
     }
 
-    var hostTRBase: UInt? {
-        get { _vmreadNatural(0x6C0A) }
-        set { _vmwriteNatural(0x6C0A, newValue) }
+    func hostCR4(_ data: CPU.CR4Register) throws {
+        try vmwrite64(0x6C04, data.value)
     }
 
-    var hostGDTRBase: UInt? {
-        get { _vmreadNatural(0x6C0C) }
-        set { _vmwriteNatural(0x6C0C, newValue) }
+    func hostFSBase() throws -> UInt {
+        try vmreadNatural(0x6C06)
     }
 
-    var hostIDTRBase: UInt? {
-        get { _vmreadNatural(0x6C0E) }
-        set { _vmwriteNatural(0x6C0E, newValue) }
+    func hostFSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6C06, data)
     }
 
-    var hostIA32SysenterESP: UInt? {
-        get { _vmreadNatural(0x6C10) }
-        set { _vmwriteNatural(0x6C10, newValue) }
+    func hostGSBase() throws -> UInt {
+        try vmreadNatural(0x6C08)
     }
 
-    var hostIA32SysenterEIP: UInt? {
-        get { _vmreadNatural(0x6C12) }
-        set { _vmwriteNatural(0x6C12, newValue) }
+    func hostGSBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6C08, data)
     }
 
-    var hostRSP: UInt? {
-        get { _vmreadNatural(0x6C14) }
-        set { _vmwriteNatural(0x6C14, newValue) }
+    func hostTRBase() throws -> UInt {
+        try vmreadNatural(0x6C0A)
     }
 
-    var hostRIP: UInt? {
-        get { _vmreadNatural(0x6C16) }
-        set { _vmwriteNatural(0x6C16, newValue) }
+    func hostTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6C0A, data)
     }
 
-
-    func printVMCS() {
-
-        func showValue<T: UnsignedInteger>(_ name: String, _ value: T?) {
-            print(name, value == nil ? "Unsupported" : String(value!, radix: 16))
-        }
-
-        //        showValue("physicalAddress:", physicalAddress)
-        showValue("vpid:", vpid)
-        showValue("postedInterruptNotificationVector:", postedInterruptNotificationVector)
-        showValue("eptpIndex:", eptpIndex)
-        showValue("guestESSelector:", guestESSelector)
-        showValue("guestCSSelector:", guestCSSelector)
-        showValue("guestSSSelector:", guestSSSelector)
-        showValue("guestDSSelector:", guestDSSelector)
-        showValue("guestFSSelector:", guestFSSelector)
-        showValue("guestGSSelector:", guestGSSelector)
-        showValue("guestLDTRSelector:", guestLDTRSelector)
-        showValue("guestTRSelector:", guestTRSelector)
-        showValue("guestInterruptStatus:", guestInterruptStatus)
-        /**
-         showValue("pmlIndex:", pmlIndex)
-         showValue("hostESSelector:", hostESSelector)
-         showValue("hostCSSelector:", hostCSSelector)
-         showValue("hostSSSelector:", hostSSSelector)
-         showValue("hostDSSelector:", hostDSSelector)
-         showValue("hostFSSelector:", hostFSSelector)
-         showValue("hostGSSelector:", hostGSSelector)
-         showValue("hostTRSelector:", hostTRSelector)
-         showValue("ioBitmapAAddress:", ioBitmapAAddress)
-         showValue("ioBitmapBAddress:", ioBitmapBAddress)
-         showValue("msrBitmapAddress:", msrBitmapAddress)
-
-         print("vmExitMSRStoreAddress:", vmExitMSRStoreAddress ?? "Unsupported")
-         print("vmExitMSRLoadAddress:", vmExitMSRLoadAddress ?? "Unsupported")
-         print("vmEntryMSRLoadAddress:", vmEntryMSRLoadAddress ?? "Unsupported")
-         showValue("executiveVMCSPtr:", executiveVMCSPtr)
-         print("pmlAddress:", pmlAddress ?? "Unsupported")
-         showValue("tscOffset:", tscOffset)
-         print("virtualAPICAddress:", virtualAPICAddress ?? "Unsupported")
-         print("apicAccessAddress:", apicAccessAddress ?? "Unsupported")
-         print("postedInterruptDescAddress:", postedInterruptDescAddress ?? "Unsupported")
-         showValue("vmFunctionControls:", vmFunctionControls)
-         showValue("eptp:", eptp)
-         showValue("eoiExitBitmap0:", eoiExitBitmap0)
-         showValue("eoiExitBitmap1:", eoiExitBitmap1)
-         showValue("eoiExitBitmap2:", eoiExitBitmap2)
-         showValue("eoiExitBitmap3:", eoiExitBitmap3)
-         print("eptpListAddress:", eptpListAddress ?? "Unsupported")
-         print("vmreadBitmapAddress:", vmreadBitmapAddress ?? "Unsupported")
-         print("vmwriteBitmapAddress:", vmwriteBitmapAddress ?? "Unsupported")
-         print("vExceptionInfoAddress:", vExceptionInfoAddress ?? "Unsupported")
-         showValue("xssExitingBitmap:", xssExitingBitmap)
-         showValue("enclsExitingBitmap:", enclsExitingBitmap)
-         print("subPagePermissionTablePtr:", subPagePermissionTablePtr ?? "Unsupported")
-         showValue("tscMultiplier:", tscMultiplier)
-         showValue("guestPhysAddress:", guestPhysAddress)
-         showValue("vmcsLinkPointer:", vmcsLinkPointer)
-         ****/
-        showValue("guestIA32DebugCtl:", guestIA32DebugCtl)
-        showValue("guestIA32PAT:", guestIA32PAT)
-        showValue("guestIA32EFER:", guestIA32EFER)
-        showValue("guestIA32PerfGlobalCtrl:", guestIA32PerfGlobalCtrl)
-        showValue("guestPDPTE0:", guestPDPTE0)
-        showValue("guestPDPTE1:", guestPDPTE1)
-        showValue("guestPDPTE2:", guestPDPTE2)
-        showValue("guestPDPTE3:", guestPDPTE3)
-        showValue("guestIA32bndcfgs:", guestIA32bndcfgs)
-        showValue("guestIA32RtitCtl:", guestIA32RtitCtl)
-        showValue("hostIA32PAT:", hostIA32PAT)
-        showValue("hostIA32EFER:", hostIA32EFER)
-        showValue("hostIA32PerfGlobalCtrl:", hostIA32PerfGlobalCtrl)
-        showValue("pinBasedVMExecControls:", pinBasedVMExecControls)
-        showValue("primaryProcVMExecControls:", primaryProcVMExecControls)
-        showValue("exceptionBitmap:", exceptionBitmap)
-        showValue("pagefaultErrorCodeMask:", pagefaultErrorCodeMask)
-        showValue("pagefaultErrorCodeMatch:", pagefaultErrorCodeMatch)
-        showValue("cr3TargetCount:", cr3TargetCount)
-        showValue("vmExitControls:", vmExitControls)
-        showValue("vmExitMSRStoreCount:", vmExitMSRStoreCount)
-        showValue("vmExitMSRLoadCount:", vmExitMSRLoadCount)
-        showValue("vmEntryControls:", vmEntryControls)
-        showValue("vmEntryMSRLoadCount:", vmEntryMSRLoadCount)
-        print("vmEntryInterruptInfo:", vmEntryInterruptInfo ?? "nil")
-        showValue("vmEntryExceptionErrorCode:", vmEntryExceptionErrorCode)
-        showValue("vmEntryInstructionLength:", vmEntryInstructionLength)
-        showValue("tprThreshold:", tprThreshold)
-        showValue("secondaryProcVMExecControls:", secondaryProcVMExecControls)
-        /*        print("supportsPLE:", supportsPLE)
-         showValue("pleGap:", pleGap)
-         showValue("pleWindow:", pleWindow)
-         showValue("vmInstructionError:", vmInstructionError)
-         print("exitReason:", exitReason ?? "nil")
-         */
-        showValue("vmExitIntInfo:", vmExitIntInfo)
-        showValue("vmExitIntErrorCode:", vmExitIntErrorCode)
-        showValue("idtVectorInfoField:", idtVectorInfoField)
-        showValue("idtVectorErrorCode:", idtVectorErrorCode)
-        showValue("vmExitInstrLen:", vmExitInstrLen)
-        showValue("vmExitInstrInfo:", vmExitInstrInfo)
-        showValue("guestESLimit:", guestESLimit)
-        showValue("guestCSLimit:", guestCSLimit)
-        showValue("guestSSLimit:", guestSSLimit)
-        showValue("guestDSLimit:", guestDSLimit)
-        showValue("guestFSLimit:", guestFSLimit)
-        showValue("guestGSLimit:", guestGSLimit)
-        showValue("guestLDTRLimit:", guestLDTRLimit)
-        showValue("guestTRLimit:", guestTRLimit)
-        showValue("guestGDTRLimit:", guestGDTRLimit)
-        showValue("guestIDTRLimit:", guestIDTRLimit)
-        showValue("guestESAccessRights:", guestESAccessRights)
-        showValue("guestCSAccessRights:", guestCSAccessRights)
-        showValue("guestSSAccessRights:", guestSSAccessRights)
-        showValue("guestDSAccessRights:", guestDSAccessRights)
-        showValue("guestFSAccessRights:", guestFSAccessRights)
-        showValue("guestGSAccessRights:", guestGSAccessRights)
-        showValue("guestLDTRAccessRights:", guestLDTRAccessRights)
-        showValue("guestTRAccessRights:", guestTRAccessRights)
-        print("guestInterruptibilityState:", guestInterruptibilityState ?? "nil")
-        showValue("guestActivityState:", guestActivityState)
-        showValue("guestSMBASE:", guestSMBASE)
-        showValue("guestIA32SysenterCS:", guestIA32SysenterCS)
-        showValue("vmxPreemptionTimerValue:", vmxPreemptionTimerValue)
-        showValue("hostIA32SysenterCS:", hostIA32SysenterCS)
-        showValue("cr0mask:", cr0mask)
-        showValue("cr4mask:", cr4mask)
-        showValue("cr0ReadShadow:", cr0ReadShadow?.bits.toUInt64())
-        showValue("cr4ReadShadow:", cr4ReadShadow?.bits.toUInt64())
-        showValue("cr3TargetValue0:", cr3TargetValue0)
-        showValue("cr3TargetValue1:", cr3TargetValue1)
-        showValue("cr3TargetValue2:", cr3TargetValue2)
-        showValue("cr3TargetValue3:", cr3TargetValue3)
-        showValue("exitQualification:", exitQualification)
-        showValue("ioRCX:", ioRCX)
-        showValue("ioRSI:", ioRSI)
-        showValue("ioRDI:", ioRDI)
-        showValue("ioRIP:", ioRIP)
-        showValue("guestLinearAddress:", guestLinearAddress)
-        showValue("guestCR0:", guestCR0?.bits.toUInt64())
-        showValue("guestCR3:", guestCR3?.bits.toUInt64())
-        showValue("guestCR4:", guestCR4?.bits.toUInt64())
-        showValue("guestESBase:", guestESBase)
-        showValue("guestCSBase:", guestCSBase)
-        showValue("guestSSBase:", guestSSBase)
-        showValue("guestDSBase:", guestDSBase)
-        showValue("guestFSBase:", guestFSBase)
-        showValue("guestGSBase:", guestGSBase)
-        showValue("guestLDTRBase:", guestLDTRBase)
-        showValue("guestTRBase:", guestTRBase)
-        showValue("guestGDTRBase:", guestGDTRBase)
-        showValue("guestIDTRBase:", guestIDTRBase)
-        showValue("guestDR7:", guestDR7)
-        showValue("guestRSP:", guestRSP)
-        showValue("guestRIP:", guestRIP)
-        showValue("guestRFlags:", guestRFlags)
-        print("guestPendingDebugExceptions:", guestPendingDebugExceptions ?? "nil")
-        showValue("guestIA32SysenterESP:", guestIA32SysenterESP)
-        showValue("guestIA32SysenterEIP:", guestIA32SysenterEIP)
-        showValue("hostCR0:", hostCR0?.bits.toUInt64())
-        showValue("hostCR3:", hostCR3?.bits.toUInt64())
-        showValue("hostCR4:", hostCR4?.bits.toUInt64())
-        showValue("hostFSBase:", hostFSBase)
-        showValue("hostGSBase:", hostGSBase)
-        showValue("hostTRBase:", hostTRBase)
-        showValue("hostGDTRBase:", hostGDTRBase)
-        showValue("hostIDTRBase:", hostIDTRBase)
-        showValue("hostIA32SysenterESP:", hostIA32SysenterESP)
-        showValue("hostIA32SysenterEIP:", hostIA32SysenterEIP)
-        showValue("hostRSP:", hostRSP)
-        showValue("hostRIP:", hostRIP)
+    func hostGDTRBase() throws -> UInt {
+        try vmreadNatural(0x6C0C)
     }
 
+    func hostGDTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6C0C, data)
+    }
 
-    func vmread16(_ index: UInt32) -> Result<UInt16, VMXError> {
+    func hostIDTRBase() throws -> UInt {
+        try vmreadNatural(0x6C0E)
+    }
+
+    func hostIDTRBase(_ data: UInt) throws {
+        try vmwriteNatural(0x6C0E, data)
+    }
+
+    func hostIA32SysenterESP() throws -> UInt {
+        try vmreadNatural(0x6C10)
+    }
+
+    func hostIA32SysenterESP(_ data: UInt) throws {
+        try vmwriteNatural(0x6C10, data)
+    }
+
+    func hostIA32SysenterEIP() throws -> UInt {
+        try vmreadNatural(0x6C12)
+    }
+
+    func hostIA32SysenterEIP(_ data: UInt) throws {
+        try vmwriteNatural(0x6C12, data)
+    }
+
+    func hostRSP() throws -> UInt {
+        try vmreadNatural(0x6C14)
+    }
+
+    func hostRSP(_ data: UInt) throws {
+        try vmwriteNatural(0x6C14, data)
+    }
+
+    func hostRIP() throws -> UInt {
+        try vmreadNatural(0x6C16)
+    }
+
+    func hostRIP(_ data: UInt) throws {
+        try vmwriteNatural(0x6C16, data)
+    }
+
+    /**
+     func printVMCS() {
+
+     func showValue<T: UnsignedInteger>(_ name: String, _ value: T?) {
+     print(name, value == nil ? "Unsupported" : String(value!, radix: 16))
+     }
+
+     //        showValue("physicalAddress:", physicalAddress)
+     showValue("vpid:", vpid)
+     showValue("postedInterruptNotificationVector:", postedInterruptNotificationVector)
+     showValue("eptpIndex:", eptpIndex)
+     showValue("guestESSelector:", guestESSelector)
+     showValue("guestCSSelector:", guestCSSelector)
+     showValue("guestSSSelector:", guestSSSelector)
+     showValue("guestDSSelector:", guestDSSelector)
+     showValue("guestFSSelector:", guestFSSelector)
+     showValue("guestGSSelector:", guestGSSelector)
+     showValue("guestLDTRSelector:", guestLDTRSelector)
+     showValue("guestTRSelector:", guestTRSelector)
+     showValue("guestInterruptStatus:", guestInterruptStatus)
+     /**
+     showValue("pmlIndex:", pmlIndex)
+     showValue("hostESSelector:", hostESSelector)
+     showValue("hostCSSelector:", hostCSSelector)
+     showValue("hostSSSelector:", hostSSSelector)
+     showValue("hostDSSelector:", hostDSSelector)
+     showValue("hostFSSelector:", hostFSSelector)
+     showValue("hostGSSelector:", hostGSSelector)
+     showValue("hostTRSelector:", hostTRSelector)
+     showValue("ioBitmapAAddress:", ioBitmapAAddress)
+     showValue("ioBitmapBAddress:", ioBitmapBAddress)
+     showValue("msrBitmapAddress:", msrBitmapAddress)
+
+     print("vmExitMSRStoreAddress:", vmExitMSRStoreAddress ?? "Unsupported")
+     print("vmExitMSRLoadAddress:", vmExitMSRLoadAddress ?? "Unsupported")
+     print("vmEntryMSRLoadAddress:", vmEntryMSRLoadAddress ?? "Unsupported")
+     showValue("executiveVMCSPtr:", executiveVMCSPtr)
+     print("pmlAddress:", pmlAddress ?? "Unsupported")
+     showValue("tscOffset:", tscOffset)
+     print("virtualAPICAddress:", virtualAPICAddress ?? "Unsupported")
+     print("apicAccessAddress:", apicAccessAddress ?? "Unsupported")
+     print("postedInterruptDescAddress:", postedInterruptDescAddress ?? "Unsupported")
+     showValue("vmFunctionControls:", vmFunctionControls)
+     showValue("eptp:", eptp)
+     showValue("eoiExitBitmap0:", eoiExitBitmap0)
+     showValue("eoiExitBitmap1:", eoiExitBitmap1)
+     showValue("eoiExitBitmap2:", eoiExitBitmap2)
+     showValue("eoiExitBitmap3:", eoiExitBitmap3)
+     print("eptpListAddress:", eptpListAddress ?? "Unsupported")
+     print("vmreadBitmapAddress:", vmreadBitmapAddress ?? "Unsupported")
+     print("vmwriteBitmapAddress:", vmwriteBitmapAddress ?? "Unsupported")
+     print("vExceptionInfoAddress:", vExceptionInfoAddress ?? "Unsupported")
+     showValue("xssExitingBitmap:", xssExitingBitmap)
+     showValue("enclsExitingBitmap:", enclsExitingBitmap)
+     print("subPagePermissionTablePtr:", subPagePermissionTablePtr ?? "Unsupported")
+     showValue("tscMultiplier:", tscMultiplier)
+     showValue("guestPhysAddress:", guestPhysAddress)
+     showValue("vmcsLinkPointer:", vmcsLinkPointer)
+     ****/
+     showValue("guestIA32DebugCtl:", guestIA32DebugCtl)
+     showValue("guestIA32PAT:", guestIA32PAT)
+     showValue("guestIA32EFER:", guestIA32EFER)
+     showValue("guestIA32PerfGlobalCtrl:", guestIA32PerfGlobalCtrl)
+     showValue("guestPDPTE0:", guestPDPTE0)
+     showValue("guestPDPTE1:", guestPDPTE1)
+     showValue("guestPDPTE2:", guestPDPTE2)
+     showValue("guestPDPTE3:", guestPDPTE3)
+     showValue("guestIA32bndcfgs:", guestIA32bndcfgs)
+     showValue("guestIA32RtitCtl:", guestIA32RtitCtl)
+     showValue("hostIA32PAT:", hostIA32PAT)
+     showValue("hostIA32EFER:", hostIA32EFER)
+     showValue("hostIA32PerfGlobalCtrl:", hostIA32PerfGlobalCtrl)
+     showValue("pinBasedVMExecControls:", pinBasedVMExecControls)
+     showValue("primaryProcVMExecControls:", primaryProcVMExecControls)
+     showValue("exceptionBitmap:", exceptionBitmap)
+     showValue("pagefaultErrorCodeMask:", pagefaultErrorCodeMask)
+     showValue("pagefaultErrorCodeMatch:", pagefaultErrorCodeMatch)
+     showValue("cr3TargetCount:", cr3TargetCount)
+     showValue("vmExitControls:", vmExitControls)
+     showValue("vmExitMSRStoreCount:", vmExitMSRStoreCount)
+     showValue("vmExitMSRLoadCount:", vmExitMSRLoadCount)
+     showValue("vmEntryControls:", vmEntryControls)
+     showValue("vmEntryMSRLoadCount:", vmEntryMSRLoadCount)
+     print("vmEntryInterruptInfo:", vmEntryInterruptInfo ?? "nil")
+     showValue("vmEntryExceptionErrorCode:", vmEntryExceptionErrorCode)
+     showValue("vmEntryInstructionLength:", vmEntryInstructionLength)
+     showValue("tprThreshold:", tprThreshold)
+     showValue("secondaryProcVMExecControls:", secondaryProcVMExecControls)
+     /*        print("supportsPLE:", supportsPLE)
+     showValue("pleGap:", pleGap)
+     showValue("pleWindow:", pleWindow)
+     showValue("vmInstructionError:", vmInstructionError)
+     print("exitReason:", exitReason ?? "nil")
+     */
+     showValue("vmExitIntInfo:", vmExitIntInfo)
+     showValue("vmExitIntErrorCode:", vmExitIntErrorCode)
+     showValue("idtVectorInfoField:", idtVectorInfoField)
+     showValue("idtVectorErrorCode:", idtVectorErrorCode)
+     showValue("vmExitInstrLen:", vmExitInstrLen)
+     showValue("vmExitInstrInfo:", vmExitInstrInfo)
+     showValue("guestESLimit:", guestESLimit)
+     showValue("guestCSLimit:", guestCSLimit)
+     showValue("guestSSLimit:", guestSSLimit)
+     showValue("guestDSLimit:", guestDSLimit)
+     showValue("guestFSLimit:", guestFSLimit)
+     showValue("guestGSLimit:", guestGSLimit)
+     showValue("guestLDTRLimit:", guestLDTRLimit)
+     showValue("guestTRLimit:", guestTRLimit)
+     showValue("guestGDTRLimit:", guestGDTRLimit)
+     showValue("guestIDTRLimit:", guestIDTRLimit)
+     showValue("guestESAccessRights:", guestESAccessRights)
+     showValue("guestCSAccessRights:", guestCSAccessRights)
+     showValue("guestSSAccessRights:", guestSSAccessRights)
+     showValue("guestDSAccessRights:", guestDSAccessRights)
+     showValue("guestFSAccessRights:", guestFSAccessRights)
+     showValue("guestGSAccessRights:", guestGSAccessRights)
+     showValue("guestLDTRAccessRights:", guestLDTRAccessRights)
+     showValue("guestTRAccessRights:", guestTRAccessRights)
+     print("guestInterruptibilityState:", guestInterruptibilityState ?? "nil")
+     showValue("guestActivityState:", guestActivityState)
+     showValue("guestSMBASE:", guestSMBASE)
+     showValue("guestIA32SysenterCS:", guestIA32SysenterCS)
+     showValue("vmxPreemptionTimerValue:", vmxPreemptionTimerValue)
+     showValue("hostIA32SysenterCS:", hostIA32SysenterCS)
+     showValue("cr0mask:", cr0mask)
+     showValue("cr4mask:", cr4mask)
+     showValue("cr0ReadShadow:", cr0ReadShadow?.bits.toUInt64())
+     showValue("cr4ReadShadow:", cr4ReadShadow?.bits.toUInt64())
+     showValue("cr3TargetValue0:", cr3TargetValue0)
+     showValue("cr3TargetValue1:", cr3TargetValue1)
+     showValue("cr3TargetValue2:", cr3TargetValue2)
+     showValue("cr3TargetValue3:", cr3TargetValue3)
+     showValue("exitQualification:", exitQualification)
+     showValue("ioRCX:", ioRCX)
+     showValue("ioRSI:", ioRSI)
+     showValue("ioRDI:", ioRDI)
+     showValue("ioRIP:", ioRIP)
+     showValue("guestLinearAddress:", guestLinearAddress)
+     showValue("guestCR0:", guestCR0?.bits.toUInt64())
+     showValue("guestCR3:", guestCR3?.bits.toUInt64())
+     showValue("guestCR4:", guestCR4?.bits.toUInt64())
+     showValue("guestESBase:", guestESBase)
+     showValue("guestCSBase:", guestCSBase)
+     showValue("guestSSBase:", guestSSBase)
+     showValue("guestDSBase:", guestDSBase)
+     showValue("guestFSBase:", guestFSBase)
+     showValue("guestGSBase:", guestGSBase)
+     showValue("guestLDTRBase:", guestLDTRBase)
+     showValue("guestTRBase:", guestTRBase)
+     showValue("guestGDTRBase:", guestGDTRBase)
+     showValue("guestIDTRBase:", guestIDTRBase)
+     showValue("guestDR7:", guestDR7)
+     showValue("guestRSP:", guestRSP)
+     showValue("guestRIP:", guestRIP)
+     showValue("guestRFlags:", guestRFlags)
+     print("guestPendingDebugExceptions:", guestPendingDebugExceptions ?? "nil")
+     showValue("guestIA32SysenterESP:", guestIA32SysenterESP)
+     showValue("guestIA32SysenterEIP:", guestIA32SysenterEIP)
+     showValue("hostCR0:", hostCR0?.bits.toUInt64())
+     showValue("hostCR3:", hostCR3?.bits.toUInt64())
+     showValue("hostCR4:", hostCR4?.bits.toUInt64())
+     showValue("hostFSBase:", hostFSBase)
+     showValue("hostGSBase:", hostGSBase)
+     showValue("hostTRBase:", hostTRBase)
+     showValue("hostGDTRBase:", hostGDTRBase)
+     showValue("hostIDTRBase:", hostIDTRBase)
+     showValue("hostIA32SysenterESP:", hostIA32SysenterESP)
+     showValue("hostIA32SysenterEIP:", hostIA32SysenterEIP)
+     showValue("hostRSP:", hostRSP)
+     showValue("hostRIP:", hostRIP)
+     }
+     *****/
+
+    func vmread16(_ index: UInt32) throws -> UInt16 {
         var data: UInt64 = 0
         let error = VMXError(vmread(index, &data))
-        switch error {
-            case .vmSucceed:
-                return .success(UInt16(data))
-            default:
-                return .failure(error)
-        }
+        guard error == .vmSucceed else { throw error }
+        return UInt16(data)
     }
 
 
-    func vmread32(_ index: UInt32) -> Result<UInt32, VMXError> {
+    func vmread32(_ index: UInt32) throws -> UInt32 {
         var data: UInt64 = 0
         let error = VMXError(vmread(index, &data))
-        switch error {
-            case .vmSucceed:
-                return .success(UInt32(data))
-            default:
-                return .failure(error)
-        }
+        guard error == .vmSucceed else { throw error }
+        return UInt32(data)
     }
 
 
-    func vmread64(_ index: UInt32) -> Result<UInt64, VMXError> {
+    func vmread64(_ index: UInt32) throws -> UInt64 {
         var data: UInt64 = 0
         let error = VMXError(vmread(index, &data))
-        switch error {
-            case .vmSucceed:
-                return .success(data)
-            default:
-                return .failure(error)
-        }
+        guard error == .vmSucceed else { throw error }
+        return data
     }
 
 
-    func vmwrite16(_ index: UInt32, _ data: UInt16) -> VMXError? {
-        let error = vmwrite(index, UInt64(data))
-        guard error == 0 else {
-            return  VMXError(error)
-        }
-        return nil
+    func vmreadNatural(_ index: UInt32) throws -> UInt {
+#if arch(x86_64)
+            return UInt(try vmread64(index))
+#else
+            return UInt(try vmread32(index))
+#endif
     }
 
 
-    func vmwrite32(_ index: UInt32, _ data: UInt32) -> VMXError? {
-        let error = vmwrite(index, UInt64(data))
-        guard error == 0 else {
-            return VMXError(error)
-        }
-        return nil
+    func vmwrite16(_ index: UInt32, _ data: UInt16) throws {
+        let error = VMXError(vmwrite(index, UInt64(data)))
+        guard error == .vmSucceed else { throw error }
     }
 
 
-    func vmwrite64(_ index: UInt32, _ data: UInt64) -> VMXError? {
-        let error = vmwrite(index, data)
-        guard error == 0 else {
-            return VMXError(error)
-        }
-        return nil
+    func vmwrite32(_ index: UInt32, _ data: UInt32) throws {
+        let error = VMXError(vmwrite(index, UInt64(data)))
+        guard error == .vmSucceed else { throw error }
     }
 
 
-    private func _readError(_ index: UInt32, _ vmxError: VMXError) {
-        print("VMXError: vmread(\(String(index, radix: 16))):", vmxError)
+    func vmwrite64(_ index: UInt32, _ data: UInt64) throws {
+        let error = VMXError(vmwrite(index, data))
+        guard error == .vmSucceed else { throw error }
     }
 
-
-    private func _vmread16(_ index: UInt32) -> UInt16? {
-        switch vmread16(index) {
-            case .failure(let vmxError):
-                print("VMXError: vmread16(\(String(index, radix: 16))):", vmxError)
-                return nil
-            case .success(let result):
-                return result
-        }
+    func vmwriteNatural(_ index: UInt32, _ data: UInt) throws {
+#if arch(x86_64)
+        try vmwrite64(index, UInt64(data))
+#else
+        try vmwrite32(index, UInt32(data))
+#endif
     }
-
-    private func _vmread32(_ index: UInt32) -> UInt32? {
-        switch vmread32(index) {
-            case .failure(let vmxError):
-                print("VMXError: vmread32(\(String(index, radix: 16))):", vmxError)
-                return nil
-            case .success(let result):
-                return result
-        }
-    }
-
-    private func _vmread64(_ index: UInt32) -> UInt64? {
-        switch vmread64(index) {
-            case .failure(let vmxError):
-                print("VMXError: vmread64(\(String(index, radix: 16))):", vmxError)
-                return nil
-            case .success(let result):
-                return result
-        }
-    }
-
-    private func _vmreadNatural(_ index: UInt32) -> UInt? {
-        switch vmread64(index) {
-            case .failure(let vmxError):
-                print("VMXError: vmread64(\(String(index, radix: 16))):", vmxError)
-                return nil
-            case .success(let result):
-                return UInt(result)
-        }
-    }
-
-    private func _vmwrite16(_ index: UInt32, _ data: UInt16?) {
-        if let data = data, let vmxError = vmwrite16(index, data) {
-            print("VMXError: vmread16(\(String(index, radix: 16)), \(String(index, radix: 16))):", vmxError)
-        }
-    }
-
-    private func _vmwrite32(_ index: UInt32, _ data: UInt32?) {
-        if let data = data, let vmxError = vmwrite32(index, data) {
-            print("VMXError: vmread32(\(String(index, radix: 16)), \(String(index, radix: 16))):", vmxError)
-        }
-    }
-
-    private func _vmwrite64(_ index: UInt32, _ data: UInt64?) {
-        if let data = data, let vmxError = vmwrite64(index, data) {
-            print("VMXError: vmread64(\(String(index, radix: 16)), \(String(index, radix: 16))):", vmxError)
-        }
-    }
-
-    private func _vmwriteNatural(_ index: UInt32, _ data: UInt?) {
-        if let data = data, let vmxError = vmwrite64(index, UInt64(data)) {
-            print("VMXError: vmread64(\(String(index, radix: 16)), \(String(index, radix: 16))):", vmxError)
-        }
-    }
-
 }
-
-
-
-
 
 #endif

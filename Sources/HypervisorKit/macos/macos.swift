@@ -31,219 +31,7 @@ class VirtualMachine {
     static private(set) var vmx_cap_entry: UInt64 = 0
     
     
-    
-    struct VCPU {
-        
-        struct SegmentRegister {
-            var selector: UInt16 = 0
-            var base: UInt = 0
-            var limit: UInt32 = 0
-            var accessRights: UInt32 = 0
-        }
-        
-        
-        
-        struct Registers {
-            
-            var cs: SegmentRegister = SegmentRegister()
-            var ss: SegmentRegister = SegmentRegister()
-            var ds: SegmentRegister = SegmentRegister()
-            var es: SegmentRegister = SegmentRegister()
-            var fs: SegmentRegister = SegmentRegister()
-            var gs: SegmentRegister = SegmentRegister()
-            var tr: SegmentRegister = SegmentRegister()
-            var ldtr: SegmentRegister = SegmentRegister()
-            
-            var rax: UInt64 = 0
-            var rbx: UInt64 = 0
-            var rcx: UInt64 = 0
-            var rdx: UInt64 = 0
-            var rsi: UInt64 = 0
-            var rdi: UInt64 = 0
-            var rsp: UInt64 = 0
-            var rbp: UInt64 = 0
-            var r8: UInt64 = 0
-            var r9: UInt64 = 0
-            var r10: UInt64 = 0
-            var r11: UInt64 = 0
-            var r12: UInt64 = 0
-            var r13: UInt64 = 0
-            var r14: UInt64 = 0
-            var r15: UInt64 = 0
-            var rip: UInt64 = 0
-            var rflags: UInt64 = 0
-            var cr0: UInt64 = 0
-            var cr2: UInt64 = 0
-            var cr3: UInt64 = 0
-            var cr4: UInt64 = 0
-            var cr8: UInt64 = 0
-            
-            var gdtrBase: UInt64 = 0
-            var gdtrLimit: UInt64 = 0
-            var idtrBase: UInt64 = 0
-            var idtrLimit: UInt64 = 0
-            
-            
-            func readRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t) throws -> UInt64 {
-                var value: UInt64 = 0
-                try hvError(hv_vcpu_read_register(vcpuId, register, &value))
-                return value
-            }
-            
-            func writeRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t, _ value: UInt64) throws {
-                try hvError(hv_vcpu_write_register(vcpuId, register, value))
-            }
-            
-            func setupRegisters(vcpuId: hv_vcpuid_t) throws {
-                try writeRegister(vcpuId, HV_X86_RAX, rax)
-                try writeRegister(vcpuId, HV_X86_RBX, rbx)
-                try writeRegister(vcpuId, HV_X86_RCX, rcx)
-                try writeRegister(vcpuId, HV_X86_RDX, rdx)
-                try writeRegister(vcpuId, HV_X86_RSI, rsi)
-                try writeRegister(vcpuId, HV_X86_RDI, rdi)
-                try writeRegister(vcpuId, HV_X86_RSP, rsp)
-                try writeRegister(vcpuId, HV_X86_RBP, rbp)
-                try writeRegister(vcpuId, HV_X86_R8, r8)
-                try writeRegister(vcpuId, HV_X86_R9, r9)
-                try writeRegister(vcpuId, HV_X86_R10, r10)
-                try writeRegister(vcpuId, HV_X86_R11, r11)
-                try writeRegister(vcpuId, HV_X86_R12, r12)
-                try writeRegister(vcpuId, HV_X86_R13, r13)
-                try writeRegister(vcpuId, HV_X86_R14, r14)
-                try writeRegister(vcpuId, HV_X86_R15, r15)
-                print("Setting RIP to:", String(rip, radix: 16))
-                try writeRegister(vcpuId, HV_X86_RIP, rip)
-                try writeRegister(vcpuId, HV_X86_RFLAGS, rflags)
-                try writeRegister(vcpuId, HV_X86_CR0, cr0)
-                try writeRegister(vcpuId, HV_X86_CR2, cr2)
-                try writeRegister(vcpuId, HV_X86_CR3, cr3)
-                try writeRegister(vcpuId, HV_X86_CR4, cr4)
-                try writeRegister(vcpuId, HV_X86_GDT_BASE, gdtrBase)
-                try writeRegister(vcpuId, HV_X86_GDT_LIMIT, gdtrLimit)
-                try writeRegister(vcpuId, HV_X86_IDT_BASE, idtrBase)
-                try writeRegister(vcpuId, HV_X86_IDT_LIMIT, idtrLimit)
-            }
-            
-            mutating func readRegisters(vcpuId: hv_vcpuid_t) throws {
-                rax = try readRegister(vcpuId, HV_X86_RAX)
-                rbx = try readRegister(vcpuId, HV_X86_RBX)
-                rcx = try readRegister(vcpuId, HV_X86_RCX)
-                rdx = try readRegister(vcpuId, HV_X86_RDX)
-                rsi = try readRegister(vcpuId, HV_X86_RSI)
-                rdi = try readRegister(vcpuId, HV_X86_RDI)
-                rsp = try readRegister(vcpuId, HV_X86_RSP)
-                rbp = try readRegister(vcpuId, HV_X86_RBP)
-                r8 = try readRegister(vcpuId, HV_X86_R8)
-                r9 = try readRegister(vcpuId, HV_X86_R9)
-                r10 = try readRegister(vcpuId, HV_X86_R10)
-                r11 = try readRegister(vcpuId, HV_X86_R11)
-                r12 = try readRegister(vcpuId, HV_X86_R12)
-                r13 = try readRegister(vcpuId, HV_X86_R13)
-                r14 = try readRegister(vcpuId, HV_X86_R14)
-                r15 = try readRegister(vcpuId, HV_X86_R15)
-                rip = try readRegister(vcpuId, HV_X86_RIP)
-                rflags = try readRegister(vcpuId, HV_X86_RFLAGS)
-                cr0 = try readRegister(vcpuId, HV_X86_CR0)
-                cr2 = try readRegister(vcpuId, HV_X86_CR2)
-                cr3 = try readRegister(vcpuId, HV_X86_CR3)
-                cr4 = try readRegister(vcpuId, HV_X86_CR4)
-                gdtrBase = try readRegister(vcpuId, HV_X86_GDT_BASE)
-                gdtrLimit = try readRegister(vcpuId, HV_X86_GDT_LIMIT)
-                idtrBase = try readRegister(vcpuId, HV_X86_IDT_BASE)
-                idtrLimit = try readRegister(vcpuId, HV_X86_IDT_LIMIT)                
-            }
-            
-            
-            func setupSegmentRegisters(vmcs: VMCS) {
-                vmcs.guestCSSelector = cs.selector
-                vmcs.guestCSBase = cs.base
-                vmcs.guestCSLimit = cs.limit
-                vmcs.guestCSAccessRights = cs.accessRights
-                
-                vmcs.guestSSSelector = ss.selector
-                vmcs.guestSSBase = ss.base
-                vmcs.guestSSLimit = ss.limit
-                vmcs.guestSSAccessRights = ss.accessRights
-                
-                vmcs.guestDSSelector = ds.selector
-                vmcs.guestDSBase = ds.base
-                vmcs.guestDSLimit = ds.limit
-                vmcs.guestDSAccessRights = ds.accessRights
-                
-                vmcs.guestESSelector = es.selector
-                vmcs.guestESBase = es.base
-                vmcs.guestESLimit = es.limit
-                vmcs.guestESAccessRights = es.accessRights
-                
-                vmcs.guestFSSelector = fs.selector
-                vmcs.guestFSBase = fs.base
-                vmcs.guestFSLimit = fs.limit
-                vmcs.guestFSAccessRights = fs.accessRights
-                
-                vmcs.guestGSSelector = gs.selector
-                vmcs.guestGSBase = gs.base
-                vmcs.guestGSLimit = gs.limit
-                vmcs.guestGSAccessRights = gs.accessRights
-                
-                vmcs.guestTRSelector = tr.selector
-                vmcs.guestTRBase = tr.base
-                vmcs.guestTRLimit = tr.limit
-                vmcs.guestTRAccessRights = tr.accessRights
-                
-                vmcs.guestLDTRSelector = ldtr.selector
-                vmcs.guestLDTRBase = ldtr.base
-                vmcs.guestLDTRLimit = ldtr.limit
-                vmcs.guestLDTRAccessRights = ldtr.accessRights
-            }
-        }
-        
-        var registers = Registers()
-        
-        let vcpuId: hv_vcpuid_t
-        let vmcs: VMCS
-        
-        init() throws {
-            var _vcpuId: hv_vcpuid_t = 0
-            try hvError(hv_vcpu_create(&_vcpuId, UInt64(HV_VCPU_DEFAULT)))
-            self.vcpuId = _vcpuId
-            print("vcpuID:", vcpuId)
-            vmcs = VMCS(vcpu: vcpuId)
-            
-            let VMCS_PRI_PROC_BASED_CTLS_HLT       = UInt64(1 << 7)
-            let VMCS_PRI_PROC_BASED_CTLS_CR8_LOAD  = UInt64(1 << 19)
-            let VMCS_PRI_PROC_BASED_CTLS_CR8_STORE = UInt64(1 << 20)
-            
-            func cap2ctrl(_ cap: UInt64, _ ctrl: UInt64) -> UInt64 {
-                return (ctrl | (cap & 0xffffffff)) & (cap >> 32)
-            }
-            vmcs.pinBasedVMExecControls = UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_pinbased, 0))
-            vmcs.primaryProcVMExecControls = UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_procbased,
-                                                                                 VMCS_PRI_PROC_BASED_CTLS_HLT |
-                                                                                    VMCS_PRI_PROC_BASED_CTLS_CR8_LOAD |
-                VMCS_PRI_PROC_BASED_CTLS_CR8_STORE))
-            vmcs.secondaryProcVMExecControls = UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_procbased2, 0))
-            vmcs.vmEntryControls = UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_entry, 0))
-            
-            vmcs.exceptionBitmap = 0xffffffff
-            vmcs.cr0mask = 0x60000000
-            vmcs.cr0ReadShadow = CPU.CR0Register(0)
-            vmcs.cr4mask = 0
-            vmcs.cr4ReadShadow = CPU.CR4Register(0)
-        }
-        
-        mutating func run() throws -> VMXExit {
-            try registers.setupRegisters(vcpuId: vcpuId)
-            registers.setupSegmentRegisters(vmcs: vmcs)
-            try hvError(hv_vcpu_run(vcpuId))
-            try registers.readRegisters(vcpuId: vcpuId)
-            return vmcs.exitReason!
-        }
-        
-        func shutdown() throws {
-            try hvError(hv_vcpu_destroy(vcpuId))
-            print("vcpu destroyed")
-        }
-    }
+
     
     
     class MemRegion {
@@ -275,8 +63,8 @@ class VirtualMachine {
     }
     
     
-    private var vcpus: [VCPU] = []
-    private var mappedMemory: [MemRegion] = []
+    private(set) var vcpus: [VCPU] = []
+    private(set) var memoryRegions: [MemRegion] = []
     
     
     init() throws {
@@ -301,17 +89,17 @@ class VirtualMachine {
     
     func addMemory(at guestAddress: UInt64, size: Int) -> MemRegion? {
         let memRegion = MemRegion(size: size, at: guestAddress)!
-        mappedMemory.append(memRegion)
+        memoryRegions.append(memRegion)
         return memRegion
     }
     
     func unmapMemory(ofSize size: Int, at address: UInt64) throws {
-        for idx in mappedMemory.startIndex..<mappedMemory.endIndex {
-            let memory = mappedMemory[idx]
+        for idx in memoryRegions.startIndex..<memoryRegions.endIndex {
+            let memory = memoryRegions[idx]
             if memory.size == size && memory.guestAddress == address {
                 try hvError(hv_vm_unmap(address, size))
                 print("memory unmmaped")
-                mappedMemory.remove(at: idx)
+                memoryRegions.remove(at: idx)
                 return
             }
         }
@@ -330,13 +118,12 @@ class VirtualMachine {
                 vcpus.remove(at: 0)
             }
             
-            while let memory = mappedMemory.first {
+            while let memory = memoryRegions.first {
                 try hvError(hv_vm_unmap(memory.guestAddress, memory.size))
-                mappedMemory.remove(at: 0)
+                memoryRegions.remove(at: 0)
             }
             
             try hvError(hv_vm_destroy())
-            print("VM Destroyed")
         } catch {
             fatalError("Error shutting down \(error)")
         }

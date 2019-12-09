@@ -3,6 +3,9 @@
 /Packages
 /*.xcodeproj
 xcuserdata/
-DerivedData/
+DerivedData
+.swiftpm
+Package.resolved
 *~
 \#*
+
