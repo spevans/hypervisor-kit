@@ -12,7 +12,11 @@ final class RealModeTests: XCTestCase {
         if let code = _realModeTestCode {
             return code
         }
+        #if os(Linux)
         let url = URL(fileURLWithPath: "real_mode_test.bin", isDirectory: false)
+        #else
+        let url = URL(fileURLWithPath: "/Users/spse/Files/src/osx/HypervisorKit/real_mode_test.bin", isDirectory: false)
+        #endif
         let code = try Data(contentsOf: url)
         _realModeTestCode = code
         return code
@@ -41,8 +45,8 @@ final class RealModeTests: XCTestCase {
         }
         
         vcpu.registers.rip = 0x1000
-        vcpu.registers.rflags = 0x2
-        vcpu.registers.rsp = 0x0
+        vcpu.registers.rflags = CPU.RFLAGS()
+        vcpu.registers.rsp = 0x1FFE
         vcpu.registers.rax = 0x0
         
         vcpu.registers.cs.selector = 0
@@ -98,14 +102,13 @@ final class RealModeTests: XCTestCase {
 
 
         
-    private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16, skipEPT: Bool = true) throws -> VMXExit {
+    private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16, skipEPT: Bool = true) throws -> VMExit {
 
             print("Running VCPU with ax:", ax)
 
             vcpu.registers.rax = UInt64(ax)
             vcpu.registers.rip = 0x1000
 
-            var seenEPT = false
             while true {
             
                 guard let vmExit = try? vcpu.run() else {
@@ -113,23 +116,47 @@ final class RealModeTests: XCTestCase {
                     throw HVError.vmRunError
             }
             
-            print("VMExit Reason:", vmExit.exitReason)            
+            print("VMExit Reason:", vmExit)
             
-            switch vmExit.exitReason {
-                case .eptViolation:
-                    // Can happen at startup on macOS
-                    if !skipEPT { return vmExit }
-                    if seenEPT {
-                        XCTFail("Got 2nd EPT violation")
-                        throw HVError.vmRunError
-                    }
-                    seenEPT = true
-
+            switch vmExit {
                 default:
                     return vmExit
                 }
             }
     }
+
+/*
+    func testBadMemoryRead() throws {
+        let vm = try createRealModeVM()
+        let vcpu = vm.vcpus[0]
+        let vmExit = try runTest(vcpu: vcpu, ax: 3)
+
+        XCTAssertEqual(vmExit, .hlt)
+        let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
+        XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
+    }
+*/
+
+
+
+    func testInstructionPrefixes() throws {
+        let vm = try createRealModeVM()
+        let memRegion = vm.memoryRegions[0]
+        memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
+        let vcpu = vm.vcpus[0]
+        vcpu.registers.rip = 0x1100
+        vcpu.registers.rflags.trap = true
+        var vmExit = try vcpu.run()
+        XCTAssertEqual(vcpu.registers.rip, 0x1100)
+        XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
+        //vcpu.registers.rip += 1
+        vmExit = try vcpu.run()
+        XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
+        //vcpu.registers.rip += 1
+        vmExit = try vcpu.run()
+
+    }
+
 
     func testHLT() throws {
         let vm = try createRealModeVM()
@@ -138,23 +165,45 @@ final class RealModeTests: XCTestCase {
         let vcpu = vm.vcpus[0]
         let vmExit = try runTest(vcpu: vcpu, ax: 0)
 
-        XCTAssertEqual(vmExit.exitReason, .hlt)
+        XCTAssertEqual(vmExit, .hlt)
         let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
         print("RAX:", String(rax, radix: 16))
         XCTAssertEqual(vcpu.registers.rax, 0x1235)
         XCTAssertEqual(vcpu.registers.rip, 0x100d)
-        XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
+//        XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
     }
 
     func testOut() throws {
         let vm = try createRealModeVM()
         let vcpu = vm.vcpus[0]
-        let vmExit = try runTest(vcpu: vcpu, ax: 1)
-        XCTAssertEqual(vmExit.exitReason, .ioInstruction)
+
+        var vmExit = try runTest(vcpu: vcpu, ax: 1)
+        while vmExit != .hlt {
+            print(vmExit)
+
+            if case let VMExit.ioOutOperation(operation) = vmExit {
+                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(1))
+                XCTAssertEqual(operation.port, 0x60)
+            } else {
+                XCTFail("Not an IO op")
+            }
+            XCTAssertEqual(vcpu.registers.rip, 0x102b)
+          //  try vcpu.skipInstruction()
+            print(vcpu.registers.rcx)
+            print("RSI:", String(vcpu.registers.rsi))
+            vmExit = try vcpu.run()
+        }
+        
+//        let vmExit2 = try vcpu.run()
+//        XCTAssertEqual(vmExit2, .hlt)
+//        XCTAssertEqual(vcpu.registers.rip, 0x1017)
+//        XCTAssertEqual(vcpu.registers.rbx, 0x1234)
     }
     
     static var allTests = [
-        ("testHLT", testHLT),
+        ("testInstructionPrefixes", testInstructionPrefixes),
+        //("testBadMemoryRead", testBadMemoryRead),
+       // ("testHLT", testHLT),
         ("testOut", testOut),
     ]
 }

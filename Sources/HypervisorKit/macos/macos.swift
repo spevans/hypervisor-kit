@@ -13,6 +13,7 @@ enum HVError: Error {
 case error(hv_return_t)
 case noMemory
 case vmRunError
+case invalidMemory
 }
 
 func hvError(_ error: hv_return_t) throws {
@@ -29,13 +30,9 @@ class VirtualMachine {
     static private(set) var vmx_cap_procbased: UInt64 = 0
     static private(set) var vmx_cap_procbased2: UInt64 = 0
     static private(set) var vmx_cap_entry: UInt64 = 0
-    
-    
 
-    
-    
-    class MemRegion {
-        private let pointer: UnsafeMutableRawPointer
+    class MemoryRegion {
+        fileprivate let pointer: UnsafeMutableRawPointer
         
         let guestAddress: UInt64
         let size: Int
@@ -64,7 +61,7 @@ class VirtualMachine {
     
     
     private(set) var vcpus: [VCPU] = []
-    private(set) var memoryRegions: [MemRegion] = []
+    private(set) var memoryRegions: [MemoryRegion] = []
     
     
     init() throws {
@@ -87,8 +84,8 @@ class VirtualMachine {
         }
     }
     
-    func addMemory(at guestAddress: UInt64, size: Int) -> MemRegion? {
-        let memRegion = MemRegion(size: size, at: guestAddress)!
+    func addMemory(at guestAddress: UInt64, size: Int) -> MemoryRegion? {
+        let memRegion = MemoryRegion(size: size, at: guestAddress)!
         memoryRegions.append(memRegion)
         return memRegion
     }
@@ -104,9 +101,21 @@ class VirtualMachine {
             }
         }
     }
+
+    func readMemory(at guestAddress: UInt64, count: Int) throws -> [UInt8] {
+        for region in memoryRegions {
+            if region.guestAddress <= guestAddress && region.guestAddress + UInt64(region.size) >= guestAddress + UInt64(count) {
+                let offset = guestAddress - region.guestAddress
+                let ptr = region.pointer.advanced(by: Int(offset))
+                let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
+                return Array<UInt8>(buffer)
+            }
+        }
+        throw HVError.invalidMemory
+    }
     
     func createVCPU() throws -> VCPU {
-        let vcpu = try VCPU.init()
+        let vcpu = try VCPU.init(vm: self)
         vcpus.append(vcpu)
         return vcpu
     }

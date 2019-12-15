@@ -485,7 +485,7 @@ final class VMCS {
     }
 
     // 64-Bit Read-Only Data Field
-    func guestPhysAddress() throws -> UInt64 { try vmread64(0x2400) }
+    func guestPhysicalAddress() throws -> UInt64 { try vmread64(0x2400) }
 
     // 64-Bit Guest-State Fields
     func vmcsLinkPointer() throws -> UInt64 {
@@ -794,11 +794,39 @@ final class VMCS {
         VMXExit(try vmread32(0x4402))
     }
 
-    func vmExitIntInfo() throws -> UInt32 {
-        try vmread32(0x4404)
+    struct VMExitInterruptionInfoField {
+
+        enum InterruptType: Int {
+            case external = 0
+            case reserved = 1
+            case nmi = 2
+            case hardwareException = 3
+            case softwareInterrupt = 4
+            case privilegedSoftwareException = 5
+            case softwareException = 6
+            case otherEvent = 7
+        }
+
+        private let bits: BitArray32
+        var rawValue: UInt32 { bits.rawValue }
+
+        var vector: UInt8 { UInt8(bits[0...7]) }
+        var interruptType: InterruptType { InterruptType(rawValue: Int(bits[8...10]))! }
+        var errorCodeValid: Bool { bits[11] == 1}
+        var nmiUnblockingDueToIRET: Bool { bits[12] == 1 }
+        var reserved: Int { Int(bits[13...30]) }
+        var valid: Bool { bits[31] == 1 }
+
+        init(_ rawValue: UInt32) {
+            bits = BitArray32(rawValue)
+        }
     }
 
-    func vmExitIntErrorCode() throws -> UInt32 {
+    func vmExitInterruptionInfo() throws -> VMExitInterruptionInfoField {
+        VMExitInterruptionInfoField(try vmread32(0x4404))
+    }
+
+    func vmExitInterruptionErrorCode() throws -> UInt32 {
         try vmread32(0x4406)
     }
 
@@ -1246,12 +1274,12 @@ final class VMCS {
         try vmwriteNatural(0x681E, data)
     }
 
-    func guestRFlags() throws -> UInt {
-        try vmreadNatural(0x6820)
+    func guestRFlags() throws -> CPU.RFLAGS {
+        CPU.RFLAGS(UInt64(try vmreadNatural(0x6820)))
     }
 
-    func guestRFlags(_ data: UInt) throws {
-        try vmwriteNatural(0x6820, data)
+    func guestRFlags(_ data: CPU.RFLAGS) throws {
+        try vmwriteNatural(0x6820, UInt(data.rawValue))
     }
 
     struct PendingDebugExceptions {
