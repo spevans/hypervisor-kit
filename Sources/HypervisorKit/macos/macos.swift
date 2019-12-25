@@ -102,7 +102,19 @@ class VirtualMachine {
         }
     }
 
-    func readMemory(at guestAddress: UInt64, count: Int) throws -> [UInt8] {
+    func memory(at guestAddress: PhysicalAddress, count: Int) throws -> UnsafeMutableRawPointer {
+        for region in memoryRegions {
+            if region.guestAddress <= guestAddress && region.guestAddress + UInt64(region.size) >= guestAddress + UInt64(count) {
+                let offset = guestAddress - region.guestAddress
+                return region.pointer.advanced(by: Int(offset))
+
+            }
+        }
+        throw HVError.invalidMemory
+    }
+
+
+    func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
         for region in memoryRegions {
             if region.guestAddress <= guestAddress && region.guestAddress + UInt64(region.size) >= guestAddress + UInt64(count) {
                 let offset = guestAddress - region.guestAddress

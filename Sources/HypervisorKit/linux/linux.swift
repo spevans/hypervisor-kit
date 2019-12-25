@@ -205,9 +205,9 @@ class VirtualMachine {
                 set { regs.rip = newValue }
             }
 
-            var rflags: UInt64 {
-                get { regs.rflags }
-                set { regs.rflags = newValue }
+            var rflags: CPU.RFLAGS {
+                get { CPU.RFLAGS(regs.rflags) }
+                set { regs.rflags = newValue.rawValue }
             }
 
             var cr0: UInt64 {

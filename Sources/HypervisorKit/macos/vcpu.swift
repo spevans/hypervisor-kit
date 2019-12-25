@@ -8,7 +8,6 @@
 #if os(macOS)
 
 import Hypervisor
-import X86InstructionDecoder
 
 extension VirtualMachine {
     
@@ -257,7 +256,7 @@ extension VirtualMachine {
                 try registers.readSegmentRegisters(vmcs: vmcs)
 
                 exitCount += 1
-                let exitReason = try vmExit()
+                guard let exitReason = try vmExit() else { continue }
 
                 // FIXME: Determine why first vmexit is an EPT violation
                 if exitCount == 1,
@@ -277,7 +276,7 @@ extension VirtualMachine {
             print("instrLen:", instrLen)
             registers.rip += UInt64(instrLen)
         }
-
+/*
         func readInstructionBytes() throws -> X86Instruction {
 
             let length = try vmcs.vmExitInstructionLength()
@@ -287,19 +286,38 @@ extension VirtualMachine {
             var decoder = Decoder(cpuMode: .realMode, bytes: instruction)
             return try decoder.decode()
         }
-        
+        */
         func shutdown() throws {
             try hvError(hv_vcpu_destroy(vcpuId))
         }
 
 
+        // Read from Segment:[{R,E},SI]
+        private func readStringUnit(selector: SegmentRegister, addressWidth: Int, dataWidth: Int) throws -> VMExit.IOOutOperation.Data {
+            switch addressWidth {
+                case 16:
+                    var rsi = registers.rsi
+                    var si = UInt16(truncatingIfNeeded: rsi)
+                    let physicalAddress = PhysicalAddress(selector.base) + PhysicalAddress(si)
+                    let ptr = try vm.memory(at: physicalAddress, count: dataWidth)
+                    let bytes = UInt16(dataWidth / 8)
+                    si = registers.rflags.direction ? si &- bytes : si &+ bytes
+                    rsi &= ~UInt64(0xffff)
+                    rsi |= UInt64(si)
+                    registers.rsi = rsi
 
-        private func stringload16 
-
-
+                    switch dataWidth {
+                        case 8: return .byte(ptr.load(as: UInt8.self))
+                        case 16: return .word(ptr.load(as: UInt16.self))
+                        case 32: return .dword(ptr.load(as: UInt32.self))
+                        default: fatalError("bad width")
+                }
+                default: fatalError("Cant handle: \(addressWidth)")
+            }
+        }
         
         
-        private func vmExit() throws -> VMExit {
+        private func vmExit() throws -> VMExit? {
             let exitReason = try vmcs.exitReason()
             switch exitReason.exitReason {
                 case .exceptionOrNMI:
@@ -307,7 +325,7 @@ extension VirtualMachine {
                     switch interruptInfo.interruptType {
                         case .hardwareException:
                             let errorCode = interruptInfo.errorCodeValid ? try vmcs.vmExitInterruptionErrorCode() : nil
-                            guard let eInfo = VMExit.ExceptionInfo(exception: interruptInfo.vector, errorCode: errorCode) else {
+                            guard let eInfo = VMExit.ExceptionInfo(exception: UInt32(interruptInfo.vector), errorCode: errorCode) else {
                                 fatalError("Bad exception \(interruptInfo)")
                             }
                             return .exception(eInfo)
@@ -315,13 +333,13 @@ extension VirtualMachine {
                         default:
                             fatalError("\(exitReason): \(interruptInfo) not implmented")
                 }
-        
+
                 case .externalINT:
                     let interruptInfo = try vmcs.vmExitInterruptionInfo()
                     switch interruptInfo.interruptType {
                         case .external:
                             let errorCode = interruptInfo.errorCodeValid ? try vmcs.vmExitInterruptionErrorCode() : nil
-                            guard let eInfo = VMExit.ExceptionInfo(exception: interruptInfo.vector, errorCode: errorCode) else {
+                            guard let eInfo = VMExit.ExceptionInfo(exception: UInt32(interruptInfo.vector), errorCode: errorCode) else {
                                 fatalError("Bad exception \(interruptInfo)")
                             }
                             return .exception(eInfo)
@@ -371,9 +389,12 @@ extension VirtualMachine {
                     let port = UInt16(exitQ[16...31])
                     
                     if isString {
+                        let isRep = Bool(exitQ[5])
+
                         let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
                         let addressSize = 16 << exitInfo[7...9]
                         let segmentRegister = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
+
                         print("bitWidth:", bitWidth, "isIn:", isIn, "port:", port)
                         print("INS/OUTS: addressSize:", addressSize, "segmentRegister:", segmentRegister)
                         let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: segmentRegister, register: .rsi)
@@ -381,29 +402,36 @@ extension VirtualMachine {
                         let physicalAddress = self.physicalAddress(for: linearAddress)!
                         print("Physical Address:", String(physicalAddress, radix: 16))
 
-                        let instruction = try readInstructionBytes()
-                        print(instruction)
-                        let op: (Int) -> (Int) = registers.rflags.direction ? { $0 - 1 } : { $0 + 1 }
-                        let count = registers.rcx
+                        let rcx = registers.rcx
+                        var count: UInt64 = {
+                            guard isRep else { return 1 }
+                            if addressSize == 16 { return rcx & 0xffff }
+                            if addressSize == 32 { return rcx & 0xffff_fffff }
+                            return rcx
+                        }()
+                        print("Count:", count)
 
-                        count &= (1 << address) - 1
-
-                        while count != 0 {
-
-                            count -= 1
-                        }
-
-
-
-                        let type: Type
-                        switch addressSize {
-                            case 16: type = UInt
+                        if isRep && count == 0 {
+                            try skipInstruction()
+                            return nil
                         }
 
                         if isIn {
-                            return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth, address: physicalAddress, count: UInt32(addressSize / 8)))
+                            return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth))
                         } else {
-                            return .ioOutOperation(VMExit.IOOutOperation(port: port, bitWidth: bitWidth, address: physicalAddress, count: UInt32(addressSize / 8)))
+                            let data = try readStringUnit(selector: registers.ds, addressWidth: 16, dataWidth: Int(bitWidth))
+
+                            if isRep {
+                                count -= 1
+                                if addressSize == 16 {
+                                    registers.rcx = (rcx & ~0xffff) | count
+                                } else if addressSize == 32 {
+                                    registers.rcx = (rcx & ~0xffff_ffff) | count
+                                } else {
+                                    registers.rcx = count
+                                }
+                            }
+                            return .ioOutOperation(VMExit.IOOutOperation(port: port, data: data))
                         }
                     }
 
@@ -411,7 +439,7 @@ extension VirtualMachine {
                         return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth))
                     } else {
                         return .ioOutOperation(VMExit.IOOutOperation(port: port, bitWidth: bitWidth, rax: registers.rax))
-                    }
+                }
 
                 case .rdmsr: fatalError("\(exitReason) not implmented")
                 case .wrmsr: fatalError("\(exitReason) not implmented")

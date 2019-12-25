@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(path: "../X86InstructionDecoder"),
+       // .package(path: "../X86InstructionDecoder"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -22,7 +22,7 @@ let package = Package(
         .target(
             name: "HypervisorKit",
             dependencies:[
-                .product(name: "X86InstructionDecoder")
+              //  .product(name: "X86InstructionDecoder")
             ],
             swiftSettings: [
                 .unsafeFlags(["-import-objc-header", "Sources/HypervisorKit/linux/linux.h"], .when(platforms: [.linux]))

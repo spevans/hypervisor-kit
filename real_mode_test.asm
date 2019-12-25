@@ -23,11 +23,11 @@ io_out_test:
                 cld
                 xor     ax, ax
                 mov     es, ax
-                mov     si, 0x1000
-                mov     dword [si], 0x01020304
-                mov     dword [si+4], 0x11121314
+                mov     si, 0x1300
+               ;; mov     dword [si], 0x01020304
+               ;; mov     dword [si+4], 0x11121314
                 mov     dx, 0x60
-                mov     cx, 9
+                mov     cx, 6
                 rep     outsd
                 hlt
 test3:
@@ -43,6 +43,13 @@ instruction_prefixes:
                 db  0xf0, 0xf2, 0x2e, 0x67, 0x46, 0x0f, 0x3a, 0x7a, 0x22, 0x8e, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
                 lock     es add word  [0x1200], ax
 
+                OFFSET  0x300
+                dd      12345678
+                dd      11223344
+                dd      00000001
+                dd      10000000
+                dd      11111111
+                dd      22222222
 
 
 jump_table:

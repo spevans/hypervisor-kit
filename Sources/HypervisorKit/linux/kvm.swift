@@ -49,29 +49,37 @@ enum KVMExit: UInt32 {
                 return VMExit.unknown(kvmRunPtr.pointee.hw.hardware_exit_reason)
 
             case .exception:
-                return VMExit.exception(VMExit.Exception(exception: kvmRunPtr.pointee.ex.exception, errorCode: kvmRunPtr.pointee.ex.error_code))
+                return VMExit.exception(VMExit.ExceptionInfo(exception: kvmRunPtr.pointee.ex.exception, errorCode: kvmRunPtr.pointee.ex.error_code)!)
 
             case .io:
                 let io = kvmRunPtr.pointee.io
                 print("IO:", io)
                 let dataOffset = io.data_offset
-                let dataPtr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
+                let bitWidth = io.size * 8
+                if io.count != 1 { fatalError("IO op with count != 1") }
 
                 if io.direction == 0 {  // In
                     return VMExit.ioInOperation(VMExit.IOInOperation(
                         port: io.port,
-                        bitWidth: io.size * 8,
-                        address: 0,
-                        count: io.count)
+                        bitWidth: bitWidth)
                     )
                 } else {
+                    let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
+
+                    let data: VMExit.IOOutOperation.Data = {
+                        switch bitWidth {
+                            case 8: return .byte(ptr.load(as: UInt8.self))
+                            case 16: return .word(ptr.load(as: UInt16.self))
+                            case 32: return .dword(ptr.load(as: UInt32.self))
+                            default: fatalError("bad width")
+                        }
+                    }()
+
                     return VMExit.ioOutOperation(VMExit.IOOutOperation(
                         port: io.port,
-                        bitWidth: io.size * 8,
-                        address: 0,
-                        count: io.count)
+                        data: data)
                     )
-                }
+            }
 
             case .debug:
                 let debugInfo = kvmRunPtr.pointee.debug.arch

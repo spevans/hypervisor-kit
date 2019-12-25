@@ -12,9 +12,9 @@ enum VMExit: Equatable {
             case byte
             case word
             case dword
-            case bytes(PhysicalAddress, UInt32)
-            case words(PhysicalAddress, UInt32)
-            case dwords(PhysicalAddress, UInt32)
+     //       case bytes(PhysicalAddress, UInt32)
+     //       case words(PhysicalAddress, UInt32)
+      //      case dwords(PhysicalAddress, UInt32)
 
             init(bitWidth: UInt8) {
                 if bitWidth == 8 {
@@ -25,17 +25,6 @@ enum VMExit: Equatable {
                     self = .dword
                 }
             }
-
-            init(bitWidth: UInt8, address: UInt64, count: UInt32) {
-                if bitWidth == 8 {
-                    self = .bytes(address, count)
-                } else if bitWidth == 16 {
-                    self = .words(address, count)
-                } else {
-                    self = .dwords(address, count)
-                }
-            }
-
         }
 
         //let bitWidth: UInt8
@@ -46,11 +35,6 @@ enum VMExit: Equatable {
             self.port = port
             self.data = Data(bitWidth: bitWidth)
         }
-
-        init(port: UInt16, bitWidth: UInt8, address: PhysicalAddress, count: UInt32) {
-            self.port = port
-            self.data = Data(bitWidth: bitWidth, address: address, count: count)
-        }
     }
 
     struct IOOutOperation: Equatable {
@@ -58,9 +42,9 @@ enum VMExit: Equatable {
             case byte(UInt8)
             case word(UInt16)
             case dword(UInt32)
-            case bytes(PhysicalAddress, UInt32)
-            case words(PhysicalAddress, UInt32)
-            case dwords(PhysicalAddress, UInt32)
+//            case bytes([UInt8])
+//            case words([UInt16])
+//            case dwords([UInt32])
 
             init(bitWidth: UInt8, rax: UInt64) {
                 if bitWidth == 8 {
@@ -71,17 +55,6 @@ enum VMExit: Equatable {
                     self = .dword(UInt32(truncatingIfNeeded: rax))
                 }
             }
-
-            init(bitWidth: UInt8, address: PhysicalAddress, count: UInt32) {
-                if bitWidth == 8 {
-                    self = .bytes(address, count)
-                } else if bitWidth == 16 {
-                    self = .words(address, count)
-                } else {
-                    self = .dwords(address, count)
-                }
-            }
-
         }
         
         let port: UInt16
@@ -92,11 +65,10 @@ enum VMExit: Equatable {
             self.data = Data(bitWidth: bitWidth, rax: rax)
         }
 
-        init(port: UInt16, bitWidth: UInt8, address: PhysicalAddress, count: UInt32) {
+        init(port: UInt16, data: Data) {
             self.port = port
-            self.data = Data(bitWidth: bitWidth, address: address, count: count)
+            self.data = data
         }
-
     }
 
 
@@ -114,7 +86,7 @@ enum VMExit: Equatable {
     }
 
     struct ExceptionInfo: Equatable {
-        enum Exception: UInt8 {
+        enum Exception: UInt32 {
             case divideError = 0
             case debug = 1
             case nmi = 2
@@ -152,8 +124,8 @@ enum VMExit: Equatable {
         let exception: Exception
         let errorCode: UInt32?
 
-        init?(exception: UInt8, errorCode: UInt32? = nil) {
-            guard let e = Exception(rawValue: exception) else { return nil}
+        init?(exception: UInt32, errorCode: UInt32? = nil) {
+            guard let e = Exception(rawValue: exception) else { return nil }
             self.exception = e
             self.errorCode = errorCode
         }
