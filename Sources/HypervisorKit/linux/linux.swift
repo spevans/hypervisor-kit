@@ -78,14 +78,14 @@ class VirtualMachine {
             fileprivate var regs = kvm_regs()
             fileprivate var sregs = kvm_sregs()
 
-            var cs: SegmentRegister = SegmentRegister()
-            var ss: SegmentRegister = SegmentRegister()
-            var ds: SegmentRegister = SegmentRegister()
-            var es: SegmentRegister = SegmentRegister()
-            var fs: SegmentRegister = SegmentRegister()
-            var gs: SegmentRegister = SegmentRegister()
-            var tr: SegmentRegister = SegmentRegister()
-            var ldtr: SegmentRegister = SegmentRegister()
+            var cs = SegmentRegister()
+            var ss = SegmentRegister()
+            var ds = SegmentRegister()
+            var es = SegmentRegister()
+            var fs = SegmentRegister()
+            var gs = SegmentRegister()
+            var tr = SegmentRegister()
+            var ldtr = SegmentRegister()
 
 
             init(regs: kvm_regs, sregs: kvm_sregs) {
@@ -113,11 +113,21 @@ class VirtualMachine {
                 sregs.gs = gs.kvmSegment
                 sregs.ss = ss.kvmSegment
                 sregs.tr = tr.kvmSegment
-                sregs.cr0 = sregs.cr0
-                sregs.cr2 = sregs.cr2
-                sregs.cr3 = sregs.cr3
-                sregs.cr4 = sregs.cr4
-                sregs.cr8 = sregs.cr8
+           //     sregs.cr0 = sregs.cr0
+           //     sregs.cr2 = sregs.cr2
+           //     sregs.cr3 = sregs.cr3
+           //     sregs.cr4 = sregs.cr4
+           //     sregs.cr8 = sregs.cr8
+            }
+
+            mutating func readSRegs() {
+                cs.kvmSegment = sregs.cs
+                ds.kvmSegment = sregs.ds
+                es.kvmSegment = sregs.es
+                fs.kvmSegment = sregs.fs
+                gs.kvmSegment = sregs.gs
+                ss.kvmSegment = sregs.ss
+
             }
 
             var rax: UInt64 {
@@ -304,7 +314,6 @@ class VirtualMachine {
                 throw HVError.vmRunError
             }
 
-
             guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
                 throw HVError.getRegisters
             }
@@ -313,7 +322,8 @@ class VirtualMachine {
                 throw HVError.getRegisters
             }
 
-            print("kvmRun.pointee.exit_reason:", kvmRun.pointee.exit_reason)
+            registers.readSRegs()
+
             //print("kvmRun.pointee.exit_qualification:", kvmRun.pointee.exit_qualification)
             guard let exitReason = KVMExit(rawValue: kvmRun.pointee.exit_reason) else {
                 fatalError("Invalid KVM exit reason: \(kvmRun.pointee.exit_reason)")
@@ -339,7 +349,7 @@ class VirtualMachine {
         internal let region: kvm_userspace_memory_region
         internal let pointer: UnsafeMutableRawPointer
 
-        var guestAddress: UInt64 { region.guest_phys_addr }
+        var guestAddress: PhysicalAddress { PhysicalAddress(region.guest_phys_addr) }
         var size: UInt64 { region.memory_size }
         var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(region.memory_size)) }
 

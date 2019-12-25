@@ -24,11 +24,69 @@ io_out_test:
                 xor     ax, ax
                 mov     es, ax
                 mov     si, 0x1300
-               ;; mov     dword [si], 0x01020304
-               ;; mov     dword [si+4], 0x11121314
                 mov     dx, 0x60
+                mov     cx, 24
+                rep     outsb
+
+                sub     si, 2
+                std
+                mov     cx, 12
+                rep     outsw
+
+                add     si, 2
+                cld
                 mov     cx, 6
                 rep     outsd
+
+                ;; Unaligned words and dwords
+                mov     si, 0x1301
+                mov     cx, 5
+                rep     outsd
+
+                std
+                sub     si, 4
+                mov     cx, 10
+                rep     outsw
+
+
+                ;; Test Segment Overrides
+                jmp     0x100:next - 0x1000    ; Set CS to 0x1000
+next:
+                cld
+                mov     si, 0x300
+                mov     cx, 4
+                rep     cs outsb
+
+                mov     ax, 0x100
+                mov     ds, ax
+                mov     si, 0x304
+                mov     cx, 4
+                rep     ds outsb
+
+                mov     ax, 0x110
+                mov     es, ax
+                mov     si, 0x208
+                mov     cx, 4
+                rep     es outsb
+
+                mov     ax, 0x120
+                mov     fs, ax
+                mov     si, 0x10C
+                mov     cx, 4
+                rep     fs outsb
+
+                mov     ax, 0x130
+                mov     gs, ax
+                mov     si, 0x10
+                mov     cx, 4
+                rep     gs outsb
+
+                mov     ax, 0x30
+                mov     ss, ax
+                mov     si, 0x1014
+                mov     cx, 4
+                rep     ss outsb
+
                 hlt
 test3:
                 mov     ax, 0x100
@@ -44,12 +102,12 @@ instruction_prefixes:
                 lock     es add word  [0x1200], ax
 
                 OFFSET  0x300
-                dd      12345678
-                dd      11223344
-                dd      00000001
-                dd      10000000
-                dd      11111111
-                dd      22222222
+                db      0x12, 0x34, 0x56, 0x78
+                db      0x11, 0x22, 0x33, 0x44
+                db      0x00, 0x00, 0x00, 0x01
+                db      0xaa, 0xbb, 0xcc, 0xdd
+                db      0xfe, 0xdc, 0xba, 0x98
+                db      0x55, 0xaa, 0xcc, 0xdd
 
 
 jump_table:

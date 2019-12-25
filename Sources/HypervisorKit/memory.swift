@@ -5,8 +5,70 @@
 //  Created by Simon Evans on 14/12/2019.
 //
 
+typealias RawAddress = UInt64
 
-typealias PhysicalAddress = UInt64
+struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
+    let rawValue: RawAddress
+
+    public var description: String {
+        return String(rawValue, radix: 16)
+    }
+
+    init(_ rawValue: UInt64) {
+        self.rawValue = RawAddress(rawValue)
+    }
+
+    init(_ rawValue: UInt) {
+        self.rawValue = RawAddress(rawValue)
+    }
+
+    func isAligned(to size: Int) -> Bool {
+        precondition(size.nonzeroBitCount == 1)
+        return rawValue & (RawAddress(size) - 1) == 0
+    }
+
+    func advanced(by n: Int) -> PhysicalAddress {
+        return PhysicalAddress(rawValue + RawAddress(n))
+    }
+
+    func advanced(by n: UInt) -> PhysicalAddress {
+        return PhysicalAddress(rawValue + RawAddress(n))
+    }
+
+    func distance(to n: PhysicalAddress) -> Int {
+        if n.rawValue > rawValue {
+            return Int(n.rawValue - rawValue)
+        } else {
+            return Int(rawValue - n.rawValue)
+        }
+    }
+
+    static func +(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
+        return lhs.advanced(by: rhs)
+    }
+
+    static func +(lhs: PhysicalAddress, rhs: Int) -> PhysicalAddress {
+        return lhs.advanced(by: rhs)
+    }
+
+    static func -(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
+        return PhysicalAddress(lhs.rawValue - RawAddress(rhs))
+    }
+
+    static func -(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Int {
+        return lhs.distance(to: rhs)
+    }
+
+    static func <(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
+
+    static func <=(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
+        return lhs.rawValue <= rhs.rawValue
+    }
+}
+
+
 //typealias VirtualAddress = UInt64
 typealias LinearAddress = UInt64
 

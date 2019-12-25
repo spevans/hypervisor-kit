@@ -53,7 +53,6 @@ enum KVMExit: UInt32 {
 
             case .io:
                 let io = kvmRunPtr.pointee.io
-                print("IO:", io)
                 let dataOffset = io.data_offset
                 let bitWidth = io.size * 8
                 if io.count != 1 { fatalError("IO op with count != 1") }

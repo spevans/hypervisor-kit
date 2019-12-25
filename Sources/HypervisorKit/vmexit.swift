@@ -12,9 +12,6 @@ enum VMExit: Equatable {
             case byte
             case word
             case dword
-     //       case bytes(PhysicalAddress, UInt32)
-     //       case words(PhysicalAddress, UInt32)
-      //      case dwords(PhysicalAddress, UInt32)
 
             init(bitWidth: UInt8) {
                 if bitWidth == 8 {
@@ -27,7 +24,6 @@ enum VMExit: Equatable {
             }
         }
 
-        //let bitWidth: UInt8
         let port: UInt16
         let data: Data
 
@@ -37,14 +33,11 @@ enum VMExit: Equatable {
         }
     }
 
-    struct IOOutOperation: Equatable {
-        enum Data: Equatable {
+    struct IOOutOperation: Equatable{
+        enum Data: Equatable, CustomStringConvertible {
             case byte(UInt8)
             case word(UInt16)
             case dword(UInt32)
-//            case bytes([UInt8])
-//            case words([UInt16])
-//            case dwords([UInt32])
 
             init(bitWidth: UInt8, rax: UInt64) {
                 if bitWidth == 8 {
@@ -55,8 +48,17 @@ enum VMExit: Equatable {
                     self = .dword(UInt32(truncatingIfNeeded: rax))
                 }
             }
+
+            var description: String {
+                switch self {
+                    case .byte(let value): return String(value, radix: 16)
+                    case .word(let value): return String(value, radix: 16)
+                    case .dword(let value): return String(value, radix: 16)
+                }
+            }
+
         }
-        
+
         let port: UInt16
         let data: Data
 

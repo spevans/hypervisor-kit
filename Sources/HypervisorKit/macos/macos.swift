@@ -34,11 +34,11 @@ class VirtualMachine {
     class MemoryRegion {
         fileprivate let pointer: UnsafeMutableRawPointer
         
-        let guestAddress: UInt64
+        let guestAddress: PhysicalAddress
         let size: Int
         var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(size)) }
         
-        init?(size: Int, at address: UInt64) {
+        init?(size: Int, at address: RawAddress) {
             // 4KB Aligned memory
             guard let ram = valloc(Int(size)) else { return nil }
             ram.initializeMemory(as: UInt8.self, repeating: 0, count: size)
@@ -49,7 +49,7 @@ class VirtualMachine {
             } catch {
                 return nil
             }
-            guestAddress = address
+            guestAddress = PhysicalAddress(address)
             self.size = size
             
         }
@@ -90,10 +90,10 @@ class VirtualMachine {
         return memRegion
     }
     
-    func unmapMemory(ofSize size: Int, at address: UInt64) throws {
+    func unmapMemory(ofSize size: Int, at address: RawAddress) throws {
         for idx in memoryRegions.startIndex..<memoryRegions.endIndex {
             let memory = memoryRegions[idx]
-            if memory.size == size && memory.guestAddress == address {
+            if memory.size == size && memory.guestAddress == PhysicalAddress(address) {
                 try hvError(hv_vm_unmap(address, size))
                 print("memory unmmaped")
                 memoryRegions.remove(at: idx)
@@ -104,7 +104,7 @@ class VirtualMachine {
 
     func memory(at guestAddress: PhysicalAddress, count: Int) throws -> UnsafeMutableRawPointer {
         for region in memoryRegions {
-            if region.guestAddress <= guestAddress && region.guestAddress + UInt64(region.size) >= guestAddress + UInt64(count) {
+            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
                 let offset = guestAddress - region.guestAddress
                 return region.pointer.advanced(by: Int(offset))
 
@@ -116,7 +116,7 @@ class VirtualMachine {
 
     func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
         for region in memoryRegions {
-            if region.guestAddress <= guestAddress && region.guestAddress + UInt64(region.size) >= guestAddress + UInt64(count) {
+            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
                 let offset = guestAddress - region.guestAddress
                 let ptr = region.pointer.advanced(by: Int(offset))
                 let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
@@ -140,7 +140,7 @@ class VirtualMachine {
             }
             
             while let memory = memoryRegions.first {
-                try hvError(hv_vm_unmap(memory.guestAddress, memory.size))
+                try hvError(hv_vm_unmap(memory.guestAddress.rawValue, memory.size))
                 memoryRegions.remove(at: 0)
             }
             

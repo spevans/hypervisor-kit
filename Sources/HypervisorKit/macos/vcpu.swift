@@ -298,7 +298,7 @@ extension VirtualMachine {
                 case 16:
                     var rsi = registers.rsi
                     var si = UInt16(truncatingIfNeeded: rsi)
-                    let physicalAddress = PhysicalAddress(selector.base) + PhysicalAddress(si)
+                    let physicalAddress = PhysicalAddress(selector.base) + UInt(si)
                     let ptr = try vm.memory(at: physicalAddress, count: dataWidth)
                     let bytes = UInt16(dataWidth / 8)
                     si = registers.rflags.direction ? si &- bytes : si &+ bytes
@@ -308,8 +308,19 @@ extension VirtualMachine {
 
                     switch dataWidth {
                         case 8: return .byte(ptr.load(as: UInt8.self))
-                        case 16: return .word(ptr.load(as: UInt16.self))
-                        case 32: return .dword(ptr.load(as: UInt32.self))
+                        case 16:
+                            // Check for alignment
+                            if physicalAddress.isAligned(to: MemoryLayout<UInt16>.size) {
+                                return .word(ptr.load(as: UInt16.self))
+                            } else {
+                                return .word(unaligned_load16(ptr))
+                            }
+                        case 32:
+                            if physicalAddress.isAligned(to: MemoryLayout<UInt32>.size) {
+                                return .dword(ptr.load(as: UInt32.self))
+                            } else {
+                                return .dword(unaligned_load32(ptr))
+                            }
                         default: fatalError("bad width")
                 }
                 default: fatalError("Cant handle: \(addressWidth)")
@@ -393,14 +404,28 @@ extension VirtualMachine {
 
                         let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
                         let addressSize = 16 << exitInfo[7...9]
-                        let segmentRegister = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
+                        let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
 
                         print("bitWidth:", bitWidth, "isIn:", isIn, "port:", port)
-                        print("INS/OUTS: addressSize:", addressSize, "segmentRegister:", segmentRegister)
-                        let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: segmentRegister, register: .rsi)
-                        let linearAddress = self.linearAddress(lma)!
-                        let physicalAddress = self.physicalAddress(for: linearAddress)!
-                        print("Physical Address:", String(physicalAddress, radix: 16))
+                        print("INS/OUTS: addressSize:", addressSize, "segmentRegister:", segmentOverride)
+
+
+                        let segReg: SegmentRegister = {
+                            switch segmentOverride {
+                                case .es: return registers.es
+                                case .cs: return registers.cs
+                                case .ss: return registers.ss
+                                case .ds: return registers.ds
+                                case .fs: return registers.fs
+                                case .gs: return registers.gs
+                            }
+                        }()
+
+
+                      //  let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: seg, register: .rsi)
+                      //  let linearAddress = self.linearAddress(lma)!
+                      //  let physicalAddress = self.physicalAddress(for: linearAddress)!
+                      //  print("Physical Address:", physicalAddress)
 
                         let rcx = registers.rcx
                         var count: UInt64 = {
@@ -419,7 +444,7 @@ extension VirtualMachine {
                         if isIn {
                             return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth))
                         } else {
-                            let data = try readStringUnit(selector: registers.ds, addressWidth: 16, dataWidth: Int(bitWidth))
+                            let data = try readStringUnit(selector: segReg, addressWidth: 16, dataWidth: Int(bitWidth))
 
                             if isRep {
                                 count -= 1

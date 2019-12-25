@@ -25,7 +25,7 @@ let package = Package(
               //  .product(name: "X86InstructionDecoder")
             ],
             swiftSettings: [
-                .unsafeFlags(["-import-objc-header", "Sources/HypervisorKit/linux/linux.h"], .when(platforms: [.linux]))
+                .unsafeFlags(["-import-objc-header", "Sources/HypervisorKit/bits.h"])
             ]
         ),
         .testTarget(
