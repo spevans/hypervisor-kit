@@ -10,10 +10,10 @@
 import Hypervisor
 
 enum HVError: Error {
-case error(hv_return_t)
-case noMemory
-case vmRunError
-case invalidMemory
+    case error(hv_return_t)
+    case noMemory
+    case vmRunError
+    case invalidMemory
 }
 
 func hvError(_ error: hv_return_t) throws {

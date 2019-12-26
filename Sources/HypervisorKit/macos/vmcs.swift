@@ -10,43 +10,6 @@
 import Hypervisor
 
 final class VMCS {
-    /*
-     static let vmxInfo = VMXBasicInfo()
-
-     let vmExecPrimary = VMXPrimaryProcessorBasedControls()
-     let vmExecSecondary: VMXSecondaryProcessorBasedControls?
-     let page: PhysPageRange
-     var vcpu: vcpu_info = vcpu_info()
-
-
-
-     var physicalAddress: UInt64 {
-     let physAddr = page.address
-     let mask = UInt(maskFromBitCount: Int(VMCS.vmxInfo.physAddressWidthMaxBits))
-     let addr = physAddr.value & mask
-     return UInt64(addr)
-     }
-
-
-
-
-
-     init() {
-     page = alloc(pages: 1)
-     page.rawPointer.storeBytes(of: VMCS.vmxInfo.vmcsRevisionId, toByteOffset: 0,
-     as: UInt32.self)
-
-     if vmExecPrimary.activateSecondaryControls.allowedToBeOne {
-     vmExecSecondary = VMXSecondaryProcessorBasedControls()
-     } else {
-     vmExecSecondary = nil
-     }
-     }
-
-     deinit {
-     freePages(pages: page)
-     }
-     */
 
     let vcpu: hv_vcpuid_t
 
