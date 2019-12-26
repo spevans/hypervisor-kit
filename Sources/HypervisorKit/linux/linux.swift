@@ -113,11 +113,6 @@ class VirtualMachine {
                 sregs.gs = gs.kvmSegment
                 sregs.ss = ss.kvmSegment
                 sregs.tr = tr.kvmSegment
-           //     sregs.cr0 = sregs.cr0
-           //     sregs.cr2 = sregs.cr2
-           //     sregs.cr3 = sregs.cr3
-           //     sregs.cr4 = sregs.cr4
-           //     sregs.cr8 = sregs.cr8
             }
 
             mutating func readSRegs() {
@@ -332,12 +327,6 @@ class VirtualMachine {
             return exitReason.vmExit(kvmRunPtr: kvmRun)
         }
 
-        func skipInstruction() throws {
-//            let instrLen = try vmcs.vmExitInstructionLength()
-//            print("instrLen:", instrLen)
-//            registers.rip += UInt64(instrLen)
-        }
-
         func shutdown() {
             munmap(kvmRun, Int(kvm_run_mmap_size))
             close(vcpu_fd)
@@ -434,7 +423,8 @@ class VirtualMachine {
         vcpus.append(vcpu)
         return vcpu
     }
-    
+
+
     func loadBinary(binary: String) -> Bool {
         guard memoryRegions.count > 0 else {
             print("No memory allocated to VM")

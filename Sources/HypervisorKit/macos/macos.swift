@@ -24,8 +24,7 @@ func hvError(_ error: hv_return_t) throws {
 
 
 class VirtualMachine {
-    
-    
+
     static private(set) var vmx_cap_pinbased: UInt64 = 0
     static private(set) var vmx_cap_procbased: UInt64 = 0
     static private(set) var vmx_cap_procbased2: UInt64 = 0

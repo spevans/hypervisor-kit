@@ -92,8 +92,17 @@ test3:
                 mov     ax, 0x100
                 out     20, ax
 
-bad_memory_read:
-                mov     ax, [0x8000]
+mmio_read:
+                mov     bl, [0x8008]
+                mov     bx, [0x8008]
+                mov     ebx, [0x8008]
+
+                mov     [0x8000], bl
+                mov     [0x8000], bx
+                mov     [0x8000], ebx
+
+                hlt
+
 
                 OFFSET  0x100
 instruction_prefixes:
@@ -114,6 +123,6 @@ jump_table:
                 dw      test1
                 dw      io_out_test
                 dw      test3
-                dw      bad_memory_read
+                dw      mmio_read
                 dw      instruction_prefixes
 

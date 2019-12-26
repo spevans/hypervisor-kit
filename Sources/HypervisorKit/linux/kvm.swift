@@ -58,40 +58,50 @@ enum KVMExit: UInt32 {
                 if io.count != 1 { fatalError("IO op with count != 1") }
 
                 if io.direction == 0 {  // In
-                    return VMExit.ioInOperation(VMExit.IOInOperation(
-                        port: io.port,
-                        bitWidth: bitWidth)
-                    )
+                    if let data = VMExit.DataRead(bitWidth: bitWidth) {
+                        return VMExit.ioInOperation(io.port, data)
+                    }
                 } else {
                     let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
 
-                    let data: VMExit.IOOutOperation.Data = {
-                        switch bitWidth {
-                            case 8: return .byte(ptr.load(as: UInt8.self))
-                            case 16: return .word(ptr.load(as: UInt16.self))
-                            case 32: return .dword(ptr.load(as: UInt32.self))
-                            default: fatalError("bad width")
-                        }
-                    }()
-
-                    return VMExit.ioOutOperation(VMExit.IOOutOperation(
-                        port: io.port,
-                        data: data)
-                    )
+                    switch bitWidth {
+                        case 8: return VMExit.ioOutOperation(io.port, .byte(ptr.load(as: UInt8.self)))
+                        case 16: return VMExit.ioOutOperation(io.port, .word(ptr.load(as: UInt16.self)))
+                        case 32: return VMExit.ioOutOperation(io.port, .dword(ptr.load(as: UInt32.self)))
+                        case 64: return VMExit.ioOutOperation(io.port, .qword(ptr.load(as: UInt64.self)))
+                        default: break
+                    }
             }
 
             case .debug:
                 let debugInfo = kvmRunPtr.pointee.debug.arch
-                return VMExit.debug(VMExit.Debug(rip: debugInfo.pc, dr6: debugInfo.dr6, dr7: debugInfo.dr7, exception: debugInfo.exception))
+                return .debug(VMExit.Debug(rip: debugInfo.pc, dr6: debugInfo.dr6, dr7: debugInfo.dr7, exception: debugInfo.exception))
 
             case .hlt:
                 return VMExit.hlt
 
             case .mmio:
                 let mmio = kvmRunPtr.pointee.mmio
-                print("mmio:", mmio)
-                let mmioOp = VMExit.MMIOOperation(isWrite: Bool(mmio.is_write), length: mmio.len, physicalAddress: mmio.phys_addr, data: mmio.data)
-                return VMExit.mmioOp(mmioOp)
+                let address = PhysicalAddress(mmio.phys_addr)
+                if Bool(mmio.is_write) {
+                    switch mmio.len {
+                        case 1: return .mmioWriteOperation(address, .byte(mmio.data.0))
+                        case 2: return .mmioWriteOperation(address, .word(UInt16(bytes: (mmio.data.0, mmio.data.1))))
+                        case 4: return .mmioWriteOperation(address, .dword(UInt32(bytes: (mmio.data.0, mmio.data.1, mmio.data.2, mmio.data.3))))
+                        case 8: return .mmioWriteOperation(address, .qword(UInt64(bytes: mmio.data)))
+                        default: break
+                    }
+                } else {
+                    switch mmio.len {
+                        case 1: return .mmioReadOperation(address, .byte)
+                        case 2: return .mmioReadOperation(address, .word)
+                        case 4: return .mmioReadOperation(address, .dword)
+                        case 8: return .mmioReadOperation(address, .qword)
+                        default: break
+                    }
+                }
+                fatalError("Cant handle MMIO exit: \(mmio)")
+
 
             case .irqWindowOpen:
                 return VMExit.irqWindowOpen
@@ -126,11 +136,8 @@ enum KVMExit: UInt32 {
 
             case .hyperV:
                 return VMExit.hyperV(VMExit.HyperV())
-
-//            @unknown default:
-//            fatalError("Unknwon KVM exit code: \(self.rawValue)")
         }
-
+        fatalError("Cant process: \(self)")
     }
 }
 

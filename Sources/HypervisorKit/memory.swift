@@ -11,7 +11,7 @@ struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
     let rawValue: RawAddress
 
     public var description: String {
-        return String(rawValue, radix: 16)
+        return "0x\(String(rawValue, radix: 16))"
     }
 
     init(_ rawValue: UInt64) {

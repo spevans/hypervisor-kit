@@ -38,7 +38,7 @@ final class RealModeTests: XCTestCase {
 
         let testCode = try realModeTestCode()
         testCode.copyBytes(to: memRegion.rawBuffer)
-                
+
         guard let vcpu = try? vm.createVCPU() else {
             XCTFail("Cant create VCPU")
             throw TestError.vcpuCreateFail
@@ -101,19 +101,19 @@ final class RealModeTests: XCTestCase {
     }        
 
 
-        
+
     private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16, skipEPT: Bool = true) throws -> VMExit {
 
-            print("Running VCPU with ax:", ax)
+        print("Running VCPU with ax:", ax)
 
-            vcpu.registers.rax = UInt64(ax)
-            vcpu.registers.rip = 0x1000
+        vcpu.registers.rax = UInt64(ax)
+        vcpu.registers.rip = 0x1000
 
-            while true {
+        while true {
             
-                guard let vmExit = try? vcpu.run() else {
-                    XCTFail("VCPU Run failed")
-                    throw HVError.vmRunError
+            guard let vmExit = try? vcpu.run() else {
+                XCTFail("VCPU Run failed")
+                throw HVError.vmRunError
             }
             
             print("VMExit Reason:", vmExit)
@@ -121,22 +121,25 @@ final class RealModeTests: XCTestCase {
             switch vmExit {
                 default:
                     return vmExit
-                }
             }
+        }
     }
 
-/*
-    func testBadMemoryRead() throws {
+
+    func testMMIO() throws {
         let vm = try createRealModeVM()
         let vcpu = vm.vcpus[0]
-        let vmExit = try runTest(vcpu: vcpu, ax: 3)
-
-        XCTAssertEqual(vmExit, .hlt)
-        let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
-        XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
+        var vmExit = try runTest(vcpu: vcpu, ax: 3)
+        var count = 0
+        while count < 10 && vmExit != .hlt {
+            print(vmExit)
+            vmExit = try vcpu.run()
+            count += 1
+        }
+        return
+        //let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
+        //XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
     }
-*/
-
 
 
     func testInstructionPrefixes() throws {
@@ -151,7 +154,7 @@ final class RealModeTests: XCTestCase {
         //XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
         //vcpu.registers.rip += 1
         vmExit = try vcpu.run()
-       // XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
+        // XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
         //vcpu.registers.rip += 1
         vmExit = try vcpu.run()
 
@@ -170,7 +173,6 @@ final class RealModeTests: XCTestCase {
         print("RAX:", String(rax, radix: 16))
         XCTAssertEqual(vcpu.registers.rax, 0x1235)
         XCTAssertEqual(vcpu.registers.rip, 0x100d)
-//        XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
     }
 
     func testOut() throws {
@@ -191,7 +193,7 @@ final class RealModeTests: XCTestCase {
             0x0100, 0x0000,
             0x4433, 0x2211,
             0x7856, 0x3412,
-          ]
+        ]
 
         let dwords: [UInt32] = [
             0x78563412,
@@ -249,9 +251,9 @@ final class RealModeTests: XCTestCase {
 
         var vmExit = try runTest(vcpu: vcpu, ax: 1)
         for byte in bytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
-                XCTAssertEqual(operation.port, 0x60)
+            if case let VMExit.ioOutOperation(port, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
+                XCTAssertEqual(port, 0x60)
             } else {
                 XCTFail("Not an OUTS")
             }
@@ -260,45 +262,45 @@ final class RealModeTests: XCTestCase {
 
 
         for word in words {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.word(word))
-                XCTAssertEqual(operation.port, 0x60)
+            if case let VMExit.ioOutOperation(port, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.word(word))
+                XCTAssertEqual(port, 0x60)
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             //print("RSI:", String(vcpu.registers.rsi, radix: 16))
             vmExit = try vcpu.run()
         }
 
         for dword in dwords {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                //print(operation.data)
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.dword(dword))
-                XCTAssertEqual(operation.port, 0x60)
+            if case let VMExit.ioOutOperation(port, data) = vmExit {
+                //print(data)
+                XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
+                XCTAssertEqual(port, 0x60)
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
 
         // Test unaligned data
         for dword in unalignedDwords {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                //print(operation.data)
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.dword(dword))
-                XCTAssertEqual(operation.port, 0x60)
+            if case let VMExit.ioOutOperation(port, data) = vmExit {
+                //print(data)
+                XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
+                XCTAssertEqual(port, 0x60)
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
 
         for word in unalignedWords {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.word(word))
-                XCTAssertEqual(operation.port, 0x60)
+            if case let VMExit.ioOutOperation(port, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.word(word))
+                XCTAssertEqual(port, 0x60)
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             //print("RSI:", String(vcpu.registers.rsi, radix: 16))
             vmExit = try vcpu.run()
@@ -307,8 +309,8 @@ final class RealModeTests: XCTestCase {
         // Test Segment Overrides
         #if true
         for byte in csOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
@@ -320,8 +322,8 @@ final class RealModeTests: XCTestCase {
         vcpu.registers.ds.base = 0x1000
 
         for byte in dsOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
                 print("DS:", String(vcpu.registers.ds.selector, radix: 16), String(vcpu.registers.ds.base, radix: 16))
                 print("CS:IP \(String(vcpu.registers.cs.base, radix: 16)):\(String(vcpu.registers.rip, radix: 16))")
@@ -331,37 +333,37 @@ final class RealModeTests: XCTestCase {
         }
         #if true
         for byte in esOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
 
         for byte in fsOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
 
         for byte in gsOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
 
         for byte in ssOverrideBytes {
-            if case let VMExit.ioOutOperation(operation) = vmExit {
-                XCTAssertEqual(operation.data, VMExit.IOOutOperation.Data.byte(byte))
+            if case let VMExit.ioOutOperation(_, data) = vmExit {
+                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                XCTFail("Not an OUTS")
+                XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = try vcpu.run()
         }
@@ -374,8 +376,8 @@ final class RealModeTests: XCTestCase {
     
     static var allTests = [
         ("testInstructionPrefixes", testInstructionPrefixes),
-        //("testBadMemoryRead", testBadMemoryRead),
-       // ("testHLT", testHLT),
+        ("testMMIO", testMMIO),
+        ("testHLT", testHLT),
         ("testOut", testOut),
     ]
 }

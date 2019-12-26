@@ -5,87 +5,54 @@
 //  Created by Simon Evans on 10/12/2019.
 //
 
+typealias IOPort = UInt16
+
 enum VMExit: Equatable {
 
-    struct IOInOperation: Equatable {
-        enum Data: Equatable {
-            case byte
-            case word
-            case dword
+    // Used by IN/OUT and MMIO instructions
+    enum DataRead: Equatable {
+        case byte
+        case word
+        case dword
+        case qword
 
-            init(bitWidth: UInt8) {
-                if bitWidth == 8 {
-                    self = .byte
-                } else if bitWidth == 16 {
-                    self = .word
-                } else {
-                    self = .dword
-                }
+        init?(bitWidth: UInt8) {
+            switch bitWidth {
+                case 8: self = .byte
+                case 16: self = .word
+                case 32: self = .dword
+                case 64: self = .qword
+                default: return nil
             }
-        }
-
-        let port: UInt16
-        let data: Data
-
-        init(port: UInt16, bitWidth: UInt8) {
-            self.port = port
-            self.data = Data(bitWidth: bitWidth)
         }
     }
 
-    struct IOOutOperation: Equatable{
-        enum Data: Equatable, CustomStringConvertible {
-            case byte(UInt8)
-            case word(UInt16)
-            case dword(UInt32)
+    enum DataWrite: Equatable, CustomStringConvertible {
+        case byte(UInt8)
+        case word(UInt16)
+        case dword(UInt32)
+        case qword(UInt64)
 
-            init(bitWidth: UInt8, rax: UInt64) {
-                if bitWidth == 8 {
-                    self = .byte(UInt8(truncatingIfNeeded: rax))
-                } else if bitWidth == 16 {
-                    self = .word(UInt16(truncatingIfNeeded: rax))
-                } else {
-                    self = .dword(UInt32(truncatingIfNeeded: rax))
-                }
+        init?(bitWidth: UInt8, value: UInt64) {
+            switch bitWidth {
+                case 8: self = .byte(UInt8(truncatingIfNeeded: value))
+                case 16: self = .word(UInt16(truncatingIfNeeded: value))
+                case 32: self = .dword(UInt32(truncatingIfNeeded: value))
+                case 64: self = .qword(value)
+                default: return nil
             }
-
-            var description: String {
-                switch self {
-                    case .byte(let value): return String(value, radix: 16)
-                    case .word(let value): return String(value, radix: 16)
-                    case .dword(let value): return String(value, radix: 16)
-                }
-            }
-
         }
 
-        let port: UInt16
-        let data: Data
-
-        init(port: UInt16, bitWidth: UInt8, rax: UInt64) {
-            self.port = port
-            self.data = Data(bitWidth: bitWidth, rax: rax)
-        }
-
-        init(port: UInt16, data: Data) {
-            self.port = port
-            self.data = data
+        var description: String {
+            switch self {
+                case .byte(let value): return String(value, radix: 16)
+                case .word(let value): return String(value, radix: 16)
+                case .dword(let value): return String(value, radix: 16)
+                case .qword(let value): return String(value, radix: 16)
+            }
         }
     }
 
-
-    struct MMIOOperation: Equatable {
-        let isWrite: Bool
-        let length: UInt32
-        let physicalAddress: UInt64
-        let data: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)
-
-        static func == (lhs: VMExit.MMIOOperation, rhs: VMExit.MMIOOperation) -> Bool {
-            lhs.isWrite == rhs.isWrite
-                && lhs.length == rhs.length
-                && lhs.physicalAddress == rhs.physicalAddress
-        }
-    }
 
     struct ExceptionInfo: Equatable {
         enum Exception: UInt32 {
@@ -168,15 +135,15 @@ enum VMExit: Equatable {
         let guestLinearAddress: UInt?
     }
 
-    
 
     case unknown(UInt64)
     case exception(ExceptionInfo)
-    case ioInOperation(IOInOperation)
-    case ioOutOperation(IOOutOperation)
+    case ioInOperation(IOPort, DataRead)
+    case ioOutOperation(IOPort, DataWrite)
     case debug(Debug)
     case hlt
-    case mmioOp(MMIOOperation)
+    case mmioReadOperation(PhysicalAddress, DataRead)
+    case mmioWriteOperation(PhysicalAddress, DataWrite)
     case irqWindowOpen
     case shutdown
     case entryFailed(UInt64)

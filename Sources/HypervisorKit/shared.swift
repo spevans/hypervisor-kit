@@ -374,3 +374,22 @@ struct CPU {
     }
 
 }
+
+extension UInt16 {
+    init(bytes: (UInt8, UInt8)) {
+        self = UInt16(bytes.1) << 8 | UInt16(bytes.1)
+    }
+}
+
+extension UInt32 {
+    init(bytes: (UInt8, UInt8, UInt8, UInt8)) {
+        self = UInt32(bytes.3) << 24 | UInt32(bytes.2) << 16 | UInt32(bytes.1) << 8 | UInt32(bytes.0)
+    }
+}
+
+extension UInt64 {
+    init(bytes: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)) {
+        self = UInt64(bytes.7) << 56 | UInt64(bytes.6) << 48 | UInt64(bytes.5) << 40 | UInt64(bytes.4) << 32 |
+            UInt64(bytes.3) << 24 | UInt64(bytes.2) << 16 | UInt64(bytes.1) << 8 | UInt64(bytes.0)
+    }
+}

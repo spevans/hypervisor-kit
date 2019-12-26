@@ -293,7 +293,7 @@ extension VirtualMachine {
 
 
         // Read from Segment:[{R,E},SI]
-        private func readStringUnit(selector: SegmentRegister, addressWidth: Int, dataWidth: Int) throws -> VMExit.IOOutOperation.Data {
+        private func readStringUnit(selector: SegmentRegister, addressWidth: Int, dataWidth: Int) throws -> VMExit.DataWrite {
             switch addressWidth {
                 case 16:
                     var rsi = registers.rsi
@@ -359,37 +359,37 @@ extension VirtualMachine {
                             fatalError("\(exitReason): \(interruptInfo) not implmented")
                 }
 
-                case .tripleFault: fatalError("\(exitReason) not implmented")
-                case .initSignal: fatalError("\(exitReason) not implmented")
-                case .startupIPI: fatalError("\(exitReason) not implmented")
-                case .ioSMI: fatalError("\(exitReason) not implmented")
-                case .otherSMI: fatalError("\(exitReason) not implmented")
-                case .intWindow: fatalError("\(exitReason) not implmented")
-                case .nmiWindow: fatalError("\(exitReason) not implmented")
-                case .taskSwitch: fatalError("\(exitReason) not implmented")
-                case .cpuid: fatalError("\(exitReason) not implmented")
-                case .getsec: fatalError("\(exitReason) not implmented")
+                case .tripleFault: fallthrough
+                case .initSignal: fallthrough
+                case .startupIPI: fallthrough
+                case .ioSMI: fallthrough
+                case .otherSMI: fallthrough
+                case .intWindow: fallthrough
+                case .nmiWindow: fallthrough
+                case .taskSwitch: fallthrough
+                case .cpuid: fallthrough
+                case .getsec: fatalError("\(exitReason) not implemented")
                 
                 case .hlt:
                     return VMExit.hlt
                 
-                case .invd: fatalError("\(exitReason) not implmented")
-                case .invlpg: fatalError("\(exitReason) not implmented")
-                case .rdpmc: fatalError("\(exitReason) not implmented")
-                case .rdtsc: fatalError("\(exitReason) not implmented")
-                case .rsm: fatalError("\(exitReason) not implmented")
-                case .vmcall: fatalError("\(exitReason) not implmented")
-                case .vmclear: fatalError("\(exitReason) not implmented")
-                case .vmlaunch: fatalError("\(exitReason) not implmented")
-                case .vmptrld: fatalError("\(exitReason) not implmented")
-                case .vmptrst: fatalError("\(exitReason) not implmented")
-                case .vmread: fatalError("\(exitReason) not implmented")
-                case .vmresume: fatalError("\(exitReason) not implmented")
-                case .vmwrite: fatalError("\(exitReason) not implmented")
-                case .vmxoff: fatalError("\(exitReason) not implmented")
-                case .vmxon: fatalError("\(exitReason) not implmented")
-                case .crAccess: fatalError("\(exitReason) not implmented")
-                case .drAccess: fatalError("\(exitReason) not implmented")
+                case .invd: fallthrough
+                case .invlpg: fallthrough
+                case .rdpmc: fallthrough
+                case .rdtsc: fallthrough
+                case .rsm: fallthrough
+                case .vmcall: fallthrough
+                case .vmclear: fallthrough
+                case .vmlaunch: fallthrough
+                case .vmptrld: fallthrough
+                case .vmptrst: fallthrough
+                case .vmread: fallthrough
+                case .vmresume: fallthrough
+                case .vmwrite: fallthrough
+                case .vmxoff: fallthrough
+                case .vmxon: fallthrough
+                case .crAccess: fallthrough
+                case .drAccess: fatalError("\(exitReason) not implemented")
                 
                 case .ioInstruction: 
                     let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
@@ -422,10 +422,10 @@ extension VirtualMachine {
                         }()
 
 
-                      //  let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: seg, register: .rsi)
-                      //  let linearAddress = self.linearAddress(lma)!
-                      //  let physicalAddress = self.physicalAddress(for: linearAddress)!
-                      //  print("Physical Address:", physicalAddress)
+                        //  let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: seg, register: .rsi)
+                        //  let linearAddress = self.linearAddress(lma)!
+                        //  let physicalAddress = self.physicalAddress(for: linearAddress)!
+                        //  print("Physical Address:", physicalAddress)
 
                         let rcx = registers.rcx
                         var count: UInt64 = {
@@ -442,7 +442,9 @@ extension VirtualMachine {
                         }
 
                         if isIn {
-                            return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth))
+                            if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                                return .ioInOperation(port, dataRead)
+                            }
                         } else {
                             let data = try readStringUnit(selector: segReg, addressWidth: 16, dataWidth: Int(bitWidth))
 
@@ -456,30 +458,36 @@ extension VirtualMachine {
                                     registers.rcx = count
                                 }
                             }
-                            return .ioOutOperation(VMExit.IOOutOperation(port: port, data: data))
+                            return .ioOutOperation(port, data)
                         }
                     }
 
                     if isIn {
-                        return .ioInOperation(VMExit.IOInOperation(port: port, bitWidth: bitWidth))
+                        if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                            return .ioInOperation(port, dataRead)
+                        }
                     } else {
-                        return .ioOutOperation(VMExit.IOOutOperation(port: port, bitWidth: bitWidth, rax: registers.rax))
-                }
+                        if let dataWrite = VMExit.DataWrite(bitWidth: bitWidth, value: registers.rax) {
+                            return .ioOutOperation(port, dataWrite)
+                        }
+                    }
+                    fatalError("Cant process .ioInstruction")
 
-                case .rdmsr: fatalError("\(exitReason) not implmented")
-                case .wrmsr: fatalError("\(exitReason) not implmented")
-                case .vmentryFailInvalidGuestState: fatalError("\(exitReason) not implmented")
-                case .vmentryFailMSRLoading: fatalError("\(exitReason) not implmented")
-                case .mwait: fatalError("\(exitReason) not implmented")
-                case .monitorTrapFlag: fatalError("\(exitReason) not implmented")
-                case .monitor: fatalError("\(exitReason) not implmented")
-                case .pause: fatalError("\(exitReason) not implmented")
-                case .vmentryFaileMCE: fatalError("\(exitReason) not implmented")
-                case .tprBelowThreshold: fatalError("\(exitReason) not implmented")
-                case .apicAccess: fatalError("\(exitReason) not implmented")
-                case .virtualisedEOI: fatalError("\(exitReason) not implmented")
-                case .accessToGDTRorIDTR: fatalError("\(exitReason) not implmented")
-                case .accessToLDTRorTR: fatalError("\(exitReason) not implmented")
+
+                case .rdmsr: fallthrough
+                case .wrmsr: fallthrough
+                case .vmentryFailInvalidGuestState: fallthrough
+                case .vmentryFailMSRLoading: fallthrough
+                case .mwait: fallthrough
+                case .monitorTrapFlag: fallthrough
+                case .monitor: fallthrough
+                case .pause: fallthrough
+                case .vmentryFaileMCE: fallthrough
+                case .tprBelowThreshold: fallthrough
+                case .apicAccess: fallthrough
+                case .virtualisedEOI: fallthrough
+                case .accessToGDTRorIDTR: fallthrough
+                case .accessToLDTRorTR: fatalError("\(exitReason) not implemented")
 
                 case .eptViolation:
                     let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
@@ -493,6 +501,7 @@ extension VirtualMachine {
                     } else {
                         access = .write
                     }
+
                     let violation = VMExit.MemoryViolation(
                         access: access,
                         readable: exitQ[3] == 1,
@@ -505,25 +514,25 @@ extension VirtualMachine {
                     return .memoryViolation(violation)
 
 
-                case .eptMisconfiguration: fatalError("\(exitReason) not implmented")
-                case .invept: fatalError("\(exitReason) not implmented")
-                case .rdtscp: fatalError("\(exitReason) not implmented")
-                case .vmxPreemptionTimerExpired: fatalError("\(exitReason) not implmented")
-                case .invvpid: fatalError("\(exitReason) not implmented")
-                case .wbinvd: fatalError("\(exitReason) not implmented")
-                case .xsetbv: fatalError("\(exitReason) not implmented")
-                case .apicWrite: fatalError("\(exitReason) not implmented")
-                case .rdrand: fatalError("\(exitReason) not implmented")
-                case .invpcid : fatalError("\(exitReason) not implmented")
-                case .vmfunc: fatalError("\(exitReason) not implmented")
-                case .envls: fatalError("\(exitReason) not implmented")
-                case .rdseed: fatalError("\(exitReason) not implmented")
-                case .pmlFull: fatalError("\(exitReason) not implmented")
-                case .xsaves: fatalError("\(exitReason) not implmented")
-                case .xrstors: fatalError("\(exitReason) not implmented")
-                case .subPagePermissionEvent: fatalError("\(exitReason) not implmented")
-                case .umwait: fatalError("\(exitReason) not implmented")
-                case .tpause: fatalError("\(exitReason) not implmented")
+                case .eptMisconfiguration: fallthrough
+                case .invept: fallthrough
+                case .rdtscp: fallthrough
+                case .vmxPreemptionTimerExpired: fallthrough
+                case .invvpid: fallthrough
+                case .wbinvd: fallthrough
+                case .xsetbv: fallthrough
+                case .apicWrite: fallthrough
+                case .rdrand: fallthrough
+                case .invpcid : fallthrough
+                case .vmfunc: fallthrough
+                case .envls: fallthrough
+                case .rdseed: fallthrough
+                case .pmlFull: fallthrough
+                case .xsaves: fallthrough
+                case .xrstors: fallthrough
+                case .subPagePermissionEvent: fallthrough
+                case .umwait: fallthrough
+                case .tpause: fatalError("\(exitReason) not implemented")
 
             }
         }
