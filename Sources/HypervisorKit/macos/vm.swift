@@ -1,5 +1,5 @@
 //
-//  macos.swift
+//  vm.swift
 //  
 //
 //  Created by Simon Evans on 01/12/2019.
@@ -30,33 +30,6 @@ class VirtualMachine {
     static private(set) var vmx_cap_procbased2: UInt64 = 0
     static private(set) var vmx_cap_entry: UInt64 = 0
 
-    class MemoryRegion {
-        fileprivate let pointer: UnsafeMutableRawPointer
-        
-        let guestAddress: PhysicalAddress
-        let size: Int
-        var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(size)) }
-        
-        init?(size: Int, at address: RawAddress) {
-            // 4KB Aligned memory
-            guard let ram = valloc(Int(size)) else { return nil }
-            ram.initializeMemory(as: UInt8.self, repeating: 0, count: size)
-            pointer = ram
-            let flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
-            do {
-                try hvError(hv_vm_map(ram, address, size, flags))
-            } catch {
-                return nil
-            }
-            guestAddress = PhysicalAddress(address)
-            self.size = size
-            
-        }
-        
-        deinit {
-            free(pointer)
-        }
-    }
     
     
     private(set) var vcpus: [VCPU] = []
@@ -83,13 +56,13 @@ class VirtualMachine {
         }
     }
     
-    func addMemory(at guestAddress: UInt64, size: Int) -> MemoryRegion? {
+    func addMemory(at guestAddress: UInt64, size: UInt64) -> MemoryRegion? {
         let memRegion = MemoryRegion(size: size, at: guestAddress)!
         memoryRegions.append(memRegion)
         return memRegion
     }
     
-    func unmapMemory(ofSize size: Int, at address: RawAddress) throws {
+    private func unmapMemory(ofSize size: Int, at address: RawAddress) throws {
         for idx in memoryRegions.startIndex..<memoryRegions.endIndex {
             let memory = memoryRegions[idx]
             if memory.size == size && memory.guestAddress == PhysicalAddress(address) {
@@ -101,7 +74,7 @@ class VirtualMachine {
         }
     }
 
-    func memory(at guestAddress: PhysicalAddress, count: Int) throws -> UnsafeMutableRawPointer {
+    func memory(at guestAddress: PhysicalAddress, count: UInt64) throws -> UnsafeMutableRawPointer {
         for region in memoryRegions {
             if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
                 let offset = guestAddress - region.guestAddress
@@ -112,7 +85,7 @@ class VirtualMachine {
         throw HVError.invalidMemory
     }
 
-
+/*
     func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
         for region in memoryRegions {
             if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
@@ -124,7 +97,7 @@ class VirtualMachine {
         }
         throw HVError.invalidMemory
     }
-    
+  */
     func createVCPU() throws -> VCPU {
         let vcpu = try VCPU.init(vm: self)
         vcpus.append(vcpu)
@@ -139,7 +112,7 @@ class VirtualMachine {
             }
             
             while let memory = memoryRegions.first {
-                try hvError(hv_vm_unmap(memory.guestAddress.rawValue, memory.size))
+                try hvError(hv_vm_unmap(memory.guestAddress.rawValue, Int(memory.size)))
                 memoryRegions.remove(at: 0)
             }
             

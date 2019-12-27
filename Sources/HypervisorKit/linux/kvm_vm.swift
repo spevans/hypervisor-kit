@@ -20,33 +20,6 @@ enum HVError: Error {
 
 final class VirtualMachine {
 
-    final class MemoryRegion {
-        internal let region: kvm_userspace_memory_region
-        internal let pointer: UnsafeMutableRawPointer
-
-        var guestAddress: PhysicalAddress { PhysicalAddress(region.guest_phys_addr) }
-        var size: UInt64 { region.memory_size }
-        var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(region.memory_size)) }
-
-        init?(size: UInt64, at address: UInt64, slot: Int) {
-            guard let ptr = mmap(nil, Int(size), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0),
-                ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
-                    return nil
-            }
-            pointer = ptr
-
-            region = kvm_userspace_memory_region(slot: UInt32(slot), flags: 0,
-                                                 guest_phys_addr: address,
-                                                 memory_size: UInt64(size),
-                                                 userspace_addr: UInt64(UInt(bitPattern: ptr)))
-        }
-
-        deinit {
-            munmap(pointer, Int(region.memory_size))
-        }
-    }
-
-
     private let vm_fd: Int32
     private(set) var vcpus: [VCPU] = []
     private(set) var memoryRegions: [MemoryRegion] = []

@@ -1,5 +1,5 @@
 //
-//  memory.swift
+//  PhysicalAddress.swift
 //  
 //
 //  Created by Simon Evans on 14/12/2019.
@@ -35,6 +35,10 @@ struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
         return PhysicalAddress(rawValue + RawAddress(n))
     }
 
+    func advanced(by n: UInt64) -> PhysicalAddress {
+        return PhysicalAddress(rawValue + RawAddress(n))
+    }
+
     func distance(to n: PhysicalAddress) -> Int {
         if n.rawValue > rawValue {
             return Int(n.rawValue - rawValue)
@@ -48,6 +52,10 @@ struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
     }
 
     static func +(lhs: PhysicalAddress, rhs: Int) -> PhysicalAddress {
+        return lhs.advanced(by: rhs)
+    }
+
+    static func +(lhs: PhysicalAddress, rhs: UInt64) -> PhysicalAddress {
         return lhs.advanced(by: rhs)
     }
 

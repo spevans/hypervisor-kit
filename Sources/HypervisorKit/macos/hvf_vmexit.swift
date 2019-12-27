@@ -17,7 +17,7 @@ extension VirtualMachine.VCPU {
                 var rsi = registers.rsi
                 var si = UInt16(truncatingIfNeeded: rsi)
                 let physicalAddress = PhysicalAddress(selector.base) + UInt(si)
-                let ptr = try vm.memory(at: physicalAddress, count: dataWidth)
+                let ptr = try vm.memory(at: physicalAddress, count: UInt64(dataWidth))
                 let bytes = UInt16(dataWidth / 8)
                 si = registers.rflags.direction ? si &- bytes : si &+ bytes
                 rsi &= ~UInt64(0xffff)
@@ -89,6 +89,7 @@ extension VirtualMachine.VCPU {
             case .getsec: fatalError("\(exitReason) not implemented")
 
             case .hlt:
+                try skipInstruction()
                 return VMExit.hlt
 
             case .invd: fallthrough

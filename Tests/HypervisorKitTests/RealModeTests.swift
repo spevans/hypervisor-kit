@@ -38,66 +38,18 @@ final class RealModeTests: XCTestCase {
 
 
         let testCode = try realModeTestCode()
-        testCode.copyBytes(to: memRegion.rawBuffer)
+        try memRegion.loadBinary(from: testCode, atOffset: 0)
+        //testCode.copyBytes(to: memRegion.rawBuffer)
 
         guard let vcpu = try? vm.createVCPU() else {
             XCTFail("Cant create VCPU")
             throw TestError.vcpuCreateFail
         }
-        
-        vcpu.registers.rip = 0x1000
-        vcpu.registers.rflags = CPU.RFLAGS()
-        vcpu.registers.rsp = 0x1FFE
-        vcpu.registers.rax = 0x0
-        
+        vcpu.setupRealMode()
+        vcpu.registers.rip = 0xFFF0
         vcpu.registers.cs.selector = 0
-        vcpu.registers.cs.limit = 0xffff
-        vcpu.registers.cs.accessRights = 0x9b
         vcpu.registers.cs.base = 0
-        
-        vcpu.registers.ds.selector = 0
-        vcpu.registers.ds.limit = 0xffff
-        vcpu.registers.ds.accessRights = 0x93
-        vcpu.registers.ds.base = 0
-        
-        vcpu.registers.es.selector = 0
-        vcpu.registers.es.limit = 0xffff
-        vcpu.registers.es.accessRights = 0x93
-        vcpu.registers.es.base = 0
-        
-        vcpu.registers.fs.selector = 0
-        vcpu.registers.fs.limit = 0xffff
-        vcpu.registers.fs.accessRights = 0x93
-        vcpu.registers.fs.base = 0
-        
-        vcpu.registers.gs.selector = 0
-        vcpu.registers.gs.limit = 0xffff
-        vcpu.registers.gs.accessRights = 0x93
-        vcpu.registers.gs.base = 0
-        
-        vcpu.registers.ss.selector = 0
-        vcpu.registers.ss.limit = 0xffff
-        vcpu.registers.ss.accessRights = 0x93
-        vcpu.registers.ds.base = 0
-        
-        vcpu.registers.tr.selector = 0
-        vcpu.registers.tr.limit = 0
-        vcpu.registers.tr.accessRights = 0x83
-        vcpu.registers.tr.base = 0
-        
-        vcpu.registers.ldtr.selector = 0
-        vcpu.registers.ldtr.limit = 0
-        vcpu.registers.ldtr.accessRights = 0x10000
-        vcpu.registers.ldtr.base = 0
-        
-        vcpu.registers.gdtrBase = 0
-        vcpu.registers.gdtrLimit = 0
-        vcpu.registers.idtrBase = 0
-        vcpu.registers.idtrLimit = 0
-        
-        vcpu.registers.cr0 = CPU.CR0Register(0x20).value
-        vcpu.registers.cr3 = CPU.CR3Register(0).value
-        vcpu.registers.cr4 = CPU.CR4Register(0x2000).value
+
         return vm
     }        
 
