@@ -6,7 +6,7 @@
 //
 
 #if os(Linux)
-import OnceC
+import CBits
 
 typealias KVM_RUN_PTR = UnsafeMutablePointer<kvm_run>
 

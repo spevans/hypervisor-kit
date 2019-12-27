@@ -1,12 +1,13 @@
 //
-//  bits.h
+//  cbits.h
 //
 //
 //  Created by Simon Evans on 25/12/2019.
 //
-
+//  Header file for convinent c bits
 
 #include <stdint.h>
+#include "linux.h"
 
 static inline uint32_t
 unaligned_load32(const void *ptr) {

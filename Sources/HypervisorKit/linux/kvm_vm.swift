@@ -6,7 +6,7 @@
 //
 
 #if os(Linux)
-import OnceC
+import CBits
 
 private let KVM_DEVICE = "/dev/kvm"
 

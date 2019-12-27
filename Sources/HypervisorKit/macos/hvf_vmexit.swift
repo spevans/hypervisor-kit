@@ -6,7 +6,7 @@
 //
 
 #if os(macOS)
-import OnceC
+import CBits
 
 extension VirtualMachine.VCPU {
 
