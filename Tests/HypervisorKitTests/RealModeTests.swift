@@ -31,7 +31,7 @@ final class RealModeTests: XCTestCase {
             throw TestError.vmCreateFail
         }
         
-        guard let memRegion = vm.addMemory(at: 0x1000, size: 8192) else {
+        guard let memRegion = try? vm.addMemory(at: 0x1000, size: 8192) else {
             XCTFail("Cant add memory region")
             throw TestError.addMemoryFail
         }
@@ -46,9 +46,6 @@ final class RealModeTests: XCTestCase {
             throw TestError.vcpuCreateFail
         }
         vcpu.setupRealMode()
-        vcpu.registers.rip = 0xFFF0
-        vcpu.registers.cs.selector = 0
-        vcpu.registers.cs.base = 0
 
         return vm
     }        
@@ -59,6 +56,8 @@ final class RealModeTests: XCTestCase {
 
         print("Running VCPU with ax:", ax)
 
+        vcpu.registers.cs.selector = 0
+        vcpu.registers.cs.base = 0
         vcpu.registers.rax = UInt64(ax)
         vcpu.registers.rip = 0x1000
 

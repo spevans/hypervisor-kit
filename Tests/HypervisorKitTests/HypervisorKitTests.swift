@@ -19,13 +19,8 @@ final class HypervisorKitTests: XCTestCase {
             throw TestError.vmCreateFail
         }
         
-        guard let _ = vm.addMemory(at: 0x1000, size: 8192) else {
-            throw TestError.addMemoryFail
-        }
-        
-        guard let _ = vm.addMemory(at: 0x4000, size: 4096) else {
-            throw TestError.addMemoryFail
-        }
+        _ = try vm.addMemory(at: 0x1000, size: 8192)
+        _ = try vm.addMemory(at: 0x4000, size: 4096)
         XCTAssertEqual(vm.memoryRegions.count, 2)
     }
     
