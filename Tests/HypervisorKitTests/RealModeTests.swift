@@ -15,7 +15,8 @@ final class RealModeTests: XCTestCase {
         #if os(Linux)
         let url = URL(fileURLWithPath: "real_mode_test.bin", isDirectory: false)
         #else
-        let url = URL(fileURLWithPath: "/Users/spse/src//HypervisorKit/real_mode_test.bin", isDirectory: false)
+
+        let url = URL(fileURLWithPath: "/Users/spse/Files/src/osx/HypervisorKit/real_mode_test.bin", isDirectory: false)
         #endif
         let code = try Data(contentsOf: url)
         _realModeTestCode = code
@@ -172,7 +173,7 @@ final class RealModeTests: XCTestCase {
         let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
         print("RAX:", String(rax, radix: 16))
         XCTAssertEqual(vcpu.registers.rax, 0x1235)
-        XCTAssertEqual(vcpu.registers.rip, 0x100d)
+        XCTAssertEqual(vcpu.registers.rip, 0x100e)
     }
 
     func testOut() throws {

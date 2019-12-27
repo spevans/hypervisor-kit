@@ -6,10 +6,6 @@
 //
 
 
-#if defined(__linux__)
-#include "linux/linux.h"
-#endif
-
 #include <stdint.h>
 
 static inline uint32_t

@@ -5,6 +5,8 @@
 //  Created by Simon Evans on 01/12/2019.
 //
 
+#if defined(__linux__)
+
 #include <fcntl.h>
 #include <linux/kvm.h>
 #include <sys/mman.h>
@@ -39,3 +41,5 @@ static inline int ioctl2arg(int fd, unsigned long request) {
 static inline int ioctl3arg(int fd, unsigned long request, const void *ptr) {
         return ioctl(fd, request, ptr);
 }
+
+#endif // __linux__

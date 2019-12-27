@@ -6,6 +6,7 @@
 //
 
 #if os(Linux)
+import OnceC
 
 typealias KVM_RUN_PTR = UnsafeMutablePointer<kvm_run>
 

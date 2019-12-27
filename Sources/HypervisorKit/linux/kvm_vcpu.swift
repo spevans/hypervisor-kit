@@ -6,6 +6,8 @@
 //
 
 #if os(Linux)
+import OnceC
+
 extension VirtualMachine {
     final class VCPU {
 
