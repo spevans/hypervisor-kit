@@ -7,4 +7,4 @@
 
 
 // This package exists for any C files and headers that need to be included
-#include "cbits.h"
+#include "CBits.h"

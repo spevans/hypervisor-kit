@@ -10,18 +10,19 @@ import CBits
 
 typealias KVM_RUN_PTR = UnsafeMutablePointer<kvm_run>
 
+public struct InternalError: Equatable {
+    let subError: UInt32
+    let nData: UInt32
+    let data: (UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64)
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        (lhs.subError == rhs.subError) && (lhs.nData == rhs.nData)
+    }
+}
+
 // X86 exits only
 enum KVMExit: UInt32 {
 
-    struct InternalError: Equatable {
-        let subError: UInt32
-        let nData: UInt32
-        let data: (UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, UInt64)
-
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            (lhs.subError == rhs.subError) && (lhs.nData == rhs.nData)
-        }
-    }
 
 
     case unknown = 0

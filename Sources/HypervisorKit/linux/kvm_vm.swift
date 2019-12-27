@@ -18,7 +18,7 @@ enum HVError: Error {
     case vmRunError
 }
 
-final class VirtualMachine {
+public final class VirtualMachine {
 
     private let vm_fd: Int32
     private(set) var vcpus: [VCPU] = []
@@ -46,7 +46,7 @@ final class VirtualMachine {
     }
 
 
-    init() throws {
+    public init() throws {
         guard let dev_fd = try? Self.vmFD() else {
             throw HVError.vmSubsystemFail
         }
@@ -60,16 +60,16 @@ final class VirtualMachine {
         }
     }
 
-    func addMemory(at guestAddress: UInt64, size: Int) -> MemoryRegion? {
+    public func addMemory(at guestAddress: UInt64, size: Int, readOnly: Bool = false) throws -> MemoryRegion {
         print("Adding \(size) bytes at address \(String(guestAddress, radix: 16))")
 
         guard let memRegion = MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count) else {
-            return nil
+            throw HVError.vmRunError
         }
 
         var kvmRegion = memRegion.region
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            return nil
+            throw HVError.vmRunError
         }
         memoryRegions.append(memRegion)
         print("Added memory")
@@ -77,14 +77,14 @@ final class VirtualMachine {
     }
 
 
-    func createVCPU() throws -> VCPU {
+    public func createVCPU() throws -> VCPU {
         guard let vcpu = VCPU(vm_fd: vm_fd) else { throw HVError.vmSubsystemFail }
         vcpus.append(vcpu)
         return vcpu
     }
 
 
-    func loadBinary(binary: String) -> Bool {
+ /*   func loadBinary(binary: String) -> Bool {
         guard memoryRegions.count > 0 else {
             print("No memory allocated to VM")
             return false
@@ -98,7 +98,7 @@ final class VirtualMachine {
         guard size <= Int(memoryRegions[0].size) else { return false }
         guard read(fd, memoryRegions[0].pointer, size) == size else { return false }
         return true
-    }
+    }*/
 
 
     deinit {
