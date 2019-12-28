@@ -18,7 +18,7 @@ enum HVKError: Error {
     case memoryError
 }
 
-final class MemoryRegion {
+public final class MemoryRegion {
 
     internal let pointer: UnsafeMutableRawPointer
 
@@ -31,10 +31,12 @@ final class MemoryRegion {
     init?(size: UInt64, at address: RawAddress) {
         // 4KB Aligned memory
         guard let ram = valloc(Int(size)) else { return nil }
+        print("Allocated \(size) bytes @ \(String(UInt(bitPattern: ram), radix: 16))")
         ram.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
         pointer = ram
         let flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
         do {
+            print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16))")
             try hvError(hv_vm_map(ram, address, Int(size), flags))
         } catch {
             return nil
@@ -75,7 +77,7 @@ final class MemoryRegion {
 
 #endif
 
-    func loadBinary(from binary: Data, atOffset offset: UInt64 = 0) throws {
+    public func loadBinary(from binary: Data, atOffset offset: UInt64 = 0) throws {
         guard binary.count <= size - offset else { throw HVKError.memoryError }
         let buffer = UnsafeMutableRawBufferPointer(start: pointer.advanced(by: Int(offset)), count: binary.count)
         binary.copyBytes(to: buffer)
