@@ -5,41 +5,43 @@
 //  Created by Simon Evans on 14/12/2019.
 //
 
-typealias RawAddress = UInt64
+public typealias RawAddress = UInt64
+//typealias VirtualAddress = UInt64
+public typealias LinearAddress = UInt64
 
-struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
+public struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
     let rawValue: RawAddress
 
     public var description: String {
         return "0x\(String(rawValue, radix: 16))"
     }
 
-    init(_ rawValue: UInt64) {
+    public init(_ rawValue: UInt64) {
         self.rawValue = RawAddress(rawValue)
     }
 
-    init(_ rawValue: UInt) {
+    public init(_ rawValue: UInt) {
         self.rawValue = RawAddress(rawValue)
     }
 
-    func isAligned(to size: Int) -> Bool {
+    public func isAligned(to size: Int) -> Bool {
         precondition(size.nonzeroBitCount == 1)
         return rawValue & (RawAddress(size) - 1) == 0
     }
 
-    func advanced(by n: Int) -> PhysicalAddress {
+    public func advanced(by n: Int) -> PhysicalAddress {
         return PhysicalAddress(rawValue + RawAddress(n))
     }
 
-    func advanced(by n: UInt) -> PhysicalAddress {
+    public func advanced(by n: UInt) -> PhysicalAddress {
         return PhysicalAddress(rawValue + RawAddress(n))
     }
 
-    func advanced(by n: UInt64) -> PhysicalAddress {
+    public func advanced(by n: UInt64) -> PhysicalAddress {
         return PhysicalAddress(rawValue + RawAddress(n))
     }
 
-    func distance(to n: PhysicalAddress) -> Int {
+    public func distance(to n: PhysicalAddress) -> Int {
         if n.rawValue > rawValue {
             return Int(n.rawValue - rawValue)
         } else {
@@ -47,38 +49,36 @@ struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
         }
     }
 
-    static func +(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
+    public static func +(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
         return lhs.advanced(by: rhs)
     }
 
-    static func +(lhs: PhysicalAddress, rhs: Int) -> PhysicalAddress {
+    public static func +(lhs: PhysicalAddress, rhs: Int) -> PhysicalAddress {
         return lhs.advanced(by: rhs)
     }
 
-    static func +(lhs: PhysicalAddress, rhs: UInt64) -> PhysicalAddress {
+    public static func +(lhs: PhysicalAddress, rhs: UInt64) -> PhysicalAddress {
         return lhs.advanced(by: rhs)
     }
 
-    static func -(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
+    public static func -(lhs: PhysicalAddress, rhs: UInt) -> PhysicalAddress {
         return PhysicalAddress(lhs.rawValue - RawAddress(rhs))
     }
 
-    static func -(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Int {
+    public static func -(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Int {
         return lhs.distance(to: rhs)
     }
 
-    static func <(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
+    public static func <(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
 
-    static func <=(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
+    public static func <=(lhs: PhysicalAddress, rhs: PhysicalAddress) -> Bool {
         return lhs.rawValue <= rhs.rawValue
     }
 }
 
 
-//typealias VirtualAddress = UInt64
-typealias LinearAddress = UInt64
 
 struct LogicalMemoryAccess {
 
