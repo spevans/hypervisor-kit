@@ -15,11 +15,11 @@ extension Bool {
 
 
 
-struct CPU {
+public struct CPU {
 
-    struct RFLAGS {
+    public struct RFLAGS {
         private(set) var bits: BitArray64
-        var rawValue: UInt64 { bits.rawValue }
+        public var rawValue: UInt64 { bits.rawValue }
 
         init() {
             bits = BitArray64(2)    // bit 1 always set
@@ -29,94 +29,94 @@ struct CPU {
             bits = BitArray64(value)
         }
 
-        var carry: Bool {
+        public var carry: Bool {
             get { bits[0] == 1 }
             set { bits[0] = newValue ? 1 : 0 }
         }
 
-        var parity: Bool {
+        public var parity: Bool {
             get { bits[2] == 1 }
             set { bits[2] = newValue ? 1: 0 }
         }
 
-        var auxiliary: Bool {
+        public var auxiliary: Bool {
             get { bits[4] == 1 }
             set { bits[4] = newValue ? 1 : 0 }
         }
 
-        var zero: Bool {
+        public var zero: Bool {
             get { bits[6] == 1 }
             set { bits[6] = newValue ? 1 : 0 }
         }
 
-        var sign: Bool {
+        public var sign: Bool {
             get { bits[7] == 1 }
             set { bits[7] = newValue ? 1 : 0 }
         }
 
-        var trap: Bool {
+        public var trap: Bool {
             get { bits[8] == 1 }
             set { bits[8] = newValue ? 1 : 0 }
         }
 
-        var interruptEnable: Bool {
+        public var interruptEnable: Bool {
             get { bits[9] == 1 }
             set { bits[9] = newValue ? 1 : 0 }
         }
 
-        var direction: Bool {
+        public var direction: Bool {
             get { bits[10] == 1 }
             set { bits[10] = newValue ? 1 : 0 }
         }
 
-        var overflow: Bool {
+        public var overflow: Bool {
             get { bits[11] == 1 }
             set { bits[11] = newValue ? 1 : 0 }
         }
 
-        var iopl: Int {
+        public var iopl: Int {
             get { Int(bits[12...13]) }
             set { bits[12...13] = UInt64(newValue) }
         }
 
-        var nestedTask: Bool {
+        public var nestedTask: Bool {
             get { bits[14] == 1 }
             set { bits[14] = newValue ? 1 : 0 }
         }
 
-        var resume: Bool {
+        public var resume: Bool {
             get { bits[16] == 1 }
             set { bits[16] = newValue ? 1 : 0 }
         }
 
-        var v8086Mode: Bool {
+        public var v8086Mode: Bool {
             get { bits[17] == 1 }
             set { bits[17] = newValue ? 1 : 0 }
         }
 
-        var alignmentCheck: Bool {
+        public var alignmentCheck: Bool {
             get { bits[18] == 1 }
             set { bits[18] = newValue ? 1 : 0 }
         }
 
-        var virtualInterrupt: Bool {
+        public var virtualInterrupt: Bool {
             get { bits[19] == 1 }
             set { bits[19] = newValue ? 1 : 0 }
         }
 
-        var virtualInterruptPending: Bool {
+        public var virtualInterruptPending: Bool {
             get { bits[20] == 1 }
             set { bits[20] = newValue ? 1 : 0 }
         }
 
-        var identification: Bool {
+        public var identification: Bool {
             get { bits[21] == 1 }
             set { bits[21] = newValue ? 1 : 0 }
         }
     }
 
 
-    struct CR0Register: CustomStringConvertible {
+    public struct CR0Register: CustomStringConvertible {
         private(set) var bits: BitArray64
         var value: UInt64 { bits.toUInt64() }
 
@@ -128,62 +128,62 @@ struct CPU {
         //        bits = BitArray64(getCR0())
         //    }
 
-        var protectionEnable: Bool {
+        public var protectionEnable: Bool {
             get { Bool(bits[0]) }
             set { bits[0] = newValue ? 1 : 0 }
         }
 
-        var monitorCoprocessor: Bool {
+        public var monitorCoprocessor: Bool {
             get { Bool(bits[1]) }
             set { bits[1] = newValue ? 1 : 0 }
         }
 
-        var fpuEmulation: Bool {
+        public var fpuEmulation: Bool {
             get { Bool(bits[2]) }
             set { bits[2] = newValue ? 1 : 0 }
         }
 
-        var taskSwitched: Bool {
+        public var taskSwitched: Bool {
             get { Bool(bits[3]) }
             set { bits[3] = newValue ? 1 : 0 }
         }
 
-        var extensionType: Bool {
+        public var extensionType: Bool {
             get { Bool(bits[4]) }
             set { bits[4] = newValue ? 1 : 0 }
         }
 
-        var numericError: Bool {
+        public var numericError: Bool {
             get { Bool(bits[5]) }
             set { bits[5] = newValue ? 1 : 0 }
         }
 
-        var writeProtect: Bool {
+        public var writeProtect: Bool {
             get { Bool(bits[16]) }
             set { bits[16] = newValue ? 1 : 0 }
         }
 
-        var alignmentMask: Bool {
+        public var alignmentMask: Bool {
             get { Bool(bits[18]) }
             set { bits[18] = newValue ? 1 : 0 }
         }
 
-        var notWriteThrough: Bool {
+        public var notWriteThrough: Bool {
             get { Bool(bits[29]) }
             set { bits[29] = newValue ? 1 : 0 }
         }
 
-        var cacheDisable: Bool {
+        public var cacheDisable: Bool {
             get { Bool(bits[30]) }
             set { bits[30] = newValue ? 1 : 0 }
         }
 
-        var paging: Bool {
+        public var paging: Bool {
             get { Bool(bits[31]) }
             set { bits[31] = newValue ? 1 : 0 }
         }
 
-        var description: String {
+        public var description: String {
             var result = "PE: " + (protectionEnable ? "1" : "0")
             result += " MC: " + (monitorCoprocessor ? "1" : "0")
             result += " FE: " + (fpuEmulation ? "1" : "0")
@@ -200,7 +200,6 @@ struct CPU {
         }
     }
 
-    typealias PhysAddress = UInt64
 
     struct CR3Register {
         private(set) var bits: BitArray64
