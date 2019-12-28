@@ -23,7 +23,7 @@ func hvError(_ error: hv_return_t) throws {
 }
 
 
-class VirtualMachine {
+public final class VirtualMachine {
 
     static private(set) var vmx_cap_pinbased: UInt64 = 0
     static private(set) var vmx_cap_procbased: UInt64 = 0
@@ -36,7 +36,7 @@ class VirtualMachine {
     private(set) var memoryRegions: [MemoryRegion] = []
     
     
-    init() throws {
+    public init() throws {
         func printCap(_ name: String, _ value: UInt64) {
             let hi = String(UInt32(value >> 32), radix: 16)
             let lo = String(UInt32(value & 0xffff_ffff), radix: 16)
@@ -56,12 +56,12 @@ class VirtualMachine {
         }
     }
     
-    func addMemory(at guestAddress: UInt64, size: UInt64) -> MemoryRegion? {
+    public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
         let memRegion = MemoryRegion(size: size, at: guestAddress)!
         memoryRegions.append(memRegion)
         return memRegion
     }
-    
+    /*
     private func unmapMemory(ofSize size: Int, at address: RawAddress) throws {
         for idx in memoryRegions.startIndex..<memoryRegions.endIndex {
             let memory = memoryRegions[idx]
@@ -72,7 +72,7 @@ class VirtualMachine {
                 return
             }
         }
-    }
+    }*/
 
     func memory(at guestAddress: PhysicalAddress, count: UInt64) throws -> UnsafeMutableRawPointer {
         for region in memoryRegions {
@@ -98,7 +98,7 @@ class VirtualMachine {
         throw HVError.invalidMemory
     }
   */
-    func createVCPU() throws -> VCPU {
+    public func createVCPU() throws -> VCPU {
         let vcpu = try VCPU.init(vm: self)
         vcpus.append(vcpu)
         return vcpu

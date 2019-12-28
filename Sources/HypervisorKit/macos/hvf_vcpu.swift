@@ -10,57 +10,57 @@
 import Hypervisor
 
 extension VirtualMachine {
-    final class VCPU {
+    public final class VCPU {
         
-        struct SegmentRegister {
-            var selector: UInt16 = 0
-            var base: UInt = 0
-            var limit: UInt32 = 0
-            var accessRights: UInt32 = 0
+        public struct SegmentRegister {
+            public var selector: UInt16 = 0
+            public var base: UInt = 0
+            public var limit: UInt32 = 0
+            public var accessRights: UInt32 = 0
         }
         
-        struct Registers {
+        public struct Registers {
             
-            var cs: SegmentRegister = SegmentRegister()
-            var ss: SegmentRegister = SegmentRegister()
-            var ds: SegmentRegister = SegmentRegister()
-            var es: SegmentRegister = SegmentRegister()
-            var fs: SegmentRegister = SegmentRegister()
-            var gs: SegmentRegister = SegmentRegister()
-            var tr: SegmentRegister = SegmentRegister()
-            var ldtr: SegmentRegister = SegmentRegister()
+            public var cs: SegmentRegister = SegmentRegister()
+            public var ss: SegmentRegister = SegmentRegister()
+            public var ds: SegmentRegister = SegmentRegister()
+            public var es: SegmentRegister = SegmentRegister()
+            public var fs: SegmentRegister = SegmentRegister()
+            public var gs: SegmentRegister = SegmentRegister()
+            public var tr: SegmentRegister = SegmentRegister()
+            public var ldtr: SegmentRegister = SegmentRegister()
             
-            var rax: UInt64 = 0
-            var rbx: UInt64 = 0
-            var rcx: UInt64 = 0
-            var rdx: UInt64 = 0
-            var rsi: UInt64 = 0
-            var rdi: UInt64 = 0
-            var rsp: UInt64 = 0
-            var rbp: UInt64 = 0
-            var r8: UInt64 = 0
-            var r9: UInt64 = 0
-            var r10: UInt64 = 0
-            var r11: UInt64 = 0
-            var r12: UInt64 = 0
-            var r13: UInt64 = 0
-            var r14: UInt64 = 0
-            var r15: UInt64 = 0
-            var rip: UInt64 = 0
-            var rflags: CPU.RFLAGS = CPU.RFLAGS()
-            var cr0: UInt64 = 0
-            var cr2: UInt64 = 0
-            var cr3: UInt64 = 0
-            var cr4: UInt64 = 0
-            var cr8: UInt64 = 0
+            public var rax: UInt64 = 0
+            public var rbx: UInt64 = 0
+            public var rcx: UInt64 = 0
+            public var rdx: UInt64 = 0
+            public var rsi: UInt64 = 0
+            public var rdi: UInt64 = 0
+            public var rsp: UInt64 = 0
+            public var rbp: UInt64 = 0
+            public var r8: UInt64 = 0
+            public var r9: UInt64 = 0
+            public var r10: UInt64 = 0
+            public var r11: UInt64 = 0
+            public var r12: UInt64 = 0
+            public var r13: UInt64 = 0
+            public var r14: UInt64 = 0
+            public var r15: UInt64 = 0
+            public var rip: UInt64 = 0
+            public var rflags: CPU.RFLAGS = CPU.RFLAGS()
+            public var cr0: UInt64 = 0
+            public var cr2: UInt64 = 0
+            public var cr3: UInt64 = 0
+            public var cr4: UInt64 = 0
+            public var cr8: UInt64 = 0
             
-            var gdtrBase: UInt64 = 0
-            var gdtrLimit: UInt64 = 0
-            var idtrBase: UInt64 = 0
-            var idtrLimit: UInt64 = 0
+            public var gdtrBase: UInt64 = 0
+            public var gdtrLimit: UInt64 = 0
+            public var idtrBase: UInt64 = 0
+            public var idtrLimit: UInt64 = 0
             
             
-            func readRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t) throws -> UInt64 {
+            private func readRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t) throws -> UInt64 {
                 var value: UInt64 = 0
                 try hvError(hv_vcpu_read_register(vcpuId, register, &value))
                 return value
@@ -206,12 +206,13 @@ extension VirtualMachine {
             }
         }
 
-        unowned internal let vm: VirtualMachine
-        var registers = Registers()
-        let vcpuId: hv_vcpuid_t
-        let vmcs: VMCS
-        var exitCount: UInt64 = 0
-        
+        private let vcpuId: hv_vcpuid_t
+        internal let vmcs: VMCS
+        private var exitCount: UInt64 = 0
+
+        public unowned let vm: VirtualMachine
+        public var registers = Registers()
+
         
         init(vm: VirtualMachine) throws {
             self.vm = vm
@@ -243,13 +244,13 @@ extension VirtualMachine {
             try vmcs.cr4ReadShadow(CPU.CR4Register(0))
         }
         
-        func run() throws -> VMExit {
+        public func run() throws -> VMExit {
             print("About to eun with RIP:", String(registers.rip, radix: 16), "RAX:", String(registers.rax, radix: 16))
-            print("VMCS RIP:", String(try vmcs.guestRIP(), radix: 16))
 
             while true {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
+                print("VMCS RIP:", String(try vmcs.guestRIP(), radix: 16))
                 try hvError(hv_vcpu_run(vcpuId))
                 try registers.readRegisters(vcpuId: vcpuId)
                 try registers.readSegmentRegisters(vmcs: vmcs)

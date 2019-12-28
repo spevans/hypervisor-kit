@@ -162,6 +162,7 @@ extension VirtualMachine.VCPU {
 
                     if isIn {
                         if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                            if !isRep { try skipInstruction() }
                             return .ioInOperation(port, dataRead)
                         }
                     } else {
@@ -176,6 +177,8 @@ extension VirtualMachine.VCPU {
                             } else {
                                 registers.rcx = count
                             }
+                        } else {
+                            try skipInstruction()
                         }
                         return .ioOutOperation(port, data)
                     }
@@ -183,10 +186,12 @@ extension VirtualMachine.VCPU {
 
                 if isIn {
                     if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                        try skipInstruction()
                         return .ioInOperation(port, dataRead)
                     }
                 } else {
                     if let dataWrite = VMExit.DataWrite(bitWidth: bitWidth, value: registers.rax) {
+                        try skipInstruction()
                         return .ioOutOperation(port, dataWrite)
                     }
                 }

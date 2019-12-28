@@ -122,7 +122,10 @@ final class RealModeTests: XCTestCase {
 
         XCTAssertEqual(vmExit, .hlt)
         let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
+        let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
+        print("Word: ", String(word, radix: 16))
         print("RAX:", String(rax, radix: 16))
+        XCTAssertEqual(word, 0x1235)
         XCTAssertEqual(vcpu.registers.rax, 0x1235)
         XCTAssertEqual(vcpu.registers.rip, 0x1011)
     }
