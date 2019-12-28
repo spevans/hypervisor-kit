@@ -12,6 +12,7 @@
 test1:  
                 mov     ax, [0x1200]
                 inc     ax
+                mov     [0x1200], ax
                 hlt
 
 io_out_test:  

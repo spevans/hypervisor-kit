@@ -5,12 +5,12 @@
 //  Created by Simon Evans on 10/12/2019.
 //
 
-typealias IOPort = UInt16
+public typealias IOPort = UInt16
 
-enum VMExit: Equatable {
+public enum VMExit: Equatable {
 
     // Used by IN/OUT and MMIO instructions
-    enum DataRead: Equatable {
+    public enum DataRead: Equatable {
         case byte
         case word
         case dword
@@ -27,7 +27,7 @@ enum VMExit: Equatable {
         }
     }
 
-    enum DataWrite: Equatable, CustomStringConvertible {
+    public enum DataWrite: Equatable, CustomStringConvertible {
         case byte(UInt8)
         case word(UInt16)
         case dword(UInt32)
@@ -43,7 +43,7 @@ enum VMExit: Equatable {
             }
         }
 
-        var description: String {
+        public var description: String {
             switch self {
                 case .byte(let value): return String(value, radix: 16)
                 case .word(let value): return String(value, radix: 16)
@@ -54,7 +54,7 @@ enum VMExit: Equatable {
     }
 
 
-    struct ExceptionInfo: Equatable {
+    public struct ExceptionInfo: Equatable {
         enum Exception: UInt32 {
             case divideError = 0
             case debug = 1
@@ -100,27 +100,27 @@ enum VMExit: Equatable {
         }
     }
 
-    struct Debug: Equatable {
+    public struct Debug: Equatable {
         let rip: UInt64
         let dr6: UInt64
         let dr7: UInt64
         let exception: UInt32
     }
 
-    struct TPRAccess: Equatable {
+    public struct TPRAccess: Equatable {
         // TODO
     }
 
-    struct HyperV: Equatable {
+    public struct HyperV: Equatable {
         // TODO
     }
 
-    struct SystemEvent: Equatable {
+    public struct SystemEvent: Equatable {
         // TODO
     }
 
 
-    struct MemoryViolation: Equatable {
+    public struct MemoryViolation: Equatable {
         enum Access {
             case read
             case write
@@ -152,7 +152,7 @@ enum VMExit: Equatable {
     case tprAccess(TPRAccess)
     case nmi
     #if os(Linux)
-    case internalError(KVMExit.InternalError)
+    case internalError(InternalError)
     #endif
     case memoryViolation(MemoryViolation)
     case systemEvent(SystemEvent)
