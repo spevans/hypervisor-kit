@@ -124,11 +124,6 @@ extension VirtualMachine.VCPU {
                     let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
                     let addressSize = 16 << exitInfo[7...9]
                     let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
-
-                    print("bitWidth:", bitWidth, "isIn:", isIn, "port:", port)
-                    print("INS/OUTS: addressSize:", addressSize, "segmentRegister:", segmentOverride)
-
-
                     let segReg: SegmentRegister = {
                         switch segmentOverride {
                             case .es: return registers.es
@@ -153,7 +148,6 @@ extension VirtualMachine.VCPU {
                         if addressSize == 32 { return rcx & 0xffff_fffff }
                         return rcx
                     }()
-                    print("Count:", count)
 
                     if isRep && count == 0 {
                         try skipInstruction()

@@ -245,12 +245,9 @@ extension VirtualMachine {
         }
         
         public func run() throws -> VMExit {
-            print("About to eun with RIP:", String(registers.rip, radix: 16), "RAX:", String(registers.rax, radix: 16))
-
             while true {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
-                print("VMCS RIP:", String(try vmcs.guestRIP(), radix: 16))
                 try hvError(hv_vcpu_run(vcpuId))
                 try registers.readRegisters(vcpuId: vcpuId)
                 try registers.readSegmentRegisters(vmcs: vmcs)
@@ -273,7 +270,6 @@ extension VirtualMachine {
         
         func skipInstruction() throws {
             let instrLen = try vmcs.vmExitInstructionLength()
-            print("instrLen:", instrLen)
             registers.rip += UInt64(instrLen)
         }
 /*
