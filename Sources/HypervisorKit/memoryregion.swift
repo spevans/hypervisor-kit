@@ -21,12 +21,12 @@ enum HVKError: Error {
 public final class MemoryRegion {
 
     internal let pointer: UnsafeMutableRawPointer
+    public var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(size)) }
 
 #if os(macOS)
 
     let guestAddress: PhysicalAddress
     let size: UInt64
-    var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(size)) }
 
     init?(size: UInt64, at address: RawAddress) {
         // 4KB Aligned memory
@@ -62,7 +62,6 @@ public final class MemoryRegion {
 
     var guestAddress: PhysicalAddress { PhysicalAddress(region.guest_phys_addr) }
     var size: UInt64 { region.memory_size }
-    var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(region.memory_size)) }
 
 
     init?(size: UInt64, at address: UInt64, slot: Int) {
