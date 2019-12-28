@@ -7,7 +7,7 @@
 
 extension VirtualMachine.VCPU {
 
-    func setupRealMode() {
+    public func setupRealMode() {
         registers.cr0 = CPU.CR0Register(0x60000030).value
         registers.cr2 = 0
         registers.cr3 = CPU.CR3Register(0).value
@@ -21,7 +21,7 @@ extension VirtualMachine.VCPU {
         registers.cs.selector = 0xf000
         registers.cs.limit = 0xffff
         registers.cs.accessRights = 0x9b
-        registers.cs.base = 0xffff0000
+        registers.cs.base = 0xf0000
 
         registers.ds.selector = 0
         registers.ds.limit = 0xffff

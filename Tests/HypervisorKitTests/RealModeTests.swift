@@ -124,7 +124,7 @@ final class RealModeTests: XCTestCase {
         let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
         print("RAX:", String(rax, radix: 16))
         XCTAssertEqual(vcpu.registers.rax, 0x1235)
-        XCTAssertEqual(vcpu.registers.rip, 0x100e)
+        XCTAssertEqual(vcpu.registers.rip, 0x1011)
     }
 
     func testOut() throws {
