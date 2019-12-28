@@ -31,11 +31,11 @@ final class RealModeTests: XCTestCase {
             throw TestError.vmCreateFail
         }
         
+        _ = try vm.addMemory(at: 00, size: 1024, readOnly: true)
         guard let memRegion = try? vm.addMemory(at: 0x1000, size: 8192) else {
             XCTFail("Cant add memory region")
             throw TestError.addMemoryFail
         }
-
 
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
@@ -115,7 +115,7 @@ final class RealModeTests: XCTestCase {
 
     func testHLT() throws {
         let vm = try createRealModeVM()
-        let memRegion = vm.memoryRegions[0]
+        let memRegion = vm.memoryRegions[1]
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
         let vcpu = vm.vcpus[0]
         let vmExit = try runTest(vcpu: vcpu, ax: 0)

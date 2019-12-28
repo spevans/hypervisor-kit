@@ -30,14 +30,21 @@ public final class MemoryRegion {
 
     init?(size: UInt64, at address: RawAddress) {
         // 4KB Aligned memory
-        guard let ram = valloc(Int(size)) else { return nil }
-        print("Allocated \(size) bytes @ \(String(UInt(bitPattern: ram), radix: 16))")
-        ram.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
-        pointer = ram
+            //guard let ram = valloc(Int(size)) else { return nil }
+
+        guard let ptr = mmap(nil, Int(size),  PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0),
+            ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
+                return nil
+        }
+        pointer = ptr
+
+        print("Allocated \(size) bytes @ \(String(UInt(bitPattern: ptr), radix: 16))")
+        ptr.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
+
         let flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
         do {
-            print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16))")
-            try hvError(hv_vm_map(ram, address, Int(size), flags))
+            print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16)) flags = \(flags)")
+            try hvError(hv_vm_map(ptr, address, Int(size), flags))
         } catch {
             return nil
         }
@@ -47,7 +54,7 @@ public final class MemoryRegion {
     }
 
     deinit {
-        free(pointer)
+        munmap(pointer, Int(size))
     }
 
 #elseif os(Linux)

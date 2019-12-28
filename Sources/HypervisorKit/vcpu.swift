@@ -15,7 +15,7 @@ extension VirtualMachine.VCPU {
 
         registers.rip = 0xFFF0
         registers.rflags = CPU.RFLAGS(2)
-        registers.rsp = 0x1FFE
+        registers.rsp = 0x0
         registers.rax = 0x0
 
         registers.cs.selector = 0xf000
