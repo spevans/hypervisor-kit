@@ -1,7 +1,7 @@
 import XCTest
 import Foundation
 
-@testable import HypervisorKit
+import HypervisorKit
 
 
 final class RealModeTests: XCTestCase {
@@ -60,12 +60,7 @@ final class RealModeTests: XCTestCase {
         vcpu.registers.rip = 0x1000
 
         while true {
-            
-            guard let vmExit = try? vcpu.run() else {
-                XCTFail("VCPU Run failed")
-                throw HVError.vmRunError
-            }
-            
+            let vmExit = try vcpu.run()
             print("VMExit Reason:", vmExit)
             
             switch vmExit {

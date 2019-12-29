@@ -22,8 +22,9 @@ enum HVError: Error {
 public final class VirtualMachine {
 
     private let vm_fd: Int32
-    private(set) var vcpus: [VCPU] = []
-    private(set) var memoryRegions: [MemoryRegion] = []
+
+    public private(set) var vcpus: [VCPU] = []
+    public private(set) var memoryRegions: [MemoryRegion] = []
 
 
     static var apiVersion: Int32? = {

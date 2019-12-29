@@ -30,10 +30,8 @@ public final class VirtualMachine {
     static private(set) var vmx_cap_procbased2: UInt64 = 0
     static private(set) var vmx_cap_entry: UInt64 = 0
 
-    
-    
-    private(set) var vcpus: [VCPU] = []
-    private(set) var memoryRegions: [MemoryRegion] = []
+    public private(set) var vcpus: [VCPU] = []
+    public private(set) var memoryRegions: [MemoryRegion] = []
     
     
     public init() throws {
