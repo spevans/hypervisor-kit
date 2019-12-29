@@ -31,7 +31,6 @@ final class RealModeTests: XCTestCase {
             throw TestError.vmCreateFail
         }
         
-        _ = try vm.addMemory(at: 00, size: 1024, readOnly: true)
         guard let memRegion = try? vm.addMemory(at: 0x1000, size: 8192) else {
             XCTFail("Cant add memory region")
             throw TestError.addMemoryFail
@@ -39,7 +38,6 @@ final class RealModeTests: XCTestCase {
 
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
-        //testCode.copyBytes(to: memRegion.rawBuffer)
 
         guard let vcpu = try? vm.createVCPU() else {
             XCTFail("Cant create VCPU")
@@ -58,7 +56,7 @@ final class RealModeTests: XCTestCase {
 
         vcpu.registers.cs.selector = 0
         vcpu.registers.cs.base = 0
-        vcpu.registers.rax = UInt64(ax)
+        vcpu.registers.ax = ax
         vcpu.registers.rip = 0x1000
 
         while true {
@@ -88,9 +86,6 @@ final class RealModeTests: XCTestCase {
             vmExit = try vcpu.run()
             count += 1
         }
-        return
-        //let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
-        //XCTAssertEqual(try? vcpu.vmcs.guestRIP(), 0x100d)
     }
 
 
@@ -115,18 +110,18 @@ final class RealModeTests: XCTestCase {
 
     func testHLT() throws {
         let vm = try createRealModeVM()
-        let memRegion = vm.memoryRegions[1]
+        let memRegion = vm.memoryRegions[0]
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
         let vcpu = vm.vcpus[0]
         let vmExit = try runTest(vcpu: vcpu, ax: 0)
 
         XCTAssertEqual(vmExit, .hlt)
-        let rax = vcpu.registers.rax //.readRegister(HV_X86_RAX)
+        let ax = vcpu.registers.ax
         let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
         print("Word: ", String(word, radix: 16))
-        print("RAX:", String(rax, radix: 16))
+        print("RAX:", String(ax, radix: 16))
         XCTAssertEqual(word, 0x1235)
-        XCTAssertEqual(vcpu.registers.rax, 0x1235)
+        XCTAssertEqual(vcpu.registers.ax, 0x1235)
         XCTAssertEqual(vcpu.registers.rip, 0x1011)
     }
 

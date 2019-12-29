@@ -57,6 +57,9 @@ public final class VirtualMachine {
     }
     
     public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
+        precondition(guestAddress & 0xfff == 0)
+        precondition(size & 0xfff == 0)
+
         let memRegion = MemoryRegion(size: size, at: guestAddress)!
         memoryRegions.append(memRegion)
         return memRegion

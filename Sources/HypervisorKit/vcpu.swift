@@ -5,6 +5,91 @@
 //  Created by Simon Evans on 27/12/2019.
 //
 
+
+extension VirtualMachine.VCPU.Registers {
+    public var al: UInt8 {
+        get { UInt8(truncatingIfNeeded: rax) }
+        set { rax = (rax & ~0xff) | UInt64(newValue) }
+    }
+
+    public var ah: UInt8 {
+        get { UInt8(truncatingIfNeeded: rax >> 8) }
+        set { rax = (rax & ~0xff00) | (UInt64(newValue) << 8) }
+    }
+
+    public var ax: UInt16 {
+        get { UInt16(truncatingIfNeeded: rax) }
+        set { rax = (rax & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var eax: UInt32 {
+        get { UInt32(truncatingIfNeeded: rax) }
+        set { rax = (rax & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+
+    public var bl: UInt8 {
+        get { UInt8(truncatingIfNeeded: rbx) }
+        set { rbx = (rbx & ~0xff) | UInt64(newValue) }
+    }
+
+    public var bh: UInt8 {
+        get { UInt8(truncatingIfNeeded: rbx >> 8) }
+        set { rbx = (rbx & ~0xff00) | (UInt64(newValue) << 8) }
+    }
+
+    public var bx: UInt16 {
+        get { UInt16(truncatingIfNeeded: rbx) }
+        set { rbx = (rbx & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var ebx: UInt32 {
+        get { UInt32(truncatingIfNeeded: rbx) }
+        set { rbx = (rbx & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var cl: UInt8 {
+        get { UInt8(truncatingIfNeeded: rcx) }
+        set { rcx = (rcx & ~0xff) | UInt64(newValue) }
+    }
+
+    public var ch: UInt8 {
+        get { UInt8(truncatingIfNeeded: rcx >> 8) }
+        set { rcx = (rcx & ~0xff00) | (UInt64(newValue) << 8) }
+    }
+
+    public var cx: UInt16 {
+        get { UInt16(truncatingIfNeeded: rcx) }
+        set { rcx = (rcx & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var ecx: UInt32 {
+        get { UInt32(truncatingIfNeeded: rcx) }
+        set { rcx = (rcx & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var dl: UInt8 {
+        get { UInt8(truncatingIfNeeded: rdx) }
+        set { rdx = (rdx & ~0xff) | UInt64(newValue) }
+    }
+
+    public var dh: UInt8 {
+        get { UInt8(truncatingIfNeeded: rdx >> 8) }
+        set { rdx = (rdx & ~0xff00) | (UInt64(newValue) << 8) }
+    }
+
+    public var dx: UInt16 {
+        get { UInt16(truncatingIfNeeded: rdx) }
+        set { rdx = (rdx & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var edx: UInt32 {
+        get { UInt32(truncatingIfNeeded: rdx) }
+        set { rdx = (rdx & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+}
+
 extension VirtualMachine.VCPU {
 
     public func setupRealMode() {

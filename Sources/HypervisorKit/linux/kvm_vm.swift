@@ -16,6 +16,7 @@ enum HVError: Error {
     case setRegisters
     case getRegisters
     case vmRunError
+    case vmMemoryError
 }
 
 public final class VirtualMachine {
@@ -63,13 +64,15 @@ public final class VirtualMachine {
     public func addMemory(at guestAddress: UInt64, size: Int, readOnly: Bool = false) throws -> MemoryRegion {
         print("Adding \(size) bytes at address \(String(guestAddress, radix: 16))")
 
+        precondition(guestAddress & 0xfff == 0)
+        precondition(size & 0xfff == 0)
         guard let memRegion = MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count) else {
-            throw HVError.vmRunError
+            throw HVError.vmMemoryError
         }
 
         var kvmRegion = memRegion.region
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            throw HVError.vmRunError
+            throw HVError.vmMemoryError
         }
         memoryRegions.append(memRegion)
         print("Added memory")
