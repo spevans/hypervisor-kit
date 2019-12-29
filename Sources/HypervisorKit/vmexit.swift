@@ -120,7 +120,7 @@ public enum VMExit: Equatable {
     }
 
 
-    public struct MemoryViolation: Equatable {
+    public struct MemoryViolation: Equatable, CustomStringConvertible {
         enum Access {
             case read
             case write
@@ -133,6 +133,12 @@ public enum VMExit: Equatable {
         let executable: Bool
         let guestPhysicalAddress: UInt64
         let guestLinearAddress: UInt?
+
+        public var description: String {
+            let perms = (readable ? "r" : "-") + (writeable ? "w" : "-") + (executable ? "x" : "-")
+            let gla = guestLinearAddress == nil ? "none" : "0x" + String(guestLinearAddress!, radix: 16)
+            return "MemoryViolation(access: \(access), perms: \(perms) GPA: 0x\(String(guestPhysicalAddress, radix: 16)) GLA: \(gla)"
+        }
     }
 
 
