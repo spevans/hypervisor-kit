@@ -88,6 +88,57 @@ extension VirtualMachine.VCPU.Registers {
         set { rdx = (rdx & ~0xffff_ffff) | UInt64(newValue) }
     }
 
+    public var di: UInt16 {
+        get { UInt16(truncatingIfNeeded: rdi) }
+        set { rdi = (rdi & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var edi: UInt32 {
+        get { UInt32(truncatingIfNeeded: rdi) }
+        set { rdi = (rdi & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var si: UInt16 {
+        get { UInt16(truncatingIfNeeded: rsi) }
+        set { rsi = (rsi & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var esi: UInt32 {
+        get { UInt32(truncatingIfNeeded: rsi) }
+        set { rsi = (rsi & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var bp: UInt16 {
+        get { UInt16(truncatingIfNeeded: rbp) }
+        set { rbp = (rbp & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var ebp: UInt32 {
+        get { UInt32(truncatingIfNeeded: rbp) }
+        set { rbp = (rbp & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var sp: UInt16 {
+        get { UInt16(truncatingIfNeeded: rsp) }
+        set { rsp = (rsp & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var esp: UInt32 {
+        get { UInt32(truncatingIfNeeded: rsp) }
+        set { rsp = (rsp & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+    public var ip: UInt16 {
+        get { UInt16(truncatingIfNeeded: rip) }
+        set { rip = (rip & ~0xffff) | UInt64(newValue) }
+    }
+
+    public var eip: UInt32 {
+        get { UInt32(truncatingIfNeeded: rip) }
+        set { rip = (rip & ~0xffff_ffff) | UInt64(newValue) }
+    }
+
+
 }
 
 extension VirtualMachine.VCPU {
