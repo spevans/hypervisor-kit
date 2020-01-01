@@ -17,6 +17,7 @@ enum HVError: Error {
     case getRegisters
     case vmRunError
     case vmMemoryError
+    case invalidMemory
 }
 
 public final class VirtualMachine {
@@ -84,23 +85,6 @@ public final class VirtualMachine {
         vcpus.append(vcpu)
         return vcpu
     }
-
-
- /*   func loadBinary(binary: String) -> Bool {
-        guard memoryRegions.count > 0 else {
-            print("No memory allocated to VM")
-            return false
-        }
-        let fd = open2arg(binary, O_RDONLY)
-        guard fd >= 0 else { return false }
-        defer { close(fd) }
-        var statInfo = stat()
-        guard fstat(fd, &statInfo) >= 0 else { return false }
-        let size = statInfo.st_size
-        guard size <= Int(memoryRegions[0].size) else { return false }
-        guard read(fd, memoryRegions[0].pointer, size) == size else { return false }
-        return true
-    }*/
 
 
     deinit {

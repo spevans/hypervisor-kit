@@ -1,5 +1,5 @@
 //
-//  vm.swift
+//  hvf_vm.swift
 //  
 //
 //  Created by Simon Evans on 01/12/2019.
@@ -63,40 +63,21 @@ public final class VirtualMachine {
         return memRegion
     }
 
-    public func memoryRegion(containing guestAddress: PhysicalAddress) -> MemoryRegion? {
-        for region in memoryRegions {
-            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress {
-                return region
-            }
-        }
-        return nil
-    }
+    /*
+     func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
+     for region in memoryRegions {
+     if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
+     let offset = guestAddress - region.guestAddress
+     let ptr = region.pointer.advanced(by: Int(offset))
+     let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
+     return Array<UInt8>(buffer)
+     }
+     }
+     throw HVError.invalidMemory
+     }
+     */
 
 
-    public func memory(at guestAddress: PhysicalAddress, count: UInt64) throws -> UnsafeMutableRawPointer {
-        for region in memoryRegions {
-            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
-                let offset = guestAddress - region.guestAddress
-                return region.pointer.advanced(by: Int(offset))
-
-            }
-        }
-        throw HVError.invalidMemory
-    }
-
-/*
-    func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
-        for region in memoryRegions {
-            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
-                let offset = guestAddress - region.guestAddress
-                let ptr = region.pointer.advanced(by: Int(offset))
-                let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
-                return Array<UInt8>(buffer)
-            }
-        }
-        throw HVError.invalidMemory
-    }
-  */
     public func createVCPU() throws -> VCPU {
         let vcpu = try VCPU.init(vm: self)
         vcpus.append(vcpu)
