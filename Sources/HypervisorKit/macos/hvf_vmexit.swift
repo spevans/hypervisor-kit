@@ -208,9 +208,8 @@ extension VirtualMachine.VCPU {
             case .accessToLDTRorTR: fatalError("\(exitReason) not implemented")
 
             case .eptViolation:
+                // Check for page access / write setting dirty bit
                 let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
-                print("RIP:", String(registers.rip, radix: 16))
-                print("exitQ:", String(exitQ.rawValue, radix: 2))
                 let access: VMExit.MemoryViolation.Access
                 if exitQ[0] == 1 {
                     access = .read
@@ -220,17 +219,41 @@ extension VirtualMachine.VCPU {
                     access = .write
                 }
 
+                let gpa = try vmcs.guestPhysicalAddress()
+                if let region = vm.memoryRegion(containing: gpa) {
+                    switch access {
+                        case .write:
+                            if region.isWriteable {
+                                // set the dirty bit for the page and ignore this vmexit
+                                region.setWriteTo(address: gpa)
+                                return nil
+                            } else {
+                                // MMIO write to readable page,
+                                fatalError("TODO MMIO write")
+                        }
+                        case .instructionFetch:
+                            // ignore
+                            return nil
+
+                        case .read:
+                            fatalError("TODO MMIO read")
+                    }
+                } else {
+                    // work out what to do next
+                    fatalError("TODO: Access to unmapped memory")
+                }
+
+                // Not currently used
                 let violation = VMExit.MemoryViolation(
                     access: access,
                     readable: exitQ[3] == 1,
                     writeable: exitQ[4] == 1,
                     executable: exitQ[5] == 1,
-                    guestPhysicalAddress: try vmcs.guestPhysicalAddress(),
+                    guestPhysicalAddress: gpa,
                     guestLinearAddress: (exitQ[7] == 1) ? try vmcs.guestLinearAddress() : nil
                 )
 
                 return .memoryViolation(violation)
-
 
             case .eptMisconfiguration: fallthrough
             case .invept: fallthrough

@@ -6,7 +6,6 @@ import HypervisorKit
 
 final class RealModeTests: XCTestCase {
 
-
     private var _realModeTestCode: Data? = nil
     private func realModeTestCode() throws -> Data {
         if let code = _realModeTestCode {
@@ -106,18 +105,47 @@ final class RealModeTests: XCTestCase {
     func testHLT() throws {
         let vm = try createRealModeVM()
         let memRegion = vm.memoryRegions[0]
+
+        dumpMemory(memRegion, offset: 0x320, count: 8)
+
+        let src_data = memRegion.rawBuffer.baseAddress!.advanced(by: 0x320)
+        XCTAssertEqual(src_data.advanced(by: 0).load(as: UInt8.self), 0xaa)
+        XCTAssertEqual(src_data.advanced(by: 1).load(as: UInt8.self), 0xbb)
+        XCTAssertEqual(src_data.advanced(by: 2).load(as: UInt8.self), 0xcc)
+        XCTAssertEqual(src_data.advanced(by: 3).load(as: UInt8.self), 0xdd)
+
+        let dest_data = memRegion.rawBuffer.baseAddress!.advanced(by: 0x1000)
+        XCTAssertEqual(dest_data.advanced(by: 0).load(as: UInt8.self), 0)
+        XCTAssertEqual(dest_data.advanced(by: 1).load(as: UInt8.self), 0)
+        XCTAssertEqual(dest_data.advanced(by: 2).load(as: UInt8.self), 0)
+        XCTAssertEqual(dest_data.advanced(by: 3).load(as: UInt8.self), 0)
+
+
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
         let vcpu = vm.vcpus[0]
-        let vmExit = try runTest(vcpu: vcpu, ax: 0)
+        showRegisters(vcpu)
+        var vmExit = try runTest(vcpu: vcpu, ax: 0)
+        while vmExit != .hlt {
+            print(vmExit)
+            vmExit = try vcpu.run()
+            showRegisters(vcpu)
+        }
 
         XCTAssertEqual(vmExit, .hlt)
+        dumpMemory(memRegion, offset: 0x320, count: 8)
         let ax = vcpu.registers.ax
         let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
         print("Word: ", String(word, radix: 16))
         print("RAX:", String(ax, radix: 16))
         XCTAssertEqual(word, 0x1235)
         XCTAssertEqual(vcpu.registers.ax, 0x1235)
-        XCTAssertEqual(vcpu.registers.rip, 0x1011)
+        XCTAssertEqual(vcpu.registers.rip, 0x1027)
+
+        XCTAssertEqual(dest_data.advanced(by: 0).load(as: UInt8.self), 0xaa)
+        XCTAssertEqual(dest_data.advanced(by: 1).load(as: UInt8.self), 0xbb)
+        XCTAssertEqual(dest_data.advanced(by: 2).load(as: UInt8.self), 0xcc)
+        XCTAssertEqual(dest_data.advanced(by: 3).load(as: UInt8.self), 0xdd)
+
     }
 
     func testOut() throws {
@@ -318,7 +346,68 @@ final class RealModeTests: XCTestCase {
         #endif
 
     }
-    
+
+    func showRegisters(_ vcpu: VirtualMachine.VCPU) {
+        func showReg(_ name: String, _ value: UInt16) {
+            let w = hexNum(value, width: 4)
+            print("\(name): \(w)", terminator: " ")
+        }
+
+        showReg("CS", vcpu.registers.cs.selector)
+        showReg("SS", vcpu.registers.ss.selector)
+        showReg("DS", vcpu.registers.ds.selector)
+        showReg("ES", vcpu.registers.es.selector)
+        showReg("FS", vcpu.registers.fs.selector)
+        showReg("GS", vcpu.registers.gs.selector)
+        print("")
+        showReg("IP", vcpu.registers.ip)
+        showReg("AX", vcpu.registers.ax)
+        showReg("BX", vcpu.registers.bx)
+        showReg("CX", vcpu.registers.cx)
+        showReg("DX", vcpu.registers.dx)
+        showReg("DI", vcpu.registers.di)
+        showReg("SI", vcpu.registers.si)
+        showReg("BP", vcpu.registers.bp)
+        showReg("SP", vcpu.registers.sp)
+        print("")
+    }
+
+
+    func hexNum<T: BinaryInteger>(_ value: T, width: Int) -> String {
+        let num = String(value, radix: 16)
+        if num.count <= width {
+            return String(repeating: "0", count: width - num.count) + num
+        }
+        return num
+    }
+
+
+    func dumpMemory(_ memory: MemoryRegion, offset: Int, count: Int) {
+        let ptr = memory.rawBuffer.baseAddress!.advanced(by: offset)
+        let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
+
+    /*
+        var idx = offset & ~0xf // Round down
+
+        while idx < offset {
+            print ("   ", terminator: "")
+            idx += 1
+        }
+     */
+        var idx = 0
+        print("\(hexNum(offset + idx, width: 5)): ", terminator: "")
+        for byte in buffer {
+            print(hexNum(byte, width: 2), terminator: " ")
+            idx += 1
+            if idx == count { break }
+            if idx.isMultiple(of: 16) {
+                print("\n\(hexNum(offset + idx, width: 5)): ", terminator: "")
+            }
+        }
+        print("\n")
+    }
+
+
     static var allTests = [
         ("testInstructionPrefixes", testInstructionPrefixes),
         ("testMMIO", testMMIO),

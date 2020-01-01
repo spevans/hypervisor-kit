@@ -58,24 +58,22 @@ public final class VirtualMachine {
         precondition(guestAddress & 0xfff == 0)
         precondition(size & 0xfff == 0)
 
-        let memRegion = MemoryRegion(size: size, at: guestAddress)!
+        let memRegion = try MemoryRegion(size: size, at: guestAddress, readOnly: readOnly)
         memoryRegions.append(memRegion)
         return memRegion
     }
-    /*
-    private func unmapMemory(ofSize size: Int, at address: RawAddress) throws {
-        for idx in memoryRegions.startIndex..<memoryRegions.endIndex {
-            let memory = memoryRegions[idx]
-            if memory.size == size && memory.guestAddress == PhysicalAddress(address) {
-                try hvError(hv_vm_unmap(address, size))
-                print("memory unmmaped")
-                memoryRegions.remove(at: idx)
-                return
+
+    public func memoryRegion(containing guestAddress: PhysicalAddress) -> MemoryRegion? {
+        for region in memoryRegions {
+            if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress {
+                return region
             }
         }
-    }*/
+        return nil
+    }
 
-    func memory(at guestAddress: PhysicalAddress, count: UInt64) throws -> UnsafeMutableRawPointer {
+
+    public func memory(at guestAddress: PhysicalAddress, count: UInt64) throws -> UnsafeMutableRawPointer {
         for region in memoryRegions {
             if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
                 let offset = guestAddress - region.guestAddress

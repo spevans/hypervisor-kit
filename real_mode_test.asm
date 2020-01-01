@@ -9,10 +9,22 @@
                 add     bx, ax
                 jmp     [bx]
 
-test1:  
+read_write_memory:
+                mov     sp, 0x1ffe
+                push    ds
+                pop     es
                 mov     ax, [0x1200]
                 inc     ax
                 mov     [0x1200], ax
+
+                cld
+                mov     bx, 0x200
+                mov     es, bx
+                mov     si, src_data
+                mov     di, 0
+                mov     cx, 2
+                rep     movsw
+
                 hlt
 
 io_out_test:  
@@ -119,9 +131,13 @@ instruction_prefixes:
                 db      0xfe, 0xdc, 0xba, 0x98
                 db      0x55, 0xaa, 0xcc, 0xdd
 
+                OFFSET  0x320
+src_data:       db      0xaa, 0xbb, 0xcc, 0xdd
+dest_data       db      0, 0, 0, 0
+
 
 jump_table:
-                dw      test1
+                dw      read_write_memory
                 dw      io_out_test
                 dw      test3
                 dw      mmio_read

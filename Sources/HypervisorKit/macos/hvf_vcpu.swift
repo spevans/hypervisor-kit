@@ -256,14 +256,14 @@ extension VirtualMachine {
                 guard let exitReason = try self.vmExit() else { continue }
 
                 // FIXME: Determine why first vmexit is an EPT violation
-                if exitCount == 1,
+                /*if exitCount == 1,
                     case let .memoryViolation(violation) = exitReason {
                     if violation.access == .instructionFetch && !violation.executable {
                         // Ignore instructionFetch on exectable memory, EPT cold start
                         // skip
                         continue
                     }
-                }
+                }*/
                 return exitReason
             }
         }

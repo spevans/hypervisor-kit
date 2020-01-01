@@ -67,9 +67,7 @@ public final class VirtualMachine {
 
         precondition(guestAddress & 0xfff == 0)
         precondition(size & 0xfff == 0)
-        guard let memRegion = MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count) else {
-            throw HVError.vmMemoryError
-        }
+        let memRegion = try MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count)
 
         var kvmRegion = memRegion.region
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {

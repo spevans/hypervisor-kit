@@ -131,13 +131,13 @@ public enum VMExit: Equatable {
         let readable: Bool
         let writeable: Bool
         let executable: Bool
-        let guestPhysicalAddress: UInt64
+        let guestPhysicalAddress: PhysicalAddress
         let guestLinearAddress: UInt?
 
         public var description: String {
             let perms = (readable ? "r" : "-") + (writeable ? "w" : "-") + (executable ? "x" : "-")
             let gla = guestLinearAddress == nil ? "none" : "0x" + String(guestLinearAddress!, radix: 16)
-            return "MemoryViolation(access: \(access), perms: \(perms) GPA: 0x\(String(guestPhysicalAddress, radix: 16)) GLA: \(gla)"
+            return "MemoryViolation(access: \(access), perms: \(perms) GPA: \(guestPhysicalAddress.description) GLA: \(gla)"
         }
     }
 

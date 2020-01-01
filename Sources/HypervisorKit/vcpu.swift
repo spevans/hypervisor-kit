@@ -182,7 +182,7 @@ extension VirtualMachine.VCPU {
         registers.ss.selector = 0
         registers.ss.limit = 0xffff
         registers.ss.accessRights = 0x93
-        registers.ds.base = 0
+        registers.ss.base = 0
 
         registers.tr.selector = 0
         registers.tr.limit = 0

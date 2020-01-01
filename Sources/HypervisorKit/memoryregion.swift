@@ -20,65 +20,97 @@ enum HVKError: Error {
 
 public final class MemoryRegion {
 
+    static private let pageSize = 4096
     internal let pointer: UnsafeMutableRawPointer
     public var rawBuffer: UnsafeMutableRawBufferPointer { UnsafeMutableRawBufferPointer(start: pointer, count: Int(size)) }
+    public let readOnly: Bool
+    public var isWriteable: Bool { readOnly == false }
 
 #if os(macOS)
 
-    let guestAddress: PhysicalAddress
-    let size: UInt64
+    public let guestAddress: PhysicalAddress
+    public let size: UInt64
 
-    init?(size: UInt64, at address: RawAddress) {
+    private var dirtyPageLog: [Bool] = []
+    private let pageCount: Int
+
+
+    init(size: UInt64, at address: RawAddress, readOnly: Bool = false) throws {
+        precondition(address & 0xfff == 0)
+        precondition(size & 0xfff == 0)
+
         // 4KB Aligned memory
-            //guard let ram = valloc(Int(size)) else { return nil }
+        var ptr: UnsafeMutableRawPointer? = nil
 
-        guard let ptr = mmap(nil, Int(size),  PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0),
-            ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
-                return nil
+        guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, ptr != nil else {
+            throw HVKError.memoryError
         }
-        pointer = ptr
+        pointer = ptr!
 
         print("Allocated \(size) bytes @ \(String(UInt(bitPattern: ptr), radix: 16))")
-        ptr.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
+        self.readOnly = readOnly
+        pointer.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
 
-        let flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
-        do {
-            print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16)) flags = \(flags)")
-            try hvError(hv_vm_map(ptr, address, Int(size), flags))
-        } catch {
-            return nil
+        let flags: hv_memory_flags_t
+        if readOnly {
+            flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_EXEC)
+        } else {
+            flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
         }
+
+        print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16)) flags = \(flags)")
+        try hvError(hv_vm_map(ptr, address, Int(size), flags))
+
         guestAddress = PhysicalAddress(address)
         self.size = size
+        self.pageCount = Int((size + UInt64(MemoryRegion.pageSize) - 1) / UInt64(MemoryRegion.pageSize))
+        dirtyPageLog.reserveCapacity(pageCount)
+        for _ in 0..<pageCount {
+            dirtyPageLog.append(false)
+        }
+    }
 
+    public func setWriteTo(address guestPhysicalAddress: PhysicalAddress) {
+        precondition(self.isWriteable)
+        let page = (guestPhysicalAddress - self.guestAddress) / MemoryRegion.pageSize
+        dirtyPageLog[page] = true
     }
 
     deinit {
-        munmap(pointer, Int(size))
+        free(pointer)
     }
 
 #elseif os(Linux)
+
+    static private let KVM_MEM_LOG_DIRTY_PAGES = 1
+    static private let KVM_MEM_READONLY        = 2
+
     internal let region: kvm_userspace_memory_region
 
     var guestAddress: PhysicalAddress { PhysicalAddress(region.guest_phys_addr) }
     var size: UInt64 { region.memory_size }
 
 
-    init?(size: UInt64, at address: UInt64, slot: Int) {
-        guard let ptr = mmap(nil, Int(size), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0),
-            ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
-                return nil
-        }
-        pointer = ptr
+    init(size: UInt64, at address: UInt64, slot: Int, readOnly: Bool = false) throws {
+        // 4KB Aligned memory
+        var ptr: UnsafeMutableRawPointer? = nil
 
-        region = kvm_userspace_memory_region(slot: UInt32(slot), flags: 0,
+        guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, ptr != nil else {
+            throw HVKError.memoryError
+        }
+        pointer = ptr!
+        self.readOnly = readOnly
+
+        let flags = readOnly ? MemoryRegion.KVM_MEM_READONLY : 0
+
+        region = kvm_userspace_memory_region(slot: UInt32(slot), flags: UInt32(flags),
                                              guest_phys_addr: address,
                                              memory_size: UInt64(size),
                                              userspace_addr: UInt64(UInt(bitPattern: ptr)))
     }
 
     deinit {
-        munmap(pointer, Int(region.memory_size))
+        free(pointer)
     }
 
 #endif

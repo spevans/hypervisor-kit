@@ -448,7 +448,7 @@ final class VMCS {
     }
 
     // 64-Bit Read-Only Data Field
-    func guestPhysicalAddress() throws -> UInt64 { try vmread64(0x2400) }
+    func guestPhysicalAddress() throws -> PhysicalAddress { try PhysicalAddress(vmread64(0x2400)) }
 
     // 64-Bit Guest-State Fields
     func vmcsLinkPointer() throws -> UInt64 {
