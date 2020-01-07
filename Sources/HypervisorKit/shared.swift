@@ -17,9 +17,23 @@ extension Bool {
 
 public struct CPU {
 
-    public struct RFLAGS {
+    public struct RFLAGS: CustomStringConvertible {
+
         private(set) var bits: BitArray64
         public var rawValue: UInt64 { bits.rawValue }
+        public var description: String {
+            var flags = ""
+            if carry { flags += "C " }
+            if parity { flags += "P " }
+            if auxiliary { flags += "A " }
+            if zero { flags += "Z " }
+            if sign { flags += "S " }
+            if trap { flags += "T " }
+            if interruptEnable { flags += "I " }
+            if direction { flags += "D " }
+            if overflow { flags += "O" }
+            return flags
+        }
 
         init() {
             bits = BitArray64(2)    // bit 1 always set

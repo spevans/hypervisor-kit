@@ -53,6 +53,7 @@ public final class VirtualMachine {
             throw error
         }
     }
+
     
     public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
         precondition(guestAddress & 0xfff == 0)

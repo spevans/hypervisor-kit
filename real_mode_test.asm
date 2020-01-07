@@ -101,19 +101,31 @@ next:
                 rep     ss outsb
 
                 hlt
+
+
+io_in_test:
+                in      al, 0x60
+                hlt
+                in      ax, 0x60
+                hlt
+                in      eax, 0x60
+                hlt
+
 test3:
                 mov     ax, 0x100
                 out     20, ax
 
 mmio_read:
+                mov     ebx, 0x87654321
                 mov     bl, [0x8008]
                 mov     bx, [0x8008]
-                mov     ebx, [0x8008]
+                mov     ebx, [0x8010]
 
                 mov     [0x8000], bl
-                mov     [0x8000], bx
-                mov     [0x8000], ebx
+                mov     [0x8008], bx
+                mov     [0x8010], ebx
 
+                hlt
                 hlt
 
 
@@ -142,4 +154,5 @@ jump_table:
                 dw      test3
                 dw      mmio_read
                 dw      instruction_prefixes
+                dw      io_in_test
 

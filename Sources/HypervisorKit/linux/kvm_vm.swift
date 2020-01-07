@@ -18,6 +18,9 @@ enum HVError: Error {
     case vmRunError
     case vmMemoryError
     case invalidMemory
+    case irqAlreadyQueued
+    case irqNumberInvalid
+    case irqAlreadyHandledByKernelPIC
 }
 
 public final class VirtualMachine {
@@ -87,13 +90,26 @@ public final class VirtualMachine {
     }
 
 
+    public func addPICandPIT() throws {
+        // Enabling IRQCHIP stops vmexits due to HLT
+        guard ioctl2arg(vm_fd, _IOCTL_KVM_CREATE_IRQCHIP) == 0 else {
+            print("Cant add IRQCHIP")
+            throw HVError.vmSubsystemFail
+        }
+
+        var pit_config = kvm_pit_config()
+        guard ioctl3arg(vm_fd, _IOCTL_KVM_CREATE_PIT2, &pit_config) == 0 else {
+            print("Cant create PIT")
+            throw HVError.vmSubsystemFail
+        }
+    }
+
+
     deinit {
         print("Shutting down VM - deinit")
         for vcpu in vcpus {
+            print("Shutting down vcpu")
             vcpu.shutdown()
-        }
-        for memRegion in memoryRegions {
-            munmap(memRegion.pointer, Int(memRegion.size))
         }
         vcpus = []
         memoryRegions = []

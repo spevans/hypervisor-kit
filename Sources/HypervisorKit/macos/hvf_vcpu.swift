@@ -210,8 +210,13 @@ extension VirtualMachine {
         internal let vmcs: VMCS
         private var exitCount: UInt64 = 0
 
+        internal var dataRead: VMExit.DataRead?
+        private var dataWrite: VMExit.DataWrite?
+
+
         public unowned let vm: VirtualMachine
         public var registers = Registers()
+
 
         
         init(vm: VirtualMachine) throws {
@@ -243,8 +248,14 @@ extension VirtualMachine {
             try vmcs.cr4mask(0)
             try vmcs.cr4ReadShadow(CPU.CR4Register(0))
         }
-        
+
+
         public func run() throws -> VMExit {
+
+            if let read = dataRead {
+                fatalError("Unsatisfied read \(read)")
+            }
+
             while true {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
@@ -282,7 +293,35 @@ extension VirtualMachine {
             var decoder = Decoder(cpuMode: .realMode, bytes: instruction)
             return try decoder.decode()
         }
-        */
+         */
+
+
+        /// Used to satisfy the IO In read performed by the VCPU
+        public func setIn(data: VMExit.DataWrite) {
+
+            guard let read = self.dataRead else {
+                fatalError("Datawrite without a valid dataRead")
+            }
+            guard read.bitWidth == data.bitWidth else {
+                fatalError("bitwidth mismath: read.bitWidth=\(read.bitWidth) data.bitWidth=\(data.bitWidth)")
+            }
+
+            self.dataWrite = data
+
+            switch data {
+                case .byte(let value): registers.al = value
+                case .word(let value): registers.ax = value
+                case .dword(let value): registers.eax = value
+                case .qword(let value): registers.rax = value
+            }
+            self.dataRead = nil
+        }
+
+        public func queue(irq: UInt8) throws {
+            fatalError("Cant queue IRQ")
+        }
+
+
         func shutdown() throws {
             try hvError(hv_vcpu_destroy(vcpuId))
         }

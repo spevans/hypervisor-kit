@@ -16,13 +16,22 @@ public enum VMExit: Equatable {
         case dword
         case qword
 
-        init?(bitWidth: UInt8) {
+        public init?(bitWidth: UInt8) {
             switch bitWidth {
                 case 8: self = .byte
                 case 16: self = .word
                 case 32: self = .dword
                 case 64: self = .qword
                 default: return nil
+            }
+        }
+
+        public var bitWidth: UInt8 {
+            switch self {
+                case .byte:  return 8
+                case .word:  return 16
+                case .dword: return 32
+                case .qword: return 64
             }
         }
     }
@@ -33,7 +42,7 @@ public enum VMExit: Equatable {
         case dword(UInt32)
         case qword(UInt64)
 
-        init?(bitWidth: UInt8, value: UInt64) {
+        public init?(bitWidth: UInt8, value: UInt64) {
             switch bitWidth {
                 case 8: self = .byte(UInt8(truncatingIfNeeded: value))
                 case 16: self = .word(UInt16(truncatingIfNeeded: value))
@@ -51,11 +60,20 @@ public enum VMExit: Equatable {
                 case .qword(let value): return String(value, radix: 16)
             }
         }
+
+        public var bitWidth: UInt8 {
+            switch self {
+                case .byte:  return 8
+                case .word:  return 16
+                case .dword: return 32
+                case .qword: return 64
+            }
+        }
     }
 
 
     public struct ExceptionInfo: Equatable {
-        enum Exception: UInt32 {
+        public enum Exception: UInt32 {
             case divideError = 0
             case debug = 1
             case nmi = 2
@@ -90,8 +108,8 @@ public enum VMExit: Equatable {
             case reserved31 = 31
         }
 
-        let exception: Exception
-        let errorCode: UInt32?
+        public let exception: Exception
+        public let errorCode: UInt32?
 
         init?(exception: UInt32, errorCode: UInt32? = nil) {
             guard let e = Exception(rawValue: exception) else { return nil }

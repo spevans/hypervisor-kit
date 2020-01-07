@@ -180,6 +180,7 @@ extension VirtualMachine.VCPU {
 
                 if isIn {
                     if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                        self.dataRead = dataRead
                         try skipInstruction()
                         return .ioInOperation(port, dataRead)
                     }
@@ -229,18 +230,18 @@ extension VirtualMachine.VCPU {
                                 return nil
                             } else {
                                 // MMIO write to readable page,
-                                fatalError("TODO MMIO write")
-                        }
+                                break
+                            }
                         case .instructionFetch:
                             // ignore
                             return nil
 
                         case .read:
-                            fatalError("TODO MMIO read")
+                            // Read in a valid memory region, just ignore
+                            return nil
                     }
                 } else {
                     // work out what to do next
-                    fatalError("TODO: Access to unmapped memory")
                 }
 
                 // Not currently used
@@ -252,7 +253,7 @@ extension VirtualMachine.VCPU {
                     guestPhysicalAddress: gpa,
                     guestLinearAddress: (exitQ[7] == 1) ? try vmcs.guestLinearAddress() : nil
                 )
-
+                //fatalError("TODO: MMIO \(violation)")
                 return .memoryViolation(violation)
 
             case .eptMisconfiguration: fallthrough

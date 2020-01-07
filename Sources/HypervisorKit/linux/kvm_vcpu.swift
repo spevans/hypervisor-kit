@@ -12,7 +12,7 @@ extension VirtualMachine {
     public final class VCPU {
 
        private let vcpu_fd: Int32
-       private let kvmRun: KVM_RUN_PTR
+       private let kvmRunPtr: KVM_RUN_PTR
        private let kvm_run_mmap_size: Int32
 
        public struct SegmentRegister {
@@ -272,7 +272,7 @@ extension VirtualMachine {
                    print("cant mmap vcpu")
                    return nil
            }
-           kvmRun = ptr.bindMemory(to: kvm_run.self, capacity: 1)
+           kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
 
            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
                fatalError("Cant get regs")
@@ -310,16 +310,57 @@ extension VirtualMachine {
 
            registers.readSRegs()
 
-           //print("kvmRun.pointee.exit_qualification:", kvmRun.pointee.exit_qualification)
-           guard let exitReason = KVMExit(rawValue: kvmRun.pointee.exit_reason) else {
-               fatalError("Invalid KVM exit reason: \(kvmRun.pointee.exit_reason)")
+           //print("kvmRunPtr.pointee.exit_qualification:", kvmRunPtr.pointee.exit_qualification)
+           guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
+               fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
            }
 
-           return exitReason.vmExit(kvmRunPtr: kvmRun)
+           return exitReason.vmExit(kvmRunPtr: kvmRunPtr)
        }
 
+
+        /// Used to satisfy the IO In read performed by the VCPU
+        public func setIn(data: VMExit.DataWrite) {
+            let io = kvmRunPtr.pointee.io
+            let dataOffset = io.data_offset
+            let bitWidth = io.size * 8
+            if io.count != 1 { fatalError("IO op with count != 1") }
+
+            guard io.direction == 0 else {  // In
+                fatalError("setIn() when IO Op is an OUT")
+            }
+
+            guard data.bitWidth == bitWidth else {
+                fatalError("Bitwith mismatch, have \(data.bitWidth) want \(bitWidth)")
+            }
+
+            let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
+
+            switch data {
+                case .byte(let value): ptr.storeBytes(of: value, as: UInt8.self)
+                case .word(let value): ptr.storeBytes(of: value, as: UInt16.self)
+                case .dword(let value): ptr.storeBytes(of: value, as: UInt32.self)
+                case .qword(let value): ptr.storeBytes(of: value, as: UInt64.self)
+            }
+        }
+
+
+        /// Queues a hardware interrupt. irq is the interrupt number, not pin or line. IE IRQ0x0 => INT0H  IRQ0x30 => INT30H etc
+        public func queue(irq: UInt8) throws {
+            var interrupt = kvm_interrupt(irq: UInt32(irq))
+            let result = ioctl3arg(vcpu_fd, _IOCTL_KVM_INTERRUPT, &interrupt)
+            switch result {
+                case 0: return
+                case -EEXIST: throw HVError.irqAlreadyQueued
+                case -EINVAL: throw HVError.irqNumberInvalid
+                case -ENXIO: throw HVError.irqAlreadyHandledByKernelPIC
+                default: fatalError("KVM_INTERRUPT returned \(result)") // Includes EFAULT for bad memory location
+            }
+        }
+
+
        func shutdown() {
-           munmap(kvmRun, Int(kvm_run_mmap_size))
+           munmap(kvmRunPtr, Int(kvm_run_mmap_size))
            close(vcpu_fd)
        }
    }

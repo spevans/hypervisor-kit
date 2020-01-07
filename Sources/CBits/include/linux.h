@@ -27,7 +27,13 @@ static unsigned long _IOCTL_KVM_SET_REGS = KVM_SET_REGS;
 static unsigned long _IOCTL_KVM_RUN = KVM_RUN;
 static unsigned long _IOCTL_KVM_CREATE_VM = KVM_CREATE_VM;
 static unsigned long _IOCTL_KVM_CREATE_VCPU = KVM_CREATE_VCPU;
+static unsigned long _IOCTL_KVM_CREATE_IRQCHIP = KVM_CREATE_IRQCHIP;
+static unsigned long _IOCTL_KVM_CREATE_PIT2 = KVM_CREATE_PIT2;
+static unsigned long _IOCTL_KVM_GET_PIT2 = KVM_GET_PIT2;
+static unsigned long _IOCTL_KVM_SET_PIT2 = KVM_SET_PIT2;
+static unsigned long _IOCTL_KVM_INTERRUPT = KVM_INTERRUPT;
 
+static __u32 _KVM_PIT_SPEAKER_DUMMY = KVM_PIT_SPEAKER_DUMMY;
 
 static inline int open2arg(const char *pathname, int flags) {
         return open(pathname, flags);

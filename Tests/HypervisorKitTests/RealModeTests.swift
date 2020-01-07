@@ -47,8 +47,6 @@ final class RealModeTests: XCTestCase {
         return vm
     }        
 
-
-
     private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16, skipEPT: Bool = true) throws -> VMExit {
 
         print("Running VCPU with ax:", ax)
@@ -217,8 +215,6 @@ final class RealModeTests: XCTestCase {
             0x55, 0xaa, 0xcc, 0xdd,
         ]
 
-
-
         let vm = try createRealModeVM()
         let vcpu = vm.vcpus[0]
 
@@ -347,6 +343,62 @@ final class RealModeTests: XCTestCase {
 
     }
 
+
+    func testIn() throws {
+        let vm = try createRealModeVM()
+        let vcpu = vm.vcpus[0]
+
+        var vmExit = try runTest(vcpu: vcpu, ax: 5)
+
+        // IN 0x60, AL
+        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
+            XCTAssertEqual(port, 0x60)
+            guard VMExit.DataRead.byte == dataRead else {
+                XCTFail("dataRead is not a .byte but a \(dataRead)")
+                return
+            }
+
+            XCTAssertEqual(dataRead, VMExit.DataRead.byte)
+            vcpu.setIn(data: VMExit.DataWrite.byte(0x12))
+        }
+        vmExit = try vcpu.run()
+        XCTAssertEqual(vmExit, .hlt)
+        XCTAssertEqual(vcpu.registers.rax, 0x12)
+
+        // IN 0x60, AX
+        vmExit = try vcpu.run()
+        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
+            XCTAssertEqual(port, 0x60)
+            guard VMExit.DataRead.word == dataRead else {
+                XCTFail("dataRead is not a .word but a \(dataRead)")
+                return
+            }
+
+            XCTAssertEqual(dataRead, VMExit.DataRead.word)
+            vcpu.setIn(data: VMExit.DataWrite.word(0xabcd))
+        }
+        vmExit = try vcpu.run()
+        XCTAssertEqual(vmExit, .hlt)
+        XCTAssertEqual(vcpu.registers.rax, 0xABCD)
+
+        // IN 0x60, EAX
+        vmExit = try vcpu.run()
+        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
+            XCTAssertEqual(port, 0x60)
+            guard VMExit.DataRead.dword == dataRead else {
+                XCTFail("dataRead is not a .dword but a \(dataRead)")
+                return
+            }
+
+            XCTAssertEqual(dataRead, VMExit.DataRead.dword)
+            vcpu.setIn(data: VMExit.DataWrite.dword(0xDEADC0DE))
+        }
+        vmExit = try vcpu.run()
+        XCTAssertEqual(vmExit, .hlt)
+        XCTAssertEqual(vcpu.registers.rax, 0xDEADC0DE)
+
+    }
+
     func showRegisters(_ vcpu: VirtualMachine.VCPU) {
         func showReg(_ name: String, _ value: UInt16) {
             let w = hexNum(value, width: 4)
@@ -359,7 +411,7 @@ final class RealModeTests: XCTestCase {
         showReg("ES", vcpu.registers.es.selector)
         showReg("FS", vcpu.registers.fs.selector)
         showReg("GS", vcpu.registers.gs.selector)
-        print("")
+        print("FLAGS", vcpu.registers.rflags)
         showReg("IP", vcpu.registers.ip)
         showReg("AX", vcpu.registers.ax)
         showReg("BX", vcpu.registers.bx)
@@ -386,14 +438,6 @@ final class RealModeTests: XCTestCase {
         let ptr = memory.rawBuffer.baseAddress!.advanced(by: offset)
         let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
 
-    /*
-        var idx = offset & ~0xf // Round down
-
-        while idx < offset {
-            print ("   ", terminator: "")
-            idx += 1
-        }
-     */
         var idx = 0
         print("\(hexNum(offset + idx, width: 5)): ", terminator: "")
         for byte in buffer {
@@ -413,5 +457,6 @@ final class RealModeTests: XCTestCase {
         ("testMMIO", testMMIO),
         ("testHLT", testHLT),
         ("testOut", testOut),
+        ("testIn", testIn),
     ]
 }
