@@ -64,18 +64,8 @@ extension VirtualMachine.VCPU {
             }
 
             case .externalINT:
-                let interruptInfo = try vmcs.vmExitInterruptionInfo()
-                switch interruptInfo.interruptType {
-                    case .external:
-                        let errorCode = interruptInfo.errorCodeValid ? try vmcs.vmExitInterruptionErrorCode() : nil
-                        guard let eInfo = VMExit.ExceptionInfo(exception: UInt32(interruptInfo.vector), errorCode: errorCode) else {
-                            fatalError("Bad exception \(interruptInfo)")
-                        }
-                        return .exception(eInfo)
-
-                    default:
-                        fatalError("\(exitReason): \(interruptInfo) not implmented")
-            }
+                // External interrupts just cause a VMexit but there is nothing to process here
+                return nil  // ignore it
 
             case .tripleFault: fallthrough
             case .initSignal: fallthrough
@@ -195,7 +185,7 @@ extension VirtualMachine.VCPU {
 
             case .rdmsr: fallthrough
             case .wrmsr: fallthrough
-            case .vmentryFailInvalidGuestState: fallthrough
+            case .vmentryFailInvalidGuestState: fatalError("VM Entry failed due to invalid Guest State")
             case .vmentryFailMSRLoading: fallthrough
             case .mwait: fallthrough
             case .monitorTrapFlag: fallthrough
@@ -206,7 +196,7 @@ extension VirtualMachine.VCPU {
             case .apicAccess: fallthrough
             case .virtualisedEOI: fallthrough
             case .accessToGDTRorIDTR: fallthrough
-            case .accessToLDTRorTR: fatalError("\(exitReason) not implemented")
+            case .accessToLDTRorTR: fatalError("\(exitReason.exitReason) not implemented")
 
             case .eptViolation:
                 // Check for page access / write setting dirty bit

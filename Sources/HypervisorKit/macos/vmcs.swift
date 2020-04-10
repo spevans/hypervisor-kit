@@ -1,6 +1,6 @@
 //
 //  vmcs.swift
-//  
+//
 //
 //  Created by Simon Evans on 05/12/2019.
 //
@@ -201,7 +201,7 @@ final class VMCS {
         try vmwrite16(0xC00, data)
     }
 
-    func hostCSSelector() throws -> UInt16? {
+    func hostCSSelector() throws -> UInt16 {
         try vmread16(0xC02)
     }
 
@@ -274,73 +274,81 @@ final class VMCS {
         try vmwrite64(0x2004, data)
     }
 
-    /****
-     var vmExitMSRStoreAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2006) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2006, UInt64(newValue!.value)) }
-     }
+    func vmExitMSRStoreAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2006)
+        return PhysicalAddress(RawAddress(addr))
+    }
 
-     var vmExitMSRLoadAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2008) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2008, UInt64(newValue!.value)) }
-     }
+    func vmExitMSRStoreAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2006, UInt64(data.rawValue))
+    }
 
-     var vmEntryMSRLoadAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x200A) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x200A, UInt64(newValue!.value)) }
-     }
+    func vmExitMSRLoadAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2008)
+        return PhysicalAddress(RawAddress(addr))
+    }
 
+    func vmExitMSRLoadAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2008, UInt64(data.rawValue))
+    }
+
+    func vmEntryMSRLoadAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x200A)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func vmEntryMSRLoadAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x200A, UInt64(data.rawValue))
+    }
+
+    /*
      func executiveVMCSPtr() throws -> UInt64 {
      try vmread64(0x200C) }
      try vmwrite64(0x200C, data)
      }
+     **/
+    func pmlAddress() throws -> PhysicalAddress{
+        let addr = try vmread64(0x200E)
+        return PhysicalAddress(RawAddress(addr))
+    }
 
-     var pmlAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x200E) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x200E, UInt64(newValue!.value)) }
-     }
+    func pmlAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x200E, UInt64(data.rawValue))
+    }
 
-     func tscOffset() throws -> UInt64 {
+    /*    func tscOffset() throws -> UInt64 {
      try vmread64(0x2010) }
      try vmwrite64(0x2010, data)
      }
+     **/
 
-     var virtualAPICAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2012) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2012, UInt64(newValue!.value)) }
-     }
+    func virtualAPICAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2012)
+        return PhysicalAddress(RawAddress(addr))
+    }
 
-     var apicAccessAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2014) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2014, UInt64(newValue!.value)) }
-     }
+    func virtualAPICAddress(_ data: PhysicalAddress) throws{
+        try vmwrite64(0x2012, data.rawValue)
+    }
 
-     var postedInterruptDescAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2016) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2016, UInt64(newValue!.value)) }
-     }
-     ****/
+    func apicAccessAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2014)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func apicAccessAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2014, data.rawValue)
+    }
+
+    func postedInterruptDescAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2016)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func postedInterruptDescAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2016, data.rawValue)
+    }
+
     func vmFunctionControls() throws -> UInt64 {
         try vmread64(0x2018)
     }
@@ -388,39 +396,44 @@ final class VMCS {
     func eoiExitBitmap3(_ data: UInt64) throws {
         try vmwrite64(0x2022, data)
     }
-    /****
-     var eptpListAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2024) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2024, UInt64(newValue!.value)) }
-     }
 
-     var vmreadBitmapAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2026) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2026, UInt64(newValue!.value)) }
-     }
+    func eptpListAddress() throws -> PhysicalAddress {
+        PhysicalAddress(try vmread64(0x2024))
+    }
 
-     var vmwriteBitmapAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2028) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2028, UInt64(newValue!.value)) }
-     }
+    func eptpListAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2024, UInt64(data.rawValue))
+    }
 
-     var vExceptionInfoAddress: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x202A) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x202A, UInt64(newValue!.value)) }
-     }
 
+    func vmreadBitmapAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2026)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func vmreadBitmapAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2026, UInt64(data.rawValue))
+    }
+
+    func vmwriteBitmapAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2028)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func vmwriteBitmapAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2028, UInt64(data.rawValue))
+    }
+
+    func vExceptionInfoAddress() throws -> PhysicalAddress {
+        let addr = try vmread64(0x202A)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func vExceptionInfoAddress(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x202A, UInt64(data.rawValue))
+    }
+
+    /*
      func xssExitingBitmap() throws -> UInt64 {
      try vmread64(0x202C) }
      try vmwrite64(0x202C, data)
@@ -430,15 +443,17 @@ final class VMCS {
      try vmread64(0x202E) }
      try vmwrite64(0x202E, data)
      }
+     */
 
-     var subPagePermissionTablePtr: PhysAddress? {
-     get {
-     if let addr = _vmread64(0x2030) { return PhysAddress(RawAddress(addr)) }
-     return nil
-     }
-     try vmwrite64(0x2030, UInt64(newValue!.value)) }
-     }
-     *****/
+    func subPagePermissionTablePtr() throws -> PhysicalAddress {
+        let addr = try vmread64(0x2030)
+        return PhysicalAddress(RawAddress(addr))
+    }
+
+    func subPagePermissionTablePtr(_ data: PhysicalAddress) throws {
+        try vmwrite64(0x2030, UInt64(data.rawValue))
+    }
+
     func tscMultiplier() throws -> UInt64 {
         try vmread64(0x2032)
     }
@@ -672,12 +687,22 @@ final class VMCS {
 
         var vector: UInt8 { UInt8(bits[0...7]) }
         var interruptType: InterruptType { InterruptType(rawValue: Int(bits[8...10]))! }
-        var deliverErrorCode: Bool { bits[11] == 1}
+        var deliverErrorCode: Bool { bits[11] == 1 }
         var reserved: Int { Int(bits[12...30]) }
-        var valid: Bool { bits[31] == 1}
+        var valid: Bool { bits[31] == 1 }
+
 
         init(_ rawValue: UInt32) {
             bits = BitArray32(rawValue)
+        }
+
+        init(vector: UInt8, type: InterruptType, deliverErrorCode: Bool, valid: Bool = true) {
+            var _bits = BitArray32(0)
+            _bits[0...7] = UInt32(vector)
+            _bits[8...10] = UInt32(type.rawValue)
+            _bits[11] = deliverErrorCode ? 1 : 0
+            _bits[31] = valid ? 1 : 0
+            bits = _bits
         }
     }
 
@@ -748,6 +773,7 @@ final class VMCS {
      }
      }
      */
+
     // Read only Data fields
     func vmInstructionError() throws -> UInt32 {
         try vmread32(0x4400)
@@ -955,15 +981,35 @@ final class VMCS {
     }
 
     struct InterruptibilityState {
-        private let bits: BitArray32
+        private var bits: BitArray32
         var rawValue: UInt32 { bits.rawValue }
 
-        var blockingBySTI: Bool         { bits[0] == 1 }
-        var blockingByMovSS: Bool       { bits[1] == 1 }
-        var blockingBySMI: Bool          { bits[2] == 1 }
-        var blockingByNMI: Bool          { bits[3] == 1}
-        var enclaveInterruption: Bool   { bits[4] == 1 }
-        var reserved: Int               { Int(bits[5...31]) }
+        var blockingBySTI: Bool {
+            get { bits[0] == 1 }
+            set { bits[0] = newValue ? 1 : 0 }
+        }
+
+        var blockingByMovSS: Bool {
+            get { bits[1] == 1 }
+            set { bits[1] = newValue ? 1 : 0 }
+        }
+
+        var blockingBySMI: Bool  {
+            get { bits[2] == 1 }
+            set { bits[2] = newValue ? 1 : 0 }
+        }
+
+        var blockingByNMI: Bool {
+            get { bits[3] == 1 }
+            set { bits[3] = newValue ? 1 : 0 }
+        }
+
+        var enclaveInterruption: Bool {
+            get { bits[4] == 1 }
+            set { bits[4] = newValue ? 1 : 0 }
+        }
+
+        var reserved: Int  { Int(bits[5...31]) }
 
         init(_ rawValue: UInt32) {
             bits = BitArray32(rawValue)

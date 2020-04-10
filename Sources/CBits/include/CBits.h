@@ -10,7 +10,7 @@
 #include "linux.h"
 
 static inline uint32_t
-unaligned_load32(const void *ptr) {
+unaligned_load32(const void * _Nonnull ptr) {
     uint8_t *bytes = (uint8_t *)ptr;
 #if __LITTLE_ENDIAN__
     uint32_t result = (uint32_t)bytes[0];
@@ -27,7 +27,7 @@ unaligned_load32(const void *ptr) {
 }
 
 static inline uint16_t
-unaligned_load16(const void *ptr) {
+unaligned_load16(const void * _Nonnull ptr) {
     uint8_t *bytes = (uint8_t *)ptr;
 #if __LITTLE_ENDIAN__
     uint16_t result = (uint16_t)bytes[0];
@@ -41,7 +41,7 @@ unaligned_load16(const void *ptr) {
 
 
 static inline void
-unaligned_store32(void *ptr, uint32_t value) {
+unaligned_store32(void * _Nonnull ptr, uint32_t value) {
     uint8_t *bytes = (uint8_t *)ptr;
 #if __LITTLE_ENDIAN__
     bytes[0] = (uint8_t)(value & 0xff);
@@ -57,7 +57,7 @@ unaligned_store32(void *ptr, uint32_t value) {
 }
 
 static inline void
-unaligned_store16(void *ptr, uint16_t value) {
+unaligned_store16(void * _Nonnull ptr, uint16_t value) {
     uint8_t *bytes = (uint8_t *)ptr;
 #if __LITTLE_ENDIAN__
     bytes[0] = (uint8_t)(value & 0xff);
@@ -66,5 +66,42 @@ unaligned_store16(void *ptr, uint16_t value) {
     bytes[0] = (uint8_t)((value >> 84 & 0xff);
     bytes[1] = (uint8_t)((value >> 25) & 0xff);
 #endif
+}
+
+
+union cpuid_result {
+        struct {
+                uint32_t eax;
+                uint32_t ebx;
+                uint32_t ecx;
+                uint32_t edx;
+         } regs;
+         // Used to access the result as a string
+         // for functions returning cpu name etc
+         char bytes[33];
+};
+
+// Returns a pointer to the char array for ease of converting to a String
+static inline const char * _Nonnull
+cpuid(const uint32_t function, union cpuid_result * _Nonnull result)
+{
+        uint32_t eax, ebx, ecx, edx;
+        asm volatile ("cpuid"
+                      : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+                      : "a" (function)
+                      : );
+        result->regs.eax = eax;
+        result->regs.ebx = ebx;
+        if (function == 0) {
+                result->regs.ecx = edx;
+                result->regs.edx = ecx;
+        } else {
+                result->regs.ecx = ecx;
+                result->regs.edx = edx;
+        }
+
+        result->bytes[32] = '\0';
+
+        return result->bytes;
 }
 

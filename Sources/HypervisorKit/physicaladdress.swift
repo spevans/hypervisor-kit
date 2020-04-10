@@ -9,8 +9,13 @@ public typealias RawAddress = UInt64
 //typealias VirtualAddress = UInt64
 public typealias LinearAddress = UInt64
 
+
+let PAGE_SIZE = 4096
+let PAGE_MASK = PAGE_SIZE - 1
+
 public struct PhysicalAddress: Comparable, Hashable, CustomStringConvertible  {
     let rawValue: RawAddress
+    var value: UInt64 { rawValue }
 
     public var description: String {
         return "0x\(String(rawValue, radix: 16))"

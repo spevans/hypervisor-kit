@@ -217,6 +217,7 @@ extension VirtualMachine {
         public unowned let vm: VirtualMachine
         public var registers = Registers()
 
+        private var queuedInterrupt: VMCS.VMEntryInterruptionInfoField?
 
         
         init(vm: VirtualMachine) throws {
@@ -225,7 +226,7 @@ extension VirtualMachine {
             try hvError(hv_vcpu_create(&_vcpuId, UInt64(HV_VCPU_DEFAULT)))
             self.vcpuId = _vcpuId
             vmcs = VMCS(vcpu: vcpuId)
-            
+
             let VMCS_PRI_PROC_BASED_CTLS_HLT       = UInt64(1 << 7)
             let VMCS_PRI_PROC_BASED_CTLS_CR8_LOAD  = UInt64(1 << 19)
             let VMCS_PRI_PROC_BASED_CTLS_CR8_STORE = UInt64(1 << 20)
@@ -259,6 +260,28 @@ extension VirtualMachine {
             while true {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
+
+                if let interruptInfo = queuedInterrupt, interruptInfo.valid {
+                    if registers.rflags.interruptEnable {
+                        queuedInterrupt = nil
+                        try vmcs.vmEntryInerruptInfo(interruptInfo)
+//                        try vmcs.vmEntryInstructionLength(0)
+//                        try vmcs.vmEntryExceptionErrorCode(0)
+//                        var i = try vmcs.guestInterruptibilityState()
+//                        print("blockingByMovSS:", i.blockingByMovSS)
+//                        print("blockingBySTI:", i.blockingBySTI)
+//                        print("blockingByNMI:", i.blockingByNMI)
+//                        print("blockingBySMI:", i.blockingBySMI)
+//                        print("IF flag set, setting interrupt")
+                        var interruptibilityState = try vmcs.guestInterruptibilityState()
+                        interruptibilityState.blockingBySTI = false
+                        interruptibilityState.blockingByMovSS = false
+                        try vmcs.guestInterruptibilityState(interruptibilityState)
+                        try vmcs.checkFieldsAreValid()
+                    }
+                }
+
+
                 try hvError(hv_vcpu_run(vcpuId))
                 try registers.readRegisters(vcpuId: vcpuId)
                 try registers.readSegmentRegisters(vmcs: vmcs)
@@ -317,8 +340,8 @@ extension VirtualMachine {
             self.dataRead = nil
         }
 
-        public func queue(irq: UInt8) throws {
-            fatalError("Cant queue IRQ")
+        public func queue(irq: UInt8) {
+            queuedInterrupt = VMCS.VMEntryInterruptionInfoField(vector: irq, type: .external, deliverErrorCode: false)
         }
 
 
