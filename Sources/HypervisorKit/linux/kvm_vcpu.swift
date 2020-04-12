@@ -1,12 +1,16 @@
 //
 //  kvm_vcpu.swift
-//  
+//
 //
 //  Created by Simon Evans on 26/12/2019.
 //
 
 #if os(Linux)
+
 import CBits
+import Foundation
+import Dispatch
+
 
 extension VirtualMachine {
     public final class VCPU {
@@ -253,38 +257,63 @@ extension VirtualMachine {
         }
 
         private let vcpu_fd: Int32
+        private let semaphore = DispatchSemaphore(value: 0)
         private let kvmRunPtr: KVM_RUN_PTR
         private let kvm_run_mmap_size: Int32
         private var pendingInterrupt: UInt32?
+
+        public unowned let vm: VirtualMachine
         public var registers = Registers()
 
-        init?(vm_fd: Int32) {
 
-            guard let mmapSize = VirtualMachine.vcpuMmapSize else { return nil }
+        init(vm: VirtualMachine, vcpu_fd: Int32) throws {
+            self.vcpu_fd = vcpu_fd
+            self.vm = vm
+
+            guard let mmapSize = VirtualMachine.vcpuMmapSize else { throw HVError.vmSubsystemFail }
             kvm_run_mmap_size = mmapSize
-
-            vcpu_fd = ioctl2arg(vm_fd, _IOCTL_KVM_CREATE_VCPU)
-            guard vcpu_fd >= 0 else { return nil }
 
             guard let ptr = mmap(nil, Int(kvm_run_mmap_size), PROT_READ | PROT_WRITE, MAP_SHARED, vcpu_fd, 0),
                 ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
                     close(vcpu_fd)
                     print("cant mmap vcpu")
-                    return nil
+                    throw HVError.vmSubsystemFail
             }
             kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
 
             guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
-                fatalError("Cant get regs")
+                print("Cant get regs")
+                throw HVError.vmSubsystemFail
             }
 
             guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &registers.sregs) >= 0 else {
-                fatalError("Cant get sregs")
+                print("Cant get sregs")
+                throw HVError.vmSubsystemFail
             }
         }
 
 
-        public func run() throws -> VMExit {
+        public func runVCPU(vmExitHandler: @escaping (VirtualMachine.VCPU, VMExit) throws -> Bool,
+                            completionHandler: @escaping () -> ()) {
+            semaphore.wait()
+            var finished = false
+            while !finished {
+                do {
+                    let vmExit = try self.runOnce()
+                    finished = try vmExitHandler(self, vmExit)
+                } catch {
+                    fatalError("processVMExit failed with \(error)")
+                }
+            }
+        }
+
+
+        public func start() {
+            semaphore.signal()
+        }
+
+
+        private func runOnce() throws -> VMExit {
 
             registers.updateSRegs()
 

@@ -8,6 +8,8 @@
 #if os(macOS)
 
 import Hypervisor
+import Foundation
+
 
 extension VirtualMachine {
     public final class VCPU {
@@ -218,8 +220,9 @@ extension VirtualMachine {
         public var registers = Registers()
 
         private var queuedInterrupt: VMCS.VMEntryInterruptionInfoField?
+        private let semaphore = DispatchSemaphore(value: 0)
 
-        
+
         init(vm: VirtualMachine) throws {
             self.vm = vm
             var _vcpuId: hv_vcpuid_t = 0
@@ -251,7 +254,26 @@ extension VirtualMachine {
         }
 
 
-        public func run() throws -> VMExit {
+        public func runVCPU(vmExitHandler: @escaping (VirtualMachine.VCPU, VMExit) throws -> Bool,
+                            completionHandler: @escaping () -> ()) {
+            semaphore.wait()
+            var finished = false
+            while !finished {
+                do {
+                    let vmExit = try self.runOnce()
+                    finished = try vmExitHandler(self, vmExit)
+                } catch {
+                    fatalError("processVMExit failed with \(error)")
+                }
+            }
+        }
+
+        public func start() {
+            semaphore.signal()
+        }
+
+
+        private func runOnce() throws -> VMExit {
 
             if let read = dataRead {
                 fatalError("Unsatisfied read \(read)")

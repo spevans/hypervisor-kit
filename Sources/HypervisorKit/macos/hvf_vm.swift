@@ -1,6 +1,6 @@
 //
 //  hvf_vm.swift
-//  
+//
 //
 //  Created by Simon Evans on 01/12/2019.
 //
@@ -8,6 +8,8 @@
 #if os(macOS)
 
 import Hypervisor
+import Foundation
+import Dispatch
 
 enum HVError: Error {
     case error(hv_return_t)
@@ -32,15 +34,15 @@ public final class VirtualMachine {
 
     public private(set) var vcpus: [VCPU] = []
     public private(set) var memoryRegions: [MemoryRegion] = []
-    
-    
+
+
     public init() throws {
         func printCap(_ name: String, _ value: UInt64) {
             let hi = String(UInt32(value >> 32), radix: 16)
             let lo = String(UInt32(value & 0xffff_ffff), radix: 16)
             print("\(name): \(hi)\t\(lo)")
         }
-        
+
         do {
             try hvError(hv_vm_create(hv_vm_options_t(HV_VM_DEFAULT)))
             print("VM Created")
@@ -54,7 +56,7 @@ public final class VirtualMachine {
         }
     }
 
-    
+
     public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
         precondition(guestAddress & 0xfff == 0)
         precondition(size & 0xfff == 0)
@@ -79,24 +81,45 @@ public final class VirtualMachine {
      */
 
 
-    public func createVCPU() throws -> VCPU {
-        let vcpu = try VCPU.init(vm: self)
-        vcpus.append(vcpu)
-        return vcpu
+    public func createVCPU(startup: @escaping (VCPU) -> (),
+                           vmExitHandler: @escaping (VirtualMachine.VCPU, VMExit) throws -> Bool,
+                           completionHandler: @escaping () -> ()) throws -> VCPU {
+
+        var vcpu: VCPU? = nil
+        var createError: Error? = nil
+        let semaphore = DispatchSemaphore(value: 0)
+
+        let thread = Thread {
+            do {
+                vcpu = try VCPU.init(vm: self)
+                semaphore.signal()
+                startup(vcpu!)
+
+                vcpu!.runVCPU(vmExitHandler: vmExitHandler, completionHandler: completionHandler)
+            } catch {
+                createError = error
+                return
+            }
+        }
+        thread.start()
+        semaphore.wait()
+        if let error = createError { throw error }
+        vcpus.append(vcpu!)
+        return vcpu!
     }
-    
+
     deinit {
         do {
             while let vcpu = vcpus.first {
                 try vcpu.shutdown()
                 vcpus.remove(at: 0)
             }
-            
+
             while let memory = memoryRegions.first {
                 try hvError(hv_vm_unmap(memory.guestAddress.rawValue, Int(memory.size)))
                 memoryRegions.remove(at: 0)
             }
-            
+
             try hvError(hv_vm_destroy())
         } catch {
             fatalError("Error shutting down \(error)")

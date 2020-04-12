@@ -1,12 +1,15 @@
 //
 //  kvm_vm.swift
-//  
+//
 //
 //  Created by Simon Evans on 01/12/2019.
 //
 
 #if os(Linux)
+
 import CBits
+import Foundation
+import Dispatch
 
 private let KVM_DEVICE = "/dev/kvm"
 
@@ -83,10 +86,37 @@ public final class VirtualMachine {
     }
 
 
-    public func createVCPU() throws -> VCPU {
-        guard let vcpu = VCPU(vm_fd: vm_fd) else { throw HVError.vmSubsystemFail }
-        vcpus.append(vcpu)
-        return vcpu
+    public func createVCPU(startup: @escaping (VCPU) -> (),
+                           vmExitHandler: @escaping (VirtualMachine.VCPU, VMExit) throws -> Bool,
+                           completionHandler: @escaping () -> ()) throws -> VCPU {
+
+        var vcpu: VCPU? = nil
+        var createError: Error? = nil
+        let semaphore = DispatchSemaphore(value: 0)
+
+        let thread = Thread {
+
+            let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
+            guard vcpu_fd >= 0 else {
+                createError = HVError.vmSubsystemFail
+                return
+            }
+            do {
+                let _vcpu = try VCPU(vm: self, vcpu_fd: vcpu_fd)
+                vcpu = _vcpu
+                semaphore.signal()
+                startup(_vcpu)
+                _vcpu.runVCPU(vmExitHandler: vmExitHandler, completionHandler: completionHandler)
+            } catch {
+                createError = error
+                return
+            }
+        }
+        thread.start()
+        semaphore.wait()
+        if let error = createError { throw error }
+        vcpus.append(vcpu!)
+        return vcpu!
     }
 
 
