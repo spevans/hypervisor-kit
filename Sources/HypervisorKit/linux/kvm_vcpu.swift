@@ -260,7 +260,9 @@ extension VirtualMachine {
         private let semaphore = DispatchSemaphore(value: 0)
         private let kvmRunPtr: KVM_RUN_PTR
         private let kvm_run_mmap_size: Int32
-        private var pendingInterrupt: UInt32?
+
+        private let lock = NSLock()
+        private var pendingIRQ: UInt32?
 
         public unowned let vm: VirtualMachine
         public var registers = Registers()
@@ -317,11 +319,9 @@ extension VirtualMachine {
 
             registers.updateSRegs()
 
-            if let pendingInt = pendingInterrupt {
-                print("pendingInt:", pendingInt)
-                if registers.rflags.interruptEnable {
-                    pendingInterrupt = nil
-                    var interrupt = kvm_interrupt(irq: pendingInt)
+            if registers.rflags.interruptEnable {
+                if let irq = nextPendingIRQ() {
+                    var interrupt = kvm_interrupt(irq: irq)
                     print("_IOCTL_KVM_INTERRUPT:", interrupt)
                     let result = ioctl3arg(vcpu_fd, _IOCTL_KVM_INTERRUPT, &interrupt)
                     switch result {
@@ -331,8 +331,6 @@ extension VirtualMachine {
                         case -ENXIO: throw HVError.irqAlreadyHandledByKernelPIC
                         default: fatalError("KVM_INTERRUPT returned \(result)") // Includes EFAULT for bad memory location
                     }
-                } else {
-                    print("IF flag not set")
                 }
             }
 
@@ -359,7 +357,6 @@ extension VirtualMachine {
 
             registers.readSRegs()
 
-            //print("kvmRunPtr.pointee.exit_qualification:", kvmRunPtr.pointee.exit_qualification)
             guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
                 fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
             }
@@ -394,10 +391,30 @@ extension VirtualMachine {
         }
 
 
-        /// Queues a hardware interrupt. irq is the interrupt number, not pin or line. IE IRQ0x0 => INT0H  IRQ0x30 => INT30H etc
+        /// Queues a hardware interrupt. irq is the interrupt number, not pin or line.
+        /// IE IRQ0x0 => INT0H  IRQ0x30 => INT30H etc
         public func queue(irq: UInt8) {
             print("queuing IRQ:", irq)
-            pendingInterrupt = UInt32(irq)
+            lock.lock()
+            pendingIRQ = UInt32(irq)
+            lock.unlock()
+        }
+
+        public func clearPendingIRQ() {
+            print("Clearing pending irq")
+            lock.lock()
+            pendingIRQ = nil
+            lock.unlock()
+        }
+
+        private func nextPendingIRQ() -> UInt32? {
+            lock.lock()
+            defer { lock.unlock() }
+            if let irq = pendingIRQ {
+                pendingIRQ = nil
+                return irq
+            }
+            return nil
         }
 
 

@@ -219,7 +219,8 @@ extension VirtualMachine {
         public unowned let vm: VirtualMachine
         public var registers = Registers()
 
-        private var queuedInterrupt: VMCS.VMEntryInterruptionInfoField?
+        private let lock = NSLock()
+        private var pendingInterrupt: VMCS.VMEntryInterruptionInfoField?
         private let semaphore = DispatchSemaphore(value: 0)
 
 
@@ -283,9 +284,8 @@ extension VirtualMachine {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
 
-                if let interruptInfo = queuedInterrupt, interruptInfo.valid {
-                    if registers.rflags.interruptEnable {
-                        queuedInterrupt = nil
+                if registers.rflags.interruptEnable {
+                    if let interruptInfo = nextPendingInterrupt() {
                         try vmcs.vmEntryInerruptInfo(interruptInfo)
 //                        try vmcs.vmEntryInstructionLength(0)
 //                        try vmcs.vmEntryExceptionErrorCode(0)
@@ -363,7 +363,27 @@ extension VirtualMachine {
         }
 
         public func queue(irq: UInt8) {
-            queuedInterrupt = VMCS.VMEntryInterruptionInfoField(vector: irq, type: .external, deliverErrorCode: false)
+            print("queuing IRQ:", irq)
+            lock.lock()
+            pendingInterrupt = VMCS.VMEntryInterruptionInfoField(vector: irq, type: .external, deliverErrorCode: false)
+            lock.unlock()
+        }
+
+        public func clearPendingIRQ() {
+            lock.lock()
+            pendingInterrupt = nil
+            lock.unlock()
+        }
+
+        private func nextPendingInterrupt() -> VMCS.VMEntryInterruptionInfoField? {
+            lock.lock()
+            defer { lock.unlock() }
+            if let interruptInfo = pendingInterrupt, interruptInfo.valid {
+                pendingInterrupt = nil
+                return interruptInfo
+            } else {
+                return nil
+            }
         }
 
 
