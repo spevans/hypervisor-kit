@@ -1,3 +1,9 @@
+;;
+;; real_mode_test.asm
+;;
+;; 16bit real mode code to be used for tests in HypervisorKitTests:RealModeTests
+;;
+
     %macro OFFSET 1
     times %1 - ($ - $$)   db 0x90
     %endmacro
@@ -8,6 +14,8 @@
                 shl     ax, 1
                 add     bx, ax
                 jmp     [bx]
+
+test_hlt:       hlt
 
 read_write_memory:
                 mov     sp, 0x1ffe
@@ -24,7 +32,6 @@ read_write_memory:
                 mov     di, 0
                 mov     cx, 2
                 rep     movsw
-
                 hlt
 
 io_out_test:  
@@ -102,7 +109,6 @@ next:
 
                 hlt
 
-
 io_in_test:
                 in      al, 0x60
                 hlt
@@ -110,10 +116,6 @@ io_in_test:
                 hlt
                 in      eax, 0x60
                 hlt
-
-test3:
-                mov     ax, 0x100
-                out     20, ax
 
 mmio_read:
                 mov     ebx, 0x87654321
@@ -125,7 +127,6 @@ mmio_read:
                 mov     [0x8008], bx
                 mov     [0x8010], ebx
 
-                hlt
                 hlt
 
 
@@ -149,10 +150,10 @@ dest_data       db      0, 0, 0, 0
 
 
 jump_table:
-                dw      read_write_memory
-                dw      io_out_test
-                dw      test3
-                dw      mmio_read
-                dw      instruction_prefixes
-                dw      io_in_test
+                dw      test_hlt                ; 0: testHLT()
+                dw      read_write_memory       ; 1: testReadWriteMemory()
+                dw      io_out_test             ; 2: testOut()
+                dw      io_in_test              ; 3: testIn()
+                dw      mmio_read               ; 4: testMMIO()
+                dw      instruction_prefixes    ; 5: testInstructionPrefixes()
 

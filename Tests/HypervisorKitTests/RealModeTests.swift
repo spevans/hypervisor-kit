@@ -1,110 +1,87 @@
 import XCTest
 import Foundation
-
 import HypervisorKit
 
 
 final class RealModeTests: XCTestCase {
 
+    static var allTests: [(String, (RealModeTests) -> () throws -> Void)] = [
+        ("testHLT", testHLT),
+        ("testReadWriteMemory", testReadWriteMemory),
+        ("testOut", testOut),
+        ("testIn", testIn),
+        // FIXME - Make these two tests useful.
+        //   ("testMMIO", testMMIO),
+        ("testInstructionPrefixes", testInstructionPrefixes)
+    ]
+
     private var _realModeTestCode: Data? = nil
     private func realModeTestCode() throws -> Data {
-        if let code = _realModeTestCode {
-            return code
+        if _realModeTestCode == nil {
+            guard let url = Bundle.module.url(forResource: "real_mode_test", withExtension: "bin") else {
+                fatalError("Cannot find real_mode_test.bin test file")
+            }
+            _realModeTestCode = try Data(contentsOf: url)
         }
-        #if os(Linux)
-        let url = URL(fileURLWithPath: "real_mode_test.bin", isDirectory: false)
-        #else
-
-        let url = URL(fileURLWithPath: "/Users/spse/Files/src/osx/HypervisorKit/real_mode_test.bin", isDirectory: false)
-        #endif
-        let code = try Data(contentsOf: url)
-        _realModeTestCode = code
-        return code
+        return _realModeTestCode!
     }
 
-    
-    private func createRealModeVM() throws -> VirtualMachine {
-        
-        guard let vm = try? VirtualMachine() else {
-            XCTFail("Cant create VM")
-            throw TestError.vmCreateFail
-        }
-        
-        guard let memRegion = try? vm.addMemory(at: 0x1000, size: 8192) else {
-            XCTFail("Cant add memory region")
-            throw TestError.addMemoryFail
-        }
 
+    private func createRealModeVM() throws -> (VirtualMachine, VirtualMachine.VCPU) {
+        let vm = try VirtualMachine(logger: logger)
+        let memRegion = try vm.addMemory(at: 0x1000, size: 8192)
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
+        let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
 
-        guard let vcpu = try? vm.createVCPU() else {
-            XCTFail("Cant create VCPU")
-            throw TestError.vcpuCreateFail
-        }
-        vcpu.setupRealMode()
-
-        return vm
+        return (vm, vcpu)
     }        
 
-    private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16, skipEPT: Bool = true) throws -> VMExit {
 
+    private func runCPU(vcpu: VirtualMachine.VCPU, waitingFor timeinterval: DispatchTimeInterval) -> Bool {
+        let group = DispatchGroup()
+        group.enter()
+        vcpu.completionHandler = {
+            group.leave()
+        }
+        vcpu.start()
+        let result = group.wait(timeout: .now() + timeinterval)
+        return result == .success
+    }
+
+
+    private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16) -> Bool {
         print("Running VCPU with ax:", ax)
-
         vcpu.registers.cs.selector = 0
         vcpu.registers.cs.base = 0
         vcpu.registers.ax = ax
         vcpu.registers.rip = 0x1000
 
-        while true {
-            let vmExit = try vcpu.run()
-            print("VMExit Reason:", vmExit)
-            
-            switch vmExit {
-                default:
-                    return vmExit
-            }
-        }
-    }
-
-
-    func testMMIO() throws {
-        let vm = try createRealModeVM()
-        let vcpu = vm.vcpus[0]
-        var vmExit = try runTest(vcpu: vcpu, ax: 3)
-        var count = 0
-        while count < 10 && vmExit != .hlt {
-            print(vmExit)
-            vmExit = try vcpu.run()
-            count += 1
-        }
-    }
-
-
-    func testInstructionPrefixes() throws {
-        let vm = try createRealModeVM()
-        let memRegion = vm.memoryRegions[0]
-        memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
-        let vcpu = vm.vcpus[0]
-        vcpu.registers.rip = 0x1100
-        vcpu.registers.rflags.trap = true
-        var vmExit = try vcpu.run()
-        XCTAssertEqual(vcpu.registers.rip, 0x1100)
-        //XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
-        //vcpu.registers.rip += 1
-        vmExit = try vcpu.run()
-        // XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
-        //vcpu.registers.rip += 1
-        vmExit = try vcpu.run()
-
+        return runCPU(vcpu: vcpu, waitingFor: .seconds(1))
     }
 
 
     func testHLT() throws {
-        let vm = try createRealModeVM()
+        let (vm, vcpu) = try createRealModeVM()
+
+        var gotHLT = false
+        vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
+            XCTAssertEqual(vmExit, .hlt)
+            gotHLT = (vmExit == .hlt)
+            return true
+        }
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 0))
+        XCTAssertTrue(gotHLT)
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
+    }
+
+
+    func testReadWriteMemory() throws {
+        let (vm, vcpu) = try createRealModeVM()
         let memRegion = vm.memoryRegions[0]
 
-        dumpMemory(memRegion, offset: 0x320, count: 8)
+        print(memRegion.dumpMemory(at: 0x320, count: 8))
 
         let src_data = memRegion.rawBuffer.baseAddress!.advanced(by: 0x320)
         XCTAssertEqual(src_data.advanced(by: 0).load(as: UInt8.self), 0xaa)
@@ -118,33 +95,47 @@ final class RealModeTests: XCTestCase {
         XCTAssertEqual(dest_data.advanced(by: 2).load(as: UInt8.self), 0)
         XCTAssertEqual(dest_data.advanced(by: 3).load(as: UInt8.self), 0)
 
-
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
-        let vcpu = vm.vcpus[0]
-        showRegisters(vcpu)
-        var vmExit = try runTest(vcpu: vcpu, ax: 0)
-        while vmExit != .hlt {
-            print(vmExit)
-            vmExit = try vcpu.run()
-            showRegisters(vcpu)
+
+        vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
+            return (vmExit == .hlt)
         }
 
-        XCTAssertEqual(vmExit, .hlt)
-        dumpMemory(memRegion, offset: 0x320, count: 8)
-        let ax = vcpu.registers.ax
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 1))
+        vm.shutdownAllVcpus()
+        print(memRegion.dumpMemory(at: 0x320, count: 8))
         let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
-        print("Word: ", String(word, radix: 16))
-        print("RAX:", String(ax, radix: 16))
         XCTAssertEqual(word, 0x1235)
-        XCTAssertEqual(vcpu.registers.ax, 0x1235)
-        XCTAssertEqual(vcpu.registers.rip, 0x1027)
 
         XCTAssertEqual(dest_data.advanced(by: 0).load(as: UInt8.self), 0xaa)
         XCTAssertEqual(dest_data.advanced(by: 1).load(as: UInt8.self), 0xbb)
         XCTAssertEqual(dest_data.advanced(by: 2).load(as: UInt8.self), 0xcc)
         XCTAssertEqual(dest_data.advanced(by: 3).load(as: UInt8.self), 0xdd)
-
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
     }
+
+
+    #if false
+    func testMMIO() throws {
+        let (vm, vcpu) = try createRealModeVM()
+
+        var count = 0
+        var vmExits: [VMExit] = []
+        vmExits.reserveCapacity(10)
+        vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
+            vmExits.append(vmExit)
+            print(vmExit)
+            count += 1
+            return (count >= 10 || vmExit == .hlt)  // true == finish
+        }
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 3))
+        XCTAssertEqual(count, 10)
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
+    }
+    #endif
+
 
     func testOut() throws {
 
@@ -215,10 +206,22 @@ final class RealModeTests: XCTestCase {
             0x55, 0xaa, 0xcc, 0xdd,
         ]
 
-        let vm = try createRealModeVM()
-        let vcpu = vm.vcpus[0]
+        let (vm, vcpu) = try createRealModeVM()
 
-        var vmExit = try runTest(vcpu: vcpu, ax: 1)
+
+        var vmExits: [VMExit] = []
+        vmExits.reserveCapacity(100)
+
+        vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
+            vmExits.append(vmExit)
+            return (vmExit == .hlt)
+        }
+
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 2))
+        XCTAssertEqual(vmExits.count, 82)
+
+
+        var vmExit = vmExits.removeFirst()
         for byte in bytes {
             if case let VMExit.ioOutOperation(port, data) = vmExit {
                 XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
@@ -226,7 +229,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
 
@@ -238,7 +241,7 @@ final class RealModeTests: XCTestCase {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
             //print("RSI:", String(vcpu.registers.rsi, radix: 16))
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         for dword in dwords {
@@ -249,7 +252,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         // Test unaligned data
@@ -261,7 +264,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         for word in unalignedWords {
@@ -272,7 +275,7 @@ final class RealModeTests: XCTestCase {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
             //print("RSI:", String(vcpu.registers.rsi, radix: 16))
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         // Test Segment Overrides
@@ -283,7 +286,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
         #endif
 
@@ -298,7 +301,7 @@ final class RealModeTests: XCTestCase {
                 print("CS:IP \(String(vcpu.registers.cs.base, radix: 16)):\(String(vcpu.registers.rip, radix: 16))")
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
         #if true
         for byte in esOverrideBytes {
@@ -307,7 +310,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         for byte in fsOverrideBytes {
@@ -316,7 +319,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         for byte in gsOverrideBytes {
@@ -325,7 +328,7 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
 
         for byte in ssOverrideBytes {
@@ -334,129 +337,116 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            vmExit = try vcpu.run()
+            vmExit = vmExits.removeFirst()
         }
-
 
         XCTAssertEqual(vmExit, .hlt)
         #endif
 
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
     }
-
 
     func testIn() throws {
-        let vm = try createRealModeVM()
-        let vcpu = vm.vcpus[0]
+        let (vm, vcpu) = try createRealModeVM()
 
-        var vmExit = try runTest(vcpu: vcpu, ax: 5)
+        var testNumber = 1
+        vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
 
-        // IN 0x60, AL
-        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
-            XCTAssertEqual(port, 0x60)
-            guard VMExit.DataRead.byte == dataRead else {
-                XCTFail("dataRead is not a .byte but a \(dataRead)")
-                return
+            if case let VMExit.ioInOperation(port, dataRead) = vmExit {
+                switch testNumber {
+                    case 1:     // IN 0x60, AL
+                        XCTAssertEqual(port, 0x60)
+                        guard VMExit.DataRead.byte == dataRead else {
+                            XCTFail("dataRead is not a .byte but a \(dataRead)")
+                            return true
+                        }
+                        XCTAssertEqual(dataRead, VMExit.DataRead.byte, "IN 0x60, AL")
+                        vcpu.setIn(data: VMExit.DataWrite.byte(0x12))
+
+                    case 2:     // IN 0x60, AX
+                        XCTAssertEqual(port, 0x60)
+                        guard VMExit.DataRead.word == dataRead else {
+                            XCTFail("dataRead is not a .word but a \(dataRead)")
+                            return true
+                        }
+                        XCTAssertEqual(dataRead, VMExit.DataRead.word)
+                        vcpu.setIn(data: VMExit.DataWrite.word(0xabcd))
+
+                    case 3:     // IN 0x60, EAX
+                        XCTAssertEqual(port, 0x60)
+                        guard VMExit.DataRead.dword == dataRead else {
+                            XCTFail("dataRead is not a .dword but a \(dataRead)")
+                            return true
+                        }
+                        XCTAssertEqual(dataRead, VMExit.DataRead.dword)
+                        vcpu.setIn(data: VMExit.DataWrite.dword(0xDEADC0DE))
+
+                    default:
+                        XCTFail("Unexpected testNumber: \(testNumber)")
+                        return true
+                }
+
+                return false    // Keep going, dont finish yet
             }
 
-            XCTAssertEqual(dataRead, VMExit.DataRead.byte)
-            vcpu.setIn(data: VMExit.DataWrite.byte(0x12))
-        }
-        vmExit = try vcpu.run()
-        XCTAssertEqual(vmExit, .hlt)
-        XCTAssertEqual(vcpu.registers.rax, 0x12)
+            if vmExit == .hlt {
+                switch testNumber {
+                    case 1:
+                        XCTAssertEqual(vcpu.registers.rax, 0x12)
 
-        // IN 0x60, AX
-        vmExit = try vcpu.run()
-        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
-            XCTAssertEqual(port, 0x60)
-            guard VMExit.DataRead.word == dataRead else {
-                XCTFail("dataRead is not a .word but a \(dataRead)")
-                return
+                    case 2:
+                        XCTAssertEqual(vcpu.registers.rax, 0xABCD)
+
+                    case 3:
+                        XCTAssertEqual(vcpu.registers.rax, 0xDEADC0DE)
+                        // All tests are now complete, so no more exits required
+                        return true
+
+                    default:
+                        XCTFail("Unexpected testNumber: \(testNumber)")
+                        return true
+                }
+                testNumber += 1
+                return false
             }
 
-            XCTAssertEqual(dataRead, VMExit.DataRead.word)
-            vcpu.setIn(data: VMExit.DataWrite.word(0xabcd))
-        }
-        vmExit = try vcpu.run()
-        XCTAssertEqual(vmExit, .hlt)
-        XCTAssertEqual(vcpu.registers.rax, 0xABCD)
-
-        // IN 0x60, EAX
-        vmExit = try vcpu.run()
-        if case let VMExit.ioInOperation(port, dataRead) = vmExit {
-            XCTAssertEqual(port, 0x60)
-            guard VMExit.DataRead.dword == dataRead else {
-                XCTFail("dataRead is not a .dword but a \(dataRead)")
-                return
-            }
-
-            XCTAssertEqual(dataRead, VMExit.DataRead.dword)
-            vcpu.setIn(data: VMExit.DataWrite.dword(0xDEADC0DE))
-        }
-        vmExit = try vcpu.run()
-        XCTAssertEqual(vmExit, .hlt)
-        XCTAssertEqual(vcpu.registers.rax, 0xDEADC0DE)
-
-    }
-
-    func showRegisters(_ vcpu: VirtualMachine.VCPU) {
-        func showReg(_ name: String, _ value: UInt16) {
-            let w = hexNum(value, width: 4)
-            print("\(name): \(w)", terminator: " ")
+            XCTFail("Unexpected vmExit: \(vmExit)")
+            return true
         }
 
-        showReg("CS", vcpu.registers.cs.selector)
-        showReg("SS", vcpu.registers.ss.selector)
-        showReg("DS", vcpu.registers.ds.selector)
-        showReg("ES", vcpu.registers.es.selector)
-        showReg("FS", vcpu.registers.fs.selector)
-        showReg("GS", vcpu.registers.gs.selector)
-        print("FLAGS", vcpu.registers.rflags)
-        showReg("IP", vcpu.registers.ip)
-        showReg("AX", vcpu.registers.ax)
-        showReg("BX", vcpu.registers.bx)
-        showReg("CX", vcpu.registers.cx)
-        showReg("DX", vcpu.registers.dx)
-        showReg("DI", vcpu.registers.di)
-        showReg("SI", vcpu.registers.si)
-        showReg("BP", vcpu.registers.bp)
-        showReg("SP", vcpu.registers.sp)
-        print("")
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 3))
+        XCTAssertEqual(testNumber, 3)
+
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
     }
 
 
-    func hexNum<T: BinaryInteger>(_ value: T, width: Int) -> String {
-        let num = String(value, radix: 16)
-        if num.count <= width {
-            return String(repeating: "0", count: width - num.count) + num
+    func testInstructionPrefixes() throws {
+        let (vm, vcpu) = try createRealModeVM()
+        let memRegion = vm.memoryRegions[0]
+        memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
+        vcpu.registers.rip = 0x1100
+        vcpu.registers.rflags.trap = true
+
+        var vmExit: VMExit?
+        vcpu.vmExitHandler = { (vcpu, _vmExit) -> Bool in
+            vmExit = _vmExit
+            return true
         }
-        return num
+        XCTAssertTrue(runCPU(vcpu: vcpu, waitingFor: .seconds(1)))
+
+
+        XCTAssertEqual(vcpu.registers.rip, 0x1100)
+        XCTAssertNotNil(vmExit)
+        //XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
+        //vcpu.registers.rip += 1
+        // XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
+        //vcpu.registers.rip += 1
+
+        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertNoThrow(try vm.shutdown())
     }
 
-
-    func dumpMemory(_ memory: MemoryRegion, offset: Int, count: Int) {
-        let ptr = memory.rawBuffer.baseAddress!.advanced(by: offset)
-        let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
-
-        var idx = 0
-        print("\(hexNum(offset + idx, width: 5)): ", terminator: "")
-        for byte in buffer {
-            print(hexNum(byte, width: 2), terminator: " ")
-            idx += 1
-            if idx == count { break }
-            if idx.isMultiple(of: 16) {
-                print("\n\(hexNum(offset + idx, width: 5)): ", terminator: "")
-            }
-        }
-        print("\n")
-    }
-
-
-    static var allTests = [
-        ("testInstructionPrefixes", testInstructionPrefixes),
-        ("testMMIO", testMMIO),
-        ("testHLT", testHLT),
-        ("testOut", testOut),
-        ("testIn", testIn),
-    ]
 }

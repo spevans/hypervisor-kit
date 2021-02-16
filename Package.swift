@@ -35,6 +35,8 @@ let package = Package(
         ),
         .testTarget(
             name: "HypervisorKitTests",
-            dependencies: ["HypervisorKit"]),
+            dependencies: ["HypervisorKit"],
+            resources: [ .copy("real_mode_test.bin") ]
+            ),
     ]
 )
