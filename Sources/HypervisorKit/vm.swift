@@ -26,4 +26,16 @@ extension VirtualMachine {
         }
         throw HVError.invalidMemory
     }
+
+
+    public func allVcpusShutdown() -> Bool {
+        vcpus.allSatisfy { $0.status == .shutdown }
+    }
+
+
+    @discardableResult
+    public func shutdownAllVcpus() -> Bool {
+        vcpus.forEach { $0.shutdown() }
+        return allVcpusShutdown()
+    }
 }

@@ -10,6 +10,7 @@
 import CBits
 import Foundation
 import Dispatch
+import Logging
 
 private let KVM_DEVICE = "/dev/kvm"
 
@@ -24,10 +25,13 @@ enum HVError: Error {
     case irqAlreadyQueued
     case irqNumberInvalid
     case irqAlreadyHandledByKernelPIC
+    case vcpusStillRunning
 }
 
 public final class VirtualMachine {
 
+    private var _shutdown = false
+    internal let logger: Logger
     private let vm_fd: Int32
 
     public private(set) var vcpus: [VCPU] = []
@@ -55,8 +59,11 @@ public final class VirtualMachine {
     }
 
 
-    public init() throws {
+    public init(logger: Logger) throws {
+        self.logger = logger
+
         guard let dev_fd = try? Self.vmFD() else {
+            logger.error("Cannot open \(KVM_DEVICE)")
             throw HVError.vmSubsystemFail
         }
         guard let apiVersion =  VirtualMachine.apiVersion, apiVersion >= 0 else {
@@ -64,13 +71,35 @@ public final class VirtualMachine {
         }
         vm_fd = ioctl2arg(dev_fd, _IOCTL_KVM_CREATE_VM)
         guard vm_fd >= 0 else {
+            logger.error("Cannont create VM")
             throw HVError.vmSubsystemFail
-
         }
     }
 
-    public func addMemory(at guestAddress: UInt64, size: Int, readOnly: Bool = false) throws -> MemoryRegion {
-        print("Adding \(size) bytes at address \(String(guestAddress, radix: 16))")
+
+    deinit {
+        guard _shutdown == true else {
+            fatalError("VM has not been shutdown().")
+        }
+    }
+
+
+    public func shutdown() throws {
+        logger.info("Shutting down VM - deinit")
+        precondition(_shutdown == false)
+        guard allVcpusShutdown() else {
+            throw HVError.vcpusStillRunning
+        }
+
+        close(vm_fd)
+        vcpus = []
+        memoryRegions = []
+        _shutdown = true
+    }
+
+
+    public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
+        logger.info("Adding \(size) bytes at address 0x\(String(guestAddress, radix: 16))")
 
         precondition(guestAddress & 0xfff == 0)
         precondition(size & 0xfff == 0)
@@ -81,32 +110,37 @@ public final class VirtualMachine {
             throw HVError.vmMemoryError
         }
         memoryRegions.append(memRegion)
-        print("Added memory")
+        logger.debug("Added memory")
         return memRegion
     }
 
 
+    @discardableResult
     public func createVCPU(startup: @escaping (VCPU) -> (),
-                           vmExitHandler: @escaping (VirtualMachine.VCPU, VMExit) throws -> Bool,
-                           completionHandler: @escaping () -> ()) throws -> VCPU {
+                           vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool)? = nil,
+                           completionHandler: (() -> ())? = nil) throws -> VCPU {
 
         var vcpu: VCPU? = nil
         var createError: Error? = nil
         let semaphore = DispatchSemaphore(value: 0)
+        let logger = self.logger
 
         let thread = Thread {
 
             let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
             guard vcpu_fd >= 0 else {
+                logger.error("Cannot create vCPU")
                 createError = HVError.vmSubsystemFail
                 return
             }
             do {
                 let _vcpu = try VCPU(vm: self, vcpu_fd: vcpu_fd)
                 vcpu = _vcpu
+                _vcpu.vmExitHandler = vmExitHandler
+                _vcpu.completionHandler = completionHandler
                 semaphore.signal()
                 startup(_vcpu)
-                _vcpu.runVCPU(vmExitHandler: vmExitHandler, completionHandler: completionHandler)
+                _vcpu.runVCPU()
             } catch {
                 createError = error
                 return
@@ -123,27 +157,15 @@ public final class VirtualMachine {
     public func addPICandPIT() throws {
         // Enabling IRQCHIP stops vmexits due to HLT
         guard ioctl2arg(vm_fd, _IOCTL_KVM_CREATE_IRQCHIP) == 0 else {
-            print("Cant add IRQCHIP")
+            logger.error("Cant add IRQCHIP")
             throw HVError.vmSubsystemFail
         }
 
         var pit_config = kvm_pit_config()
         guard ioctl3arg(vm_fd, _IOCTL_KVM_CREATE_PIT2, &pit_config) == 0 else {
-            print("Cant create PIT")
+            logger.error("Cant create PIT")
             throw HVError.vmSubsystemFail
         }
-    }
-
-
-    deinit {
-        print("Shutting down VM - deinit")
-        for vcpu in vcpus {
-            print("Shutting down vcpu")
-            vcpu.shutdown()
-        }
-        vcpus = []
-        memoryRegions = []
-        close(vm_fd)
     }
 }
 

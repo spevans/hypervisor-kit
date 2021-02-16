@@ -48,6 +48,8 @@ extension VirtualMachine.VCPU {
 
     internal func vmExit() throws -> VMExit? {
         let exitReason = try vmcs.exitReason()
+        vm.logger.trace("vmExit: \(exitReason.exitReason), rip: 0x\(String(self.registers.rip, radix: 16))")
+
         switch exitReason.exitReason {
             case .exceptionOrNMI:
                 let interruptInfo = try vmcs.vmExitInterruptionInfo()
@@ -59,9 +61,15 @@ extension VirtualMachine.VCPU {
                         }
                         return .exception(eInfo)
 
+                    case .softwareException:
+                        if interruptInfo.vector == 0x03 {
+                            return nil  // ignore software breakpoint
+                        }
+                        fallthrough
+
                     default:
                         fatalError("\(exitReason): \(interruptInfo) not implmented")
-            }
+                }
 
             case .externalINT:
                 // External interrupts just cause a VMexit but there is nothing to process here
@@ -76,7 +84,7 @@ extension VirtualMachine.VCPU {
             case .nmiWindow: fallthrough
             case .taskSwitch: fallthrough
             case .cpuid: fallthrough
-            case .getsec: fatalError("\(exitReason) not implemented")
+            case .getsec: fatalError("VMExit handler for '\(exitReason.exitReason)' not implemented")
 
             case .hlt:
                 try skipInstruction()
@@ -98,7 +106,7 @@ extension VirtualMachine.VCPU {
             case .vmxoff: fallthrough
             case .vmxon: fallthrough
             case .crAccess: fallthrough
-            case .drAccess: fatalError("\(exitReason) not implemented")
+            case .drAccess: fatalError("VMExit handler for '\(exitReason.exitReason)' not implemented")
 
             case .ioInstruction:
                 let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
@@ -185,18 +193,19 @@ extension VirtualMachine.VCPU {
 
             case .rdmsr: fallthrough
             case .wrmsr: fallthrough
-            case .vmentryFailInvalidGuestState: fatalError("VM Entry failed due to invalid Guest State")
+            case .vmentryFailInvalidGuestState: fallthrough
             case .vmentryFailMSRLoading: fallthrough
             case .mwait: fallthrough
             case .monitorTrapFlag: fallthrough
             case .monitor: fallthrough
             case .pause: fallthrough
-            case .vmentryFaileMCE: fallthrough
+            case .vmentryFailMCE: fallthrough
             case .tprBelowThreshold: fallthrough
             case .apicAccess: fallthrough
             case .virtualisedEOI: fallthrough
             case .accessToGDTRorIDTR: fallthrough
-            case .accessToLDTRorTR: fatalError("\(exitReason.exitReason) not implemented")
+            case .accessToLDTRorTR:
+                fatalError("\(exitReason.exitReason) not implemented")
 
             case .eptViolation:
                 // Check for page access / write setting dirty bit
@@ -214,14 +223,10 @@ extension VirtualMachine.VCPU {
                 if let region = vm.memoryRegion(containing: gpa) {
                     switch access {
                         case .write:
-                            if region.isWriteable {
-                                // set the dirty bit for the page and ignore this vmexit
-                                region.setWriteTo(address: gpa)
-                                return nil
-                            } else {
-                                // MMIO write to readable page,
-                                break
-                            }
+                            // set the dirty bit for the page and ignore this vmexit
+                            region.setWriteTo(address: gpa)
+                            return nil
+
                         case .instructionFetch:
                             // ignore
                             return nil
@@ -231,20 +236,29 @@ extension VirtualMachine.VCPU {
                             return nil
                     }
                 } else {
-                    // work out what to do next
-                }
+                    // Non memory region, treat as MMIO
+                    switch access {
+                        case .write:
+                            let write = VMExit.DataWrite(bitWidth: 8, value: 0)!
+                            return .mmioWriteOperation(gpa, write)
 
-                // Not currently used
-                let violation = VMExit.MemoryViolation(
-                    access: access,
-                    readable: exitQ[3] == 1,
-                    writeable: exitQ[4] == 1,
-                    executable: exitQ[5] == 1,
-                    guestPhysicalAddress: gpa,
-                    guestLinearAddress: (exitQ[7] == 1) ? try vmcs.guestLinearAddress() : nil
-                )
-                //fatalError("TODO: MMIO \(violation)")
-                return .memoryViolation(violation)
+                        case .read:
+                            let read = VMExit.DataRead(bitWidth: 8)!
+                            return .mmioReadOperation(gpa, read)
+
+                        case .instructionFetch:
+                            // Instruction fetch to MMIO
+                            let violation = VMExit.MemoryViolation(
+                                access: access,
+                                readable: exitQ[3] == 1,
+                                writeable: exitQ[4] == 1,
+                                executable: exitQ[5] == 1,
+                                guestPhysicalAddress: gpa,
+                                guestLinearAddress: (exitQ[7] == 1) ? try vmcs.guestLinearAddress() : nil
+                            )
+                            return .memoryViolation(violation)
+                    }
+                }
 
             case .eptMisconfiguration: fallthrough
             case .invept: fallthrough
@@ -257,14 +271,14 @@ extension VirtualMachine.VCPU {
             case .rdrand: fallthrough
             case .invpcid : fallthrough
             case .vmfunc: fallthrough
-            case .envls: fallthrough
+            case .encls: fallthrough
             case .rdseed: fallthrough
             case .pmlFull: fallthrough
             case .xsaves: fallthrough
             case .xrstors: fallthrough
             case .subPagePermissionEvent: fallthrough
             case .umwait: fallthrough
-            case .tpause: fatalError("\(exitReason) not implemented")
+            case .tpause: fatalError("\(exitReason.exitReason) not implemented")
 
         }
     }

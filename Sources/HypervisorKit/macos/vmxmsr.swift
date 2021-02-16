@@ -10,6 +10,20 @@
 #if os(macOS)
 
 import Hypervisor
+
+extension CPU {
+    enum PATEntry: UInt8 {
+              case Uncacheable = 0
+              case WriteCombining = 1
+              case WriteThrough = 4
+              case WriteProtected = 5
+              case WriteBack = 6
+              case Uncached = 7
+          }
+
+}
+
+
 struct VMXAllowedBits {
     let allowedToBeZero: Bool
     let allowedToBeOne: Bool
@@ -147,9 +161,6 @@ struct VMXPrimaryProcessorBasedControls: VMXAllowedBitsP {
         low = UInt32(truncatingIfNeeded: value)
         high = UInt32(truncatingIfNeeded: (value >> 32))
         bits = BitArray64(value)
-//        (low, high) = CPU.readMSR(0x482)
-//        bits = BitArray64(UInt64(high) << 32 | UInt64(low))
-
     }
 
     var intWindowExiting:           VMXAllowedBits { VMXAllowedBits(bits, 2)  }

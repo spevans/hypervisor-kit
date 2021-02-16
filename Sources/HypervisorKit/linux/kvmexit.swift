@@ -23,8 +23,6 @@ public struct InternalError: Equatable {
 // X86 exits only
 enum KVMExit: UInt32 {
 
-
-
     case unknown = 0
     case exception = 1
     case io = 2

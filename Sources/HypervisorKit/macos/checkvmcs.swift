@@ -11,17 +11,6 @@
 
 import Hypervisor
 
-extension CPU {
-    enum PATEntry: UInt8 {
-              case Uncacheable = 0
-              case WriteCombining = 1
-              case WriteThrough = 4
-              case WriteProtected = 5
-              case WriteBack = 6
-              case Uncached = 7
-          }
-
-}
 
 extension VMCS {
 
@@ -72,7 +61,7 @@ extension VMCS {
 
     func checkFieldsAreValid() throws {
 
-        print("Checking VMCS fields")
+//        print("Checking VMCS fields")
         // These are VMCS or MSR lookups so read once
 //        let maxPhysicalAddress = VMXBasicInfo().maxPhysicalAddress
         let maxCPUPhysicalAddress = CPU.capabilities.maxPhysicalAddress
@@ -1262,19 +1251,19 @@ extension VMCS {
             //      • Wait-for-SIPI. No interruptions are allowed.
             //  — The activity-state field must not indicate the wait-for-SIPI state if the “entry to SMM” VM-entry control is 1.
 
-            if _guestActivityState != 0 && (guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS) {
+            if _guestActivityState != .active && (guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS) {
                 fatalError("Interrupibility-state field indicates blocking by either MOV-SS or STI but activity state is not the Active state")
             }
 
             switch _guestActivityState {
-                case 0:     // Active
+                case .active:     // Active
                     break
 
-            case 1:     // HLT
+                case .hlt:
 #if false
-                if !vmxMiscInfo.supportsActivityStateHLT { fatalError("GuestActivityState is HLT but CPU does not support it") }
+                    if !vmxMiscInfo.supportsActivityStateHLT { fatalError("GuestActivityState is HLT but CPU does not support it") }
 #endif
-                if BitArray32(try self.guestSSAccessRights())[5...6] != 0 { fatalError("GuestActivityState is HLT but DPL in SS access-rights field is not 0") }
+                    if BitArray32(try self.guestSSAccessRights())[5...6] != 0 { fatalError("GuestActivityState is HLT but DPL in SS access-rights field is not 0") }
                     if interruptInfo.valid {
                         switch interruptInfo.interruptType {
                             // OK
@@ -1287,28 +1276,28 @@ extension VMCS {
                         }
                     }
 
-            case 2:     // Shutdown
+                case .shutdown:
 #if false
                 if !vmxMiscInfo.supportsActivityStateShutdown { fatalError("GuestActivityState is Shutdown but CPU does not support it") }
 #endif
-                    if interruptInfo.valid {
-                            switch interruptInfo.interruptType {
-                                // OK
-                                case .nmi,
-                                     .hardwareException where interruptInfo.vector == 18: // 18 = Machine Check Exception
-                                    break
+                if interruptInfo.valid {
+                    switch interruptInfo.interruptType {
+                        // OK
+                        case .nmi,
+                             .hardwareException where interruptInfo.vector == 18: // 18 = Machine Check Exception
+                            break
 
-                                default: fatalError("Invalid vmEntryInterruptInfo type: \(interruptInfo.interruptType) for Shutdown Activity state")
-                            }
-                        }
+                        default: fatalError("Invalid vmEntryInterruptInfo type: \(interruptInfo.interruptType) for Shutdown Activity state")
+                    }
+                }
 
-            case 3:     // Wait-for-SIPI
+                case .waitForSIPI:     // Wait-for-SIPI
 #if false
-                if !vmxMiscInfo.supportsActivityStateWaitForSIPI { fatalError("GuestActivityState is Wait-For-SIPI but CPU does not support it") }
+                    if !vmxMiscInfo.supportsActivityStateWaitForSIPI { fatalError("GuestActivityState is Wait-For-SIPI but CPU does not support it") }
 #endif
                     if interruptInfo.valid { fatalError("VMEntry Interrupt Info is not valid in Wait-for-SIPI activity state") }
 
-            default:
+                default:
 
                     fatalError("Invalid guest activity state \(_guestActivityState)")
             }
@@ -1383,7 +1372,7 @@ extension VMCS {
             // • Bit14(BS) must be 1 if the TF flag(bit8) in the RFLAGS field is 1 and the BTF flag(bit1) in the IA32_DEBUGCTL field is 0.
             // • Bit14(BS) must be 0 if the TF flag(bit8) in the RFLAGS field is 0 or the BTF flag(bit1) in the IA32_DEBUGCTL field is 1.
 
-            if guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS || _guestActivityState == 1 {
+            if guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS || _guestActivityState == .hlt {
                 let debugCtl = BitArray64(try self.guestIA32DebugCtl())
                 if rflags[8] == 1 && debugCtl[1] == 0 {
                     if !pendingDebugExceptions.bs { fatalError("pendingDebugExceptions.BS must be 1 when RFLAGS.TF == 1 and IA32_DEBUGCTL.BTF == 0") }
@@ -1447,7 +1436,7 @@ extension VMCS {
         try checkGuestRIPandRFLAGS()
         try checkGuestNonRegisterState()
         checkGuestPDPTEntries()
-        print("VMCS Fields OK")
+//        print("VMCS Fields OK")
     }
 }
 

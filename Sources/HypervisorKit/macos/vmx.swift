@@ -67,7 +67,7 @@ enum VMXError: Error, Equatable {
     }
 }
 
-enum VMXExitReason: UInt16 {
+enum VMXExitReason: UInt16, CustomStringConvertible {
     case exceptionOrNMI = 0
     case externalINT = 1
     case tripleFault = 2
@@ -107,7 +107,7 @@ enum VMXExitReason: UInt16 {
     case monitorTrapFlag = 37
     case monitor = 39
     case pause = 40
-    case vmentryFaileMCE = 41
+    case vmentryFailMCE = 41
     case tprBelowThreshold = 43
     case apicAccess = 44
     case virtualisedEOI = 45
@@ -125,7 +125,7 @@ enum VMXExitReason: UInt16 {
     case rdrand = 57
     case invpcid  = 58
     case vmfunc = 59
-    case envls = 60
+    case encls = 60
     case rdseed = 61
     case pmlFull = 62
     case xsaves = 63
@@ -134,6 +134,140 @@ enum VMXExitReason: UInt16 {
     case umwait = 67
     case tpause = 68
 
+    var description: String {
+        switch self {
+            case .exceptionOrNMI:
+                return "Exception or NMI"
+            case .externalINT:
+                return "External Interrupt"
+            case .tripleFault:
+                return "Triple Fault"
+            case .initSignal:
+                return "INIT Signal arrived"
+            case .startupIPI:
+                return "Start-up IPI arrived"
+            case .ioSMI:
+                return "I/O SMI arrived"
+            case .otherSMI:
+                return "Non-I/O SMI arrived"
+            case .intWindow:
+                return "Interrupt window"
+            case .nmiWindow:
+                return "NMI window"
+            case .taskSwitch:
+                return "Guest attempted Task Switch"
+            case .cpuid:
+                return "Guest attempted CPUID"
+            case .getsec:
+                return "Guest attempted GETSEC"
+            case .hlt:
+                return "Guest attempted HLT"
+            case .invd:
+                return "Guest attempted INVD"
+            case .invlpg:
+                return "Guest attempted INVLPG"
+            case .rdpmc:
+                return "Guest attempted RDPMC"
+            case .rdtsc:
+                return "Guest attempted RSTSC"
+            case .rsm:
+                return "Guest attempted RSM"
+            case .vmcall:
+                return "Guest executed VMCALL"
+            case .vmclear:
+                return "Guest attempted VMCLEAR"
+            case .vmlaunch:
+                return "Guest attempted VMLAUNCH"
+            case .vmptrld:
+                return "Guest attempted VMPTRLD"
+            case .vmptrst:
+                return "Guest attempted VMPTRST"
+            case .vmread:
+                return "Guest attempted VMMREAD"
+            case .vmresume:
+                return "Guest attempted VMRESUME"
+            case .vmwrite:
+                return "Guest attempted VMWRITE"
+            case .vmxoff:
+                return "Guest attempted VMXOFF"
+            case .vmxon:
+                return "Guest attempted VMXON"
+            case .crAccess:
+                return "Guest attempted CR access"
+            case .drAccess:
+                return "Guest attempted DR access"
+            case .ioInstruction:
+                return "Guest attempeted I/O instruction"
+            case .rdmsr:
+                return "Guest attempted RDMSR"
+            case .wrmsr:
+                return "Guest attempted WRMSR"
+            case .vmentryFailInvalidGuestState:
+                return "VMEntry failed due to invalid Guest State"
+            case .vmentryFailMSRLoading:
+                return "VMEntry failed due to MSR loading"
+            case .mwait:
+                return "Guest attempted MWAIT"
+            case .monitorTrapFlag:
+                return "Monitor trap flag"
+            case .monitor:
+                return "Guest attempted MONITOR"
+            case .pause:
+                return "Guest attempted PAUSE"
+            case .vmentryFailMCE:
+                return "VMEntry failed due to MCE"
+            case .tprBelowThreshold:
+                return "TPR below threshold"
+            case .apicAccess:
+                return "Guest attempted APIC access"
+            case .virtualisedEOI:
+                return "Virtualised EOI"
+            case .accessToGDTRorIDTR:
+                return "Guest attempted access to GDTR or IDTR"
+            case .accessToLDTRorTR:
+                return "Guest attempted access to LDTR or TR"
+            case .eptViolation:
+                return "EPT violation"
+            case .eptMisconfiguration:
+                return "EPT miscconfiguration"
+            case .invept:
+                return "Guest attempted INVEPT"
+            case .rdtscp:
+                return "Guest attempted RDTSCP"
+            case .vmxPreemptionTimerExpired:
+                return "VMX-preemption timer expired"
+            case .invvpid:
+                return "Guest attempted INVVPID"
+            case .wbinvd:
+                return "Guest attempted WBINVD"
+            case .xsetbv:
+                return "Guest attempted XSETBV"
+            case .apicWrite:
+                return "APIC write"
+            case .rdrand:
+                return "Guest attempted RDRAND"
+            case .invpcid:
+                return "Guest attempted INVPCID"
+            case .vmfunc:
+                return "Guest attempted VMFUNC"
+            case .encls:
+                return "Guest attempted ENCLS"
+            case .rdseed:
+                return "Guest attempted RDSEED"
+            case .pmlFull:
+                return "Page modification log full"
+            case .xsaves:
+                return "Guest attempted XSAVES"
+            case .xrstors:
+                return "Guest attempted XRSTORS"
+            case .subPagePermissionEvent:
+                return "Sub-page permission event"
+            case .umwait:
+                return "Guest attempted UMWAIT"
+            case .tpause:
+                return "Guest attempted TPAUSE"
+        }
+    }
 }
 
 #endif

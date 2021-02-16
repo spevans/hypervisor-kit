@@ -139,18 +139,18 @@ public enum VMExit: Equatable {
 
 
     public struct MemoryViolation: Equatable, CustomStringConvertible {
-        enum Access {
+        public enum Access {
             case read
             case write
             case instructionFetch
         }
 
-        let access: Access
-        let readable: Bool
-        let writeable: Bool
-        let executable: Bool
-        let guestPhysicalAddress: PhysicalAddress
-        let guestLinearAddress: UInt?
+        public let access: Access
+        public let readable: Bool
+        public let writeable: Bool
+        public let executable: Bool
+        public let guestPhysicalAddress: PhysicalAddress
+        public let guestLinearAddress: UInt?
 
         public var description: String {
             let perms = (readable ? "r" : "-") + (writeable ? "w" : "-") + (executable ? "x" : "-")

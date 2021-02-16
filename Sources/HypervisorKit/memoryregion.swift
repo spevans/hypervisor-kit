@@ -42,12 +42,11 @@ public final class MemoryRegion {
         // 4KB Aligned memory
         var ptr: UnsafeMutableRawPointer? = nil
 
-        guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, ptr != nil else {
+        guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, let _pointer = ptr else {
             throw HVKError.memoryError
         }
-        pointer = ptr!
+        pointer = _pointer
 
-        print("Allocated \(size) bytes @ \(String(UInt(bitPattern: ptr), radix: 16))")
         self.readOnly = readOnly
         pointer.initializeMemory(as: UInt8.self, repeating: 0, count: Int(size))
 
@@ -58,8 +57,7 @@ public final class MemoryRegion {
             flags = hv_memory_flags_t(HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC)
         }
 
-        print("Mapping ram size: \(String(size, radix: 16)) @ \(String(address, radix: 16)) flags = \(flags)")
-        try hvError(hv_vm_map(ptr, address, Int(size), flags))
+        try hvError(hv_vm_map(pointer, address, Int(size), flags))
 
         guestAddress = PhysicalAddress(address)
         self.size = size
@@ -116,8 +114,29 @@ public final class MemoryRegion {
 #endif
 
     public func loadBinary(from binary: Data, atOffset offset: UInt64 = 0) throws {
-        guard binary.count <= size - offset else { throw HVKError.memoryError }
+        guard binary.count <= size - offset else {
+            throw HVKError.memoryError
+        }
         let buffer = UnsafeMutableRawBufferPointer(start: pointer.advanced(by: Int(offset)), count: binary.count)
         binary.copyBytes(to: buffer)
+    }
+
+
+    public func dumpMemory(at offset: Int, count: Int) -> String {
+        let ptr = self.rawBuffer.baseAddress!.advanced(by: offset)
+        let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
+
+        var idx = 0
+        var output = "\(hexNum(offset + idx, width: 5)): "
+        for byte in buffer {
+            output += hexNum(byte, width: 2)
+            output += " "
+            idx += 1
+            if idx == count { break }
+            if idx.isMultiple(of: 16) {
+                output += "\n\(hexNum(offset + idx, width: 5)): "
+            }
+        }
+        return output
     }
 }

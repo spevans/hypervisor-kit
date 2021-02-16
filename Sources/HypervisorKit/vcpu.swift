@@ -6,6 +6,16 @@
 //
 
 
+enum VCPUStatus {
+    case setup
+    case waitingToStart
+    case running
+    case vmExit
+    case shuttingDown
+    case shutdown
+}
+
+
 extension VirtualMachine.VCPU.Registers {
     public var al: UInt8 {
         get { UInt8(truncatingIfNeeded: rax) }
@@ -198,5 +208,36 @@ extension VirtualMachine.VCPU {
         registers.gdtrLimit = 0xffff
         registers.idtrBase = 0
         registers.idtrLimit = 0xffff
+    }
+
+
+    func dumpRegisters() -> String {
+
+        var outputString = ""
+        func showReg(_ name: String, _ value: UInt16) {
+            let w = hexNum(value, width: 4)
+            outputString += "\(name): \(w) "
+        }
+
+        showReg("CS", self.registers.cs.selector)
+        showReg("SS", self.registers.ss.selector)
+        showReg("DS", self.registers.ds.selector)
+        showReg("ES", self.registers.es.selector)
+        showReg("FS", self.registers.fs.selector)
+        showReg("GS", self.registers.gs.selector)
+        outputString += "FLAGS \(self.registers.rflags)\n"
+
+        showReg("IP", self.registers.ip)
+        showReg("AX", self.registers.ax)
+        showReg("BX", self.registers.bx)
+        showReg("CX", self.registers.cx)
+        showReg("DX", self.registers.dx)
+        showReg("DI", self.registers.di)
+        showReg("SI", self.registers.si)
+        showReg("BP", self.registers.bp)
+        showReg("SP", self.registers.sp)
+        outputString += "\n"
+
+        return outputString
     }
 }

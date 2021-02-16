@@ -632,7 +632,7 @@ final class VMCS {
         try vmread32(0x400C)
     }
 
-    func vmExitControsl(_ data: UInt32) throws {
+    func vmExitControls(_ data: UInt32) throws {
         try vmwrite32(0x400C, data)
     }
 
@@ -711,7 +711,7 @@ final class VMCS {
         VMEntryInterruptionInfoField(try vmread32(0x4016))
     }
 
-    func vmEntryInerruptInfo(_ data: VMEntryInterruptionInfoField) throws {
+    func vmEntryInterruptInfo(_ data: VMEntryInterruptionInfoField) throws {
         try vmwrite32(0x4016, data.rawValue)
     }
 
@@ -1025,12 +1025,41 @@ final class VMCS {
         try vmwrite32(0x4824, data.rawValue)
     }
 
-    func guestActivityState() throws -> UInt32 {
-        try vmread32(0x4826)
+    enum GuestActivityState: Equatable {
+        case active
+        case hlt
+        case shutdown
+        case waitForSIPI
+        case unknown(UInt32)
+
+        init(_ rawValue: UInt32) {
+            switch rawValue {
+                case 0: self = .active
+                case 1: self = .hlt
+                case 3: self = .shutdown
+                case 4: self = .waitForSIPI
+                default: self = .unknown(rawValue)
+            }
+        }
+
+        var rawValue: UInt32 {
+            switch self {
+                case .active:               return 1
+                case .hlt:                  return 2
+                case .shutdown:             return 3
+                case .waitForSIPI:          return 4
+                case .unknown(let value):   return value
+            }
+        }
     }
 
-    func guestActivityState(_ data: UInt32) throws {
-        try vmwrite32(0x4826, data)
+
+    func guestActivityState() throws -> GuestActivityState {
+        GuestActivityState(try vmread32(0x4826))
+    }
+
+    func guestActivityState(_ data: GuestActivityState) throws {
+        try vmwrite32(0x4826, data.rawValue)
     }
 
     func guestSMBASE() throws -> UInt32 {
