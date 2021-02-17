@@ -1,7 +1,7 @@
 import XCTest
 
-import HypervisorKitTests
+import VMMKitTests
 
 var tests = [XCTestCaseEntry]()
-tests += HypervisorKitTests.allTests()
+tests += VMMKitTests.allTests()
 XCTMain(tests)

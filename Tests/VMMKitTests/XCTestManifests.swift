@@ -3,7 +3,7 @@ import Logging
 
 let logger: Logger = {
     LoggingSystem.bootstrap(StreamLogHandler.standardError)
-    var logger = Logger(label: "HypervisorKitTests")
+    var logger = Logger(label: "VMMKitTests")
     logger.logLevel = .trace
     return logger
 }()
@@ -12,7 +12,7 @@ let logger: Logger = {
 #if !canImport(ObjectiveC)
 public func allTests() -> [XCTestCaseEntry] {
     return [
-        testCase(HypervisorKitTests.allTests),
+        testCase(VMMKitTests.allTests),
         testCase(RealModeTests.allTests),
     ]
 }

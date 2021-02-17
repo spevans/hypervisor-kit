@@ -4,19 +4,19 @@
 import PackageDescription
 
 #if !arch(x86_64)
-  fatalError("HypervisorKit is currently only supported on x86_64")
+  fatalError("VMMKit is currently only supported on x86_64")
 #endif
 
 let package = Package(
-    name: "HypervisorKit",
+    name: "vmmkit",
     platforms: [
         .macOS(.v10_15),
     ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "HypervisorKit",
-            targets: ["HypervisorKit"]),
+            name: "VMMKit",
+            targets: ["VMMKit"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
@@ -28,14 +28,14 @@ let package = Package(
             name: "CBits",
             dependencies:[]),
         .target(
-            name: "HypervisorKit",
+            name: "VMMKit",
             dependencies:[
                 "CBits", .product(name: "Logging", package: "swift-log")
             ]
         ),
         .testTarget(
-            name: "HypervisorKitTests",
-            dependencies: ["HypervisorKit"],
+            name: "VMMKitTests",
+            dependencies: ["VMMKit"],
             resources: [ .copy("real_mode_test.bin") ]
             ),
     ]

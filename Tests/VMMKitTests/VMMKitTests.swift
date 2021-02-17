@@ -1,10 +1,10 @@
 import XCTest
 import Foundation
 
-@testable import HypervisorKit
+@testable import VMMKit
 
 
-final class HypervisorKitTests: XCTestCase {
+final class VMMKitTests: XCTestCase {
 
     func testCreateVM() throws {
         let vm = try VirtualMachine(logger: logger)
@@ -14,7 +14,7 @@ final class HypervisorKitTests: XCTestCase {
         XCTAssertNoThrow(try vm.shutdown())
     }
 
-    static var allTests: [(String, (HypervisorKitTests) -> () throws -> Void)] = [
+    static var allTests: [(String, (VMMKitTests) -> () throws -> Void)] = [
         ("testCreateVM", testCreateVM),
     ]
 }

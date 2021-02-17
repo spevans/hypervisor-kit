@@ -1,6 +1,6 @@
 import XCTest
 import Foundation
-import HypervisorKit
+import VMMKit
 
 
 final class RealModeTests: XCTestCase {

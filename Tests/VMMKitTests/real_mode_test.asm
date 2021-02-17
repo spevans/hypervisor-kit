@@ -1,7 +1,7 @@
 ;;
 ;; real_mode_test.asm
 ;;
-;; 16bit real mode code to be used for tests in HypervisorKitTests:RealModeTests
+;; 16bit real mode code to be used for tests in VMMKitTests:RealModeTests
 ;;
 
     %macro OFFSET 1
