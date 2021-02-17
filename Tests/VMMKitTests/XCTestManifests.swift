@@ -4,7 +4,7 @@ import Logging
 let logger: Logger = {
     LoggingSystem.bootstrap(StreamLogHandler.standardError)
     var logger = Logger(label: "VMMKitTests")
-    logger.logLevel = .trace
+    logger.logLevel = .debug
     return logger
 }()
 

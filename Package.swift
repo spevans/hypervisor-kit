@@ -36,6 +36,7 @@ let package = Package(
         .testTarget(
             name: "VMMKitTests",
             dependencies: ["VMMKit"],
+            exclude: ["real_mode_test.asm"],
             resources: [ .copy("real_mode_test.bin") ]
             ),
     ]
