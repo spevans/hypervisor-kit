@@ -21,9 +21,14 @@ extension VirtualMachine {
         private let kvm_run_mmap_size: Int32
 
         private let lock = NSLock()
-        private let semaphore = DispatchSemaphore(value: 0)
+        internal let semaphore = DispatchSemaphore(value: 0)
         private var pendingIRQ: UInt32?
-        private var shutdownRequested = false
+
+        private var _shutdownRequested = false
+        internal var shutdownRequested: Bool {
+            get { lock.performLocked { _shutdownRequested } }
+            set { lock.performLocked { _shutdownRequested = newValue } }
+        }
 
         private var _status: VCPUStatus = .setup
         private(set) var status: VCPUStatus {
@@ -69,14 +74,14 @@ extension VirtualMachine {
             semaphore.wait()
             status = .running
             // Shutdown might be requested before the vCPU is run, if so never enter the loop
-            var finished = self.lock.performLocked { shutdownRequested }
+            var finished = shutdownRequested
 
             while !finished {
                 do {
                     let vmExit = try self.runOnce()
                     finished = try vmExitHandler(self, vmExit)
                     if !finished {
-                        finished = self.lock.performLocked { shutdownRequested }
+                        finished = shutdownRequested
                     }
                 } catch {
                     fatalError("processVMExit failed with \(error)")
@@ -238,10 +243,6 @@ extension VirtualMachine {
                     throw HVError.setRegisters
                 }
             }
-        }
-
-        func shutdown() {
-            lock.performLocked { shutdownRequested = true }
         }
     }
 }

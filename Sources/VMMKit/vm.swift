@@ -36,7 +36,7 @@ extension VirtualMachine {
 
     @discardableResult
     public func shutdownAllVcpus() -> Bool {
-        vcpus.forEach { $0.shutdown() }
+        vcpus.forEach { _ = $0.shutdown() }
         return allVcpusShutdown()
     }
 }

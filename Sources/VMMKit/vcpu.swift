@@ -6,6 +6,7 @@
 //  Copyright © 2019 Simon Evans. All rights reserved.
 //
 
+import Foundation
 
 enum VCPUStatus {
     case setup
@@ -16,6 +17,24 @@ enum VCPUStatus {
     case shutdown
 }
 
+
+extension VirtualMachine.VCPU {
+
+    public func shutdown() -> Bool {
+        if status == .shutdown { return true }
+        shutdownRequested = true
+        let currentStatus = self.status
+        if currentStatus == .setup || currentStatus == .waitingToStart {
+            // Tell the thread to wakeup so that it can immediately exit.
+            self.semaphore.signal()
+        }
+        for _ in 1...100 {
+            if status == .shutdown { return true }
+            Thread.sleep(forTimeInterval: 0.001) // 1ms
+        }
+        return status == .shutdown
+    }
+}
 
 extension VirtualMachine.VCPU.Registers {
     public var al: UInt8 {

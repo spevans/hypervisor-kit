@@ -18,13 +18,18 @@ extension VirtualMachine {
         private let vcpuId: hv_vcpuid_t
         internal let vmcs: VMCS
         private let lock = NSLock()
-        private let semaphore = DispatchSemaphore(value: 0)
+        internal let semaphore = DispatchSemaphore(value: 0)
         private var pendingInterrupt: VMCS.VMEntryInterruptionInfoField?
-        private var shutdownRequested = false
         private var exitCount: UInt64 = 0
 
         internal var dataRead: VMExit.DataRead?
         private var dataWrite: VMExit.DataWrite?
+
+        private var _shutdownRequested = false
+        internal var shutdownRequested: Bool {
+            get { lock.performLocked { _shutdownRequested } }
+            set { lock.performLocked { _shutdownRequested = newValue } }
+        }
 
         private var _status: VCPUStatus = .setup
         private(set) var status: VCPUStatus {
@@ -77,7 +82,7 @@ extension VirtualMachine {
             semaphore.wait()
             status = .running
             // Shutdown might be requested before the vCPU is run, if so never enter the loop
-            var finished = self.lock.performLocked { shutdownRequested }
+            var finished = shutdownRequested
 
             while !finished {
                 do {
@@ -85,7 +90,7 @@ extension VirtualMachine {
                     status = .vmExit
                     finished = try vmExitHandler(self, vmExit)
                     if !finished {
-                        finished = self.lock.performLocked { shutdownRequested }
+                        finished = shutdownRequested
                     }
                 } catch {
                     vm.logger.error("runVCPU failed with \(error)")
@@ -107,7 +112,6 @@ extension VirtualMachine {
 
 
         public func start() {
-            guard vmExitHandler != nil else { fatalError("vmExitHandler not set") }
             semaphore.signal()
         }
 
@@ -233,10 +237,6 @@ extension VirtualMachine {
             } else {
                 return nil
             }
-        }
-
-        public func shutdown() {
-            lock.performLocked { shutdownRequested = true }
         }
     }
 }
