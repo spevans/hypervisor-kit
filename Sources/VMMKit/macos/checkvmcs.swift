@@ -1,6 +1,6 @@
 //
 //  checkvmcs.swift
-//  tests
+//  VMMKit
 //
 //  Created by Simon Evans on 28/08/2019.
 //  Copyright © 2019 Simon Evans. All rights reserved.

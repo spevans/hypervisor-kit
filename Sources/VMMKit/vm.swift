@@ -1,8 +1,9 @@
 //
 //  vm.swift
-//  
+//  VMMKit
 //
 //  Created by Simon Evans on 01/01/2020.
+//  Copyright © 2020 Simon Evans. All rights reserved.
 //
 
 extension VirtualMachine {

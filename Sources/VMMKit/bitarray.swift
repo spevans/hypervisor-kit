@@ -1,5 +1,5 @@
 /*
- * kernel/klib/extensions/bitarray.swift
+ * bitarray.swift
  *
  * Created by Simon Evans on 28/03/2017.
  * Copyright © 2015 - 2017 Simon Evans. All rights reserved.

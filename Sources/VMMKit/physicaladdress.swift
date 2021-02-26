@@ -1,8 +1,9 @@
 //
 //  PhysicalAddress.swift
-//  
+//  VMMKit
 //
 //  Created by Simon Evans on 14/12/2019.
+//  Copyright © 2019 Simon Evans. All rights reserved.
 //
 
 public typealias RawAddress = UInt64

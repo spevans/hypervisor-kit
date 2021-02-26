@@ -1,8 +1,9 @@
 //
 //  vmx.swift
-//  
+//  VMMKit
 //
 //  Created by Simon Evans on 10/12/2019.
+//  Copyright © 2019 Simon Evans. All rights reserved.
 //
 
 #if os(macOS)

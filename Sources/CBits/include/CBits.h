@@ -1,8 +1,9 @@
 //
 //  cbits.h
-//
+//  VMMKit
 //
 //  Created by Simon Evans on 25/12/2019.
+//  Copyright © 2019 Simon Evans. All rights reserved.
 //
 //  Header file for convinent c bits
 
