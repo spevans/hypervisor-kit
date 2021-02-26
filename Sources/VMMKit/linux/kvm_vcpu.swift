@@ -32,7 +32,14 @@ extension VirtualMachine {
         }
 
         public unowned let vm: VirtualMachine
-        public var registers = Registers()
+
+        private var _regs: kvm_regs? = kvm_regs()
+        private var _sregs: kvm_sregs? = kvm_sregs()
+        private var _registers: Registers?
+        public var registers: Registers {
+            get { _registers = _registers ?? Registers(vcpu: self); return _registers! }
+            set { _registers = newValue }
+        }
         public var vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool)!
         public var completionHandler: (() -> ())? = nil
 
@@ -54,16 +61,6 @@ extension VirtualMachine {
                     throw HVError.vmSubsystemFail
             }
             kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
-
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
-                vm.logger.error("Cannot get regs")
-                throw HVError.vmSubsystemFail
-            }
-
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &registers.sregs) >= 0 else {
-                vm.logger.error("Cannot get sregs")
-                throw HVError.vmSubsystemFail
-            }
         }
 
 
@@ -90,6 +87,13 @@ extension VirtualMachine {
             }
             status = .shuttingDown
             munmap(kvmRunPtr, Int(kvm_run_mmap_size))
+
+            // Get a final copy of the CPU registers
+            do {
+                _registers = try Registers(regs: getRegs(), sregs: getSregs())
+            } catch {
+                fatalError("Cant read CPU registers \(error)")
+            }
             close(vcpu_fd)
             status = .shutdown
             Thread.exit()
@@ -102,8 +106,8 @@ extension VirtualMachine {
 
 
         private func runOnce() throws -> VMExit {
-
-            registers.updateSRegs()
+            try setSregs()
+            try setRegs()
 
             if registers.rflags.interruptEnable {
                 if let irq = nextPendingIRQ() {
@@ -120,28 +124,14 @@ extension VirtualMachine {
                 }
             }
 
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &registers.regs) >= 0 else {
-                throw HVError.setRegisters
-            }
-
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &registers.sregs) >= 0 else {
-                throw HVError.setRegisters
-            }
-
             let ret = ioctl2arg(vcpu_fd, _IOCTL_KVM_RUN)
             guard ret >= 0 else {
                 throw HVError.vmRunError
             }
 
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &registers.regs) >= 0 else {
-                throw HVError.getRegisters
-            }
-
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &registers.sregs) >= 0 else {
-                throw HVError.getRegisters
-            }
-
-            registers.readSRegs()
+            // reset the register cache
+            _sregs = nil
+            _regs = nil
 
             guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
                 fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
@@ -206,6 +196,49 @@ extension VirtualMachine {
             return nil
         }
 
+        fileprivate func getRegs() throws -> kvm_regs {
+            if _regs == nil {
+                var regs = kvm_regs()
+                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &regs) >= 0 else {
+                    vm.logger.error("kvm: GET_REGS failed")
+                    throw HVError.getRegisters
+                }
+                _regs = regs
+            }
+            return _regs!
+        }
+
+        fileprivate func setRegs() throws {
+            if var regs = _regs {
+                vm.logger.trace("setRegs, rip: \(String(regs.rip, radix: 16))")
+                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &regs) >= 0 else {
+                    vm.logger.error("kvm: SET_REGS failed")
+                    throw HVError.setRegisters
+                }
+            }
+        }
+
+        fileprivate func getSregs() throws -> kvm_sregs {
+            if _sregs == nil {
+                var sregs = kvm_sregs()
+                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &sregs) >= 0 else {
+                    let e = errno
+                    vm.logger.error("kvm: GET_SREGS failed \(e)")
+                    throw HVError.getRegisters
+                }
+                _sregs = sregs
+            }
+            return _sregs!
+        }
+
+        fileprivate func setSregs() throws {
+            if var sregs = _sregs {
+                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &sregs) >= 0 else {
+                    vm.logger.error("kvm: SET_REGS failed")
+                    throw HVError.setRegisters
+                }
+            }
+        }
 
         func shutdown() {
             lock.performLocked { shutdownRequested = true }
@@ -217,6 +250,11 @@ extension VirtualMachine {
 extension VirtualMachine.VCPU {
     public struct SegmentRegister {
         var kvmSegment = kvm_segment()
+
+
+        init(_ kvmSegment: kvm_segment) {
+            self.kvmSegment = kvmSegment
+        }
 
         public var selector: UInt16 {
             get { kvmSegment.selector }
@@ -263,195 +301,435 @@ extension VirtualMachine.VCPU {
     }
 
 
+    // Access to the register set. This acts as a cache of the register and segment register values
+    // to avoid excess ioctl() calls to get either of the 2 sets.
+    // When the vCPU has finished executing, the _registers in the vcpu object is instansiated with
+    // the final register values instead of the vcpu so that the final register values can be accessed.
     public struct Registers {
-        fileprivate var regs = kvm_regs()
-        fileprivate var sregs = kvm_sregs()
+        private var vcpu: VirtualMachine.VCPU?
+        private var _regs: kvm_regs?
+        private var _sregs: kvm_sregs?
 
-        public var cs = SegmentRegister()
-        public var ss = SegmentRegister()
-        public var ds = SegmentRegister()
-        public var es = SegmentRegister()
-        public var fs = SegmentRegister()
-        public var gs = SegmentRegister()
-        public var tr = SegmentRegister()
-        public var ldtr = SegmentRegister()
-
-
-        init(regs: kvm_regs, sregs: kvm_sregs) {
-            self.regs = regs
-            self.sregs = sregs
-            self.cs = SegmentRegister(kvmSegment: sregs.cs)
-            self.ss = SegmentRegister(kvmSegment: sregs.ss)
-            self.ds = SegmentRegister(kvmSegment: sregs.ds)
-            self.es = SegmentRegister(kvmSegment: sregs.es)
-            self.fs = SegmentRegister(kvmSegment: sregs.fs)
-            self.gs = SegmentRegister(kvmSegment: sregs.gs)
-            self.tr = SegmentRegister(kvmSegment: sregs.tr)
-            self.ldtr = SegmentRegister(kvmSegment: sregs.ldt)
+        fileprivate init(vcpu: VirtualMachine.VCPU) {
+            self.vcpu = vcpu
         }
 
-        init() {
+        fileprivate init(regs: kvm_regs, sregs: kvm_sregs) {
+            self._regs = regs
+            self._sregs = sregs
+        }
+
+        @discardableResult
+        private func getRegs() throws -> kvm_regs {
+            if let vcpu = vcpu {
+                return try vcpu.getRegs()
+            }
+            return _regs!
+        }
+
+        @discardableResult
+        private func getSregs() throws -> kvm_sregs {
+            if let vcpu = vcpu {
+                return try vcpu.getSregs()
+            }
+            return _sregs!
         }
 
 
-        mutating func updateSRegs() {
-            sregs.cs = cs.kvmSegment
-            sregs.ds = ds.kvmSegment
-            sregs.es = es.kvmSegment
-            sregs.fs = fs.kvmSegment
-            sregs.gs = gs.kvmSegment
-            sregs.ss = ss.kvmSegment
-            sregs.tr = tr.kvmSegment
+        public var cs: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.cs)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cs = newValue.kvmSegment
+            }
         }
 
-        mutating func readSRegs() {
-            cs.kvmSegment = sregs.cs
-            ds.kvmSegment = sregs.ds
-            es.kvmSegment = sregs.es
-            fs.kvmSegment = sregs.fs
-            gs.kvmSegment = sregs.gs
-            ss.kvmSegment = sregs.ss
+        public var ds: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.ds)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.ds = newValue.kvmSegment
+            }
+        }
 
+        public var es: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.es)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.es = newValue.kvmSegment
+            }
+        }
+
+        public var fs: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.fs)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.fs = newValue.kvmSegment
+            }
+        }
+
+        public var gs: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.gs)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.gs = newValue.kvmSegment
+            }
+        }
+
+        public var ss: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.ss)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.ss = newValue.kvmSegment
+            }
+        }
+
+        public var tr: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.tr)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.tr = newValue.kvmSegment
+            }
+        }
+
+        public var ldtr: SegmentRegister {
+            get {
+                let sregs = try! getSregs()
+                return SegmentRegister(sregs.ldt)
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.ldt = newValue.kvmSegment
+            }
         }
 
         public var rax: UInt64 {
-            get { regs.rax }
-            set { regs.rax = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rax
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rax = newValue
+            }
         }
 
         public var rbx: UInt64 {
-            get { regs.rbx }
-            set { regs.rbx = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rbx
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rbx = newValue
+            }
         }
 
         public var rcx: UInt64 {
-            get { regs.rcx }
-            set { regs.rcx = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rcx
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rcx = newValue
+            }
         }
 
         public var rdx: UInt64 {
-            get { regs.rdx }
-            set { regs.rdx = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rdx
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rdx = newValue
+            }
         }
 
         public var rsi: UInt64 {
-            get { regs.rsi }
-            set { regs.rsi = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rsi
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rsi = newValue
+            }
         }
 
         public var rdi: UInt64 {
-            get { regs.rdi }
-            set { regs.rdi = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rdi
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rdi = newValue
+            }
         }
 
         public var rsp: UInt64 {
-            get { regs.rsp }
-            set { regs.rsp = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rsp
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rsp = newValue
+            }
         }
 
         public var rbp: UInt64 {
-            get { regs.rbp }
-            set { regs.rbp = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rbp
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rbp = newValue
+            }
         }
 
         public var r8: UInt64 {
-            get { regs.r8 }
-            set { regs.r8 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r8
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r8 = newValue
+            }
         }
 
         public var r9: UInt64 {
-            get { regs.r9 }
-            set { regs.r9 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r9
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r9 = newValue
+            }
         }
 
         public var r10: UInt64 {
-            get { regs.r10 }
-            set { regs.r10 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r10
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r10 = newValue
+            }
         }
 
         public var r11: UInt64 {
-            get { regs.r11 }
-            set { regs.r11 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r11
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r11 = newValue
+            }
         }
 
         public var r12: UInt64 {
-            get { regs.r12 }
-            set { regs.r12 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r12
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r12 = newValue
+            }
         }
 
         public var r13: UInt64 {
-            get { regs.r13 }
-            set { regs.r13 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r13
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r13 = newValue
+            }
         }
 
         public var r14: UInt64 {
-            get { regs.r14 }
-            set { regs.r14 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r14
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r14 = newValue
+            }
         }
 
         public var r15: UInt64 {
-            get { regs.r15 }
-            set { regs.r15 = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.r15
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.r15 = newValue
+            }
         }
 
         public var rip: UInt64 {
-            get { regs.rip }
-            set { regs.rip = newValue }
+            get {
+                let regs = try! getRegs()
+                return regs.rip
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rip = newValue
+            }
         }
 
         public var rflags: CPU.RFLAGS {
-            get { CPU.RFLAGS(regs.rflags) }
-            set { regs.rflags = newValue.rawValue }
+            get {
+                let regs = try! getRegs()
+                return CPU.RFLAGS(regs.rflags)
+            }
+            set {
+                try! getRegs()
+                vcpu?._regs!.rflags = newValue.rawValue
+            }
         }
 
         public var cr0: UInt64 {
-            get { sregs.cr0 }
-            set { sregs.cr0 = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.cr0
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cr0 = newValue
+            }
         }
 
         public var cr2: UInt64 {
-            get { sregs.cr2 }
-            set { sregs.cr2 = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.cr2
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cr2 = newValue
+            }
         }
 
         public var cr3: UInt64 {
-            get { sregs.cr3 }
-            set { sregs.cr3 = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.cr3
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cr3 = newValue
+            }
         }
 
         public var cr4: UInt64 {
-            get { sregs.cr4 }
-            set { sregs.cr4 = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.cr4
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cr4 = newValue
+            }
         }
 
         public var cr8: UInt64 {
-            get { sregs.cr8 }
-            set { sregs.cr8 = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.cr8
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.cr8 = newValue
+            }
         }
 
         public var efer: UInt64 {
-            get { sregs.efer }
-            set { sregs.efer = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.efer
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.efer = newValue
+            }
         }
 
         public var gdtrBase: UInt64 {
-            get { sregs.gdt.base }
-            set { sregs.gdt.base = newValue }
+            get {
+                let sregs = try! getSregs()
+                return sregs.gdt.base
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.gdt.base = newValue
+            }
         }
 
-        public var gdtrLimit: UInt32 {
-            get { UInt32(sregs.gdt.limit) }
-            set { sregs.gdt.limit = UInt16(newValue) }
+        public var gdtrLimit: UInt16 {
+            get {
+                let sregs = try! getSregs()
+                return sregs.gdt.limit
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.gdt.limit = newValue
+            }
         }
 
-        public var idtrBase: UInt64  {
-            get { sregs.idt.base }
-            set { sregs.idt.base = newValue }
+        public var idtrBase: UInt64 {
+            get {
+                let sregs = try! getSregs()
+                return sregs.idt.base
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.idt.base = newValue
+            }
         }
 
-        public var idtrLimit:  UInt32 {
-            get { UInt32(sregs.idt.limit) }
-            set { sregs.idt.limit = UInt16(newValue) }
+        public var idtrLimit: UInt16 {
+            get {
+                let sregs = try! getSregs()
+                return sregs.idt.limit
+            }
+            set {
+                try! getSregs()
+                vcpu?._sregs!.idt.limit = newValue
+            }
         }
     }
 }
