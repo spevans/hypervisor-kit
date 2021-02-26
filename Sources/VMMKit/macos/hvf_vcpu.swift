@@ -92,9 +92,6 @@ extension VirtualMachine {
                     finished = true
                 }
             }
-            if let handler = completionHandler {
-                handler()
-            }
             status = .shuttingDown
             do {
                 try hvError(hv_vcpu_destroy(vcpuId))
@@ -102,6 +99,9 @@ extension VirtualMachine {
                 vm.logger.error("Error shutting down vCPU \(vcpuId): \(error)")
             }
             status = .shutdown
+            if let handler = completionHandler {
+                handler()
+            }
             Thread.exit()
         }
 

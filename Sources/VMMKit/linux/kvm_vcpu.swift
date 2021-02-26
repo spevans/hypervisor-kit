@@ -82,9 +82,6 @@ extension VirtualMachine {
                     fatalError("processVMExit failed with \(error)")
                 }
             }
-            if let handler = completionHandler {
-                handler()
-            }
             status = .shuttingDown
             munmap(kvmRunPtr, Int(kvm_run_mmap_size))
 
@@ -96,6 +93,9 @@ extension VirtualMachine {
             }
             close(vcpu_fd)
             status = .shutdown
+            if let handler = completionHandler {
+                handler()
+            }
             Thread.exit()
         }
 
