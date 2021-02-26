@@ -139,8 +139,8 @@ public final class VirtualMachine {
                 vcpu = _vcpu
                 _vcpu.vmExitHandler = vmExitHandler
                 _vcpu.completionHandler = completionHandler
-                semaphore.signal()
                 startup(_vcpu)
+                semaphore.signal()
                 _vcpu.runVCPU()
             } catch {
                 createError = error
