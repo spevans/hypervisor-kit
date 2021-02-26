@@ -18,6 +18,8 @@ enum VCPUStatus {
 }
 
 
+public typealias VMExitHandler = ((VirtualMachine.VCPU, VMExit) throws -> Bool)
+
 extension VirtualMachine.VCPU {
 
     public func shutdown() -> Bool {

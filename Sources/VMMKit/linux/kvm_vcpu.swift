@@ -31,7 +31,7 @@ extension VirtualMachine {
         }
 
         private var _status: VCPUStatus = .setup
-        private(set) var status: VCPUStatus {
+        internal var status: VCPUStatus {
             get { lock.performLocked { _status } }
             set { lock.performLocked { _status = newValue } }
         }
@@ -45,8 +45,8 @@ extension VirtualMachine {
             get { _registers = _registers ?? Registers(vcpu: self); return _registers! }
             set { _registers = newValue }
         }
-        public var vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool)!
-        public var completionHandler: (() -> ())? = nil
+        public var vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool) = { _, _ in true }
+        public var completionHandler: (() -> ())?
 
 
         init(vm: VirtualMachine, vcpu_fd: Int32) throws {
@@ -68,9 +68,8 @@ extension VirtualMachine {
             kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
         }
 
-
+        // This runs in its own thread created in VirtualMachine.createVCPU()
         internal func runVCPU() {
-            status = .waitingToStart
             semaphore.wait()
             status = .running
             // Shutdown might be requested before the vCPU is run, if so never enter the loop
@@ -105,7 +104,8 @@ extension VirtualMachine {
         }
 
 
-        public func start() {
+        public func start() throws {
+            guard status == .waitingToStart else { throw HVError.vcpuNotWaitingToStart }
             semaphore.signal()
         }
 

@@ -26,6 +26,7 @@ enum HVError: Error {
     case noMemory
     case vmRunError
     case invalidMemory
+    case vcpuNotWaitingToStart
     case vcpusStillRunning
 }
 
@@ -135,9 +136,7 @@ public final class VirtualMachine {
 
 
     @discardableResult
-    public func createVCPU(startup: @escaping (VCPU) -> (),
-                           vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool)? = nil,
-                           completionHandler: (() -> ())? = nil) throws -> VCPU {
+    public func createVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {
 
         var vcpu: VCPU? = nil
         var createError: Error? = nil
@@ -147,9 +146,9 @@ public final class VirtualMachine {
             do {
                 let _vcpu = try VCPU.init(vm: self)
                 vcpu = _vcpu
-                _vcpu.vmExitHandler = vmExitHandler
-                _vcpu.completionHandler = completionHandler
                 startup(_vcpu)
+                try _vcpu.preflightCheck()
+                _vcpu.status = .waitingToStart
                 semaphore.signal()
                 _vcpu.runVCPU()
             } catch {

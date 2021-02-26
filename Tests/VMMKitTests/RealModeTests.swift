@@ -52,7 +52,13 @@ final class RealModeTests: XCTestCase {
         vcpu.completionHandler = {
             group.leave()
         }
-        vcpu.start()
+        do {
+            try vcpu.start()
+        } catch {
+            XCTFail("Cannot start vcpu: \(error)")
+            group.leave()
+            return false
+        }
         let result = group.wait(timeout: .now() + timeinterval)
         return result == .success
     }
