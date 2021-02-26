@@ -61,9 +61,9 @@ extension VirtualMachine {
             try vmcs.secondaryProcVMExecControls(UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_procbased2, 0)))
             try vmcs.vmEntryControls(UInt32(truncatingIfNeeded: cap2ctrl(VirtualMachine.vmx_cap_entry, 0)))
 
-//            try vmcs.guestActivityState(.active)
-//            try vmcs.vmEntryInterruptInfo(VMCS.VMEntryInterruptionInfoField(0))
-//            try vmcs.guestInterruptibilityState(VMCS.InterruptibilityState(0))
+            try vmcs.guestActivityState(.active)
+            try vmcs.vmEntryInterruptInfo(VMCS.VMEntryInterruptionInfoField(0))
+            try vmcs.guestInterruptibilityState(VMCS.InterruptibilityState(0))
             try vmcs.exceptionBitmap(0xffffffff)
             try vmcs.cr0mask(0x60000000)
             try vmcs.cr0ReadShadow(CPU.CR0Register(0))
@@ -118,9 +118,15 @@ extension VirtualMachine {
                 fatalError("Unsatisfied read \(read)")
             }
 
+            var activityState = try vmcs.guestActivityState()
             while true {
                 try registers.setupRegisters(vcpuId: vcpuId)
                 try registers.setupSegmentRegisters(vmcs: vmcs)
+
+                if activityState == .hlt {
+                    // TODO: Need to wait for an interrupt to wake up or NMI of
+                    vm.logger.trace("In HLT state")
+                }
 
                 if registers.rflags.interruptEnable {
                     if let interruptInfo = nextPendingIRQ() {
@@ -148,6 +154,8 @@ extension VirtualMachine {
                 try registers.readSegmentRegisters(vmcs: vmcs)
 
                 exitCount += 1
+                activityState = try vmcs.guestActivityState()
+                if activityState == .shutdown { return .shutdown }
                 guard let exitReason = try self.vmExit() else { continue }
 
                 // FIXME: Determine why first vmexit is an EPT violation

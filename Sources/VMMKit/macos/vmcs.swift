@@ -1037,18 +1037,18 @@ final class VMCS {
             switch rawValue {
                 case 0: self = .active
                 case 1: self = .hlt
-                case 3: self = .shutdown
-                case 4: self = .waitForSIPI
+                case 2: self = .shutdown
+                case 3: self = .waitForSIPI
                 default: self = .unknown(rawValue)
             }
         }
 
         var rawValue: UInt32 {
             switch self {
-                case .active:               return 1
-                case .hlt:                  return 2
-                case .shutdown:             return 3
-                case .waitForSIPI:          return 4
+                case .active:               return 0
+                case .hlt:                  return 1
+                case .shutdown:             return 2
+                case .waitForSIPI:          return 3
                 case .unknown(let value):   return value
             }
         }
