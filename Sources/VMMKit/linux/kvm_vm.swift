@@ -126,7 +126,6 @@ public final class VirtualMachine {
         let logger = self.logger
 
         let thread = Thread {
-
             let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
             guard vcpu_fd >= 0 else {
                 logger.error("Cannot create vCPU")

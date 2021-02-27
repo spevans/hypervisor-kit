@@ -59,7 +59,6 @@ extension VirtualMachine.VCPU.Registers {
         set { rax = (rax & ~0xffff_ffff) | UInt64(newValue) }
     }
 
-
     public var bl: UInt8 {
         get { UInt8(truncatingIfNeeded: rbx) }
         set { rbx = (rbx & ~0xff) | UInt64(newValue) }
@@ -169,8 +168,6 @@ extension VirtualMachine.VCPU.Registers {
         get { UInt32(truncatingIfNeeded: rip) }
         set { rip = (rip & ~0xffff_ffff) | UInt64(newValue) }
     }
-
-
 }
 
 extension VirtualMachine.VCPU {

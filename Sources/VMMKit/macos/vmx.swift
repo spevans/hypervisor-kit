@@ -198,7 +198,7 @@ enum VMXExitReason: UInt16, CustomStringConvertible {
             case .drAccess:
                 return "Guest attempted DR access"
             case .ioInstruction:
-                return "Guest attempeted I/O instruction"
+                return "Guest attempted I/O instruction"
             case .rdmsr:
                 return "Guest attempted RDMSR"
             case .wrmsr:

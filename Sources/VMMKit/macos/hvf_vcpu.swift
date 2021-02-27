@@ -145,14 +145,6 @@ extension VirtualMachine {
                     if let interruptInfo = nextPendingIRQ() {
                         vm.logger.trace("Injecting interrupt: \(interruptInfo)")
                         try vmcs.vmEntryInterruptInfo(interruptInfo)
-//                        try vmcs.vmEntryInstructionLength(0)
-//                        try vmcs.vmEntryExceptionErrorCode(0)
-//                        var i = try vmcs.guestInterruptibilityState()
-//                        print("blockingByMovSS:", i.blockingByMovSS)
-//                        print("blockingBySTI:", i.blockingBySTI)
-//                        print("blockingByNMI:", i.blockingByNMI)
-//                        print("blockingBySMI:", i.blockingBySMI)
-//                        print("IF flag set, setting interrupt")
                         var interruptibilityState = try vmcs.guestInterruptibilityState()
                         interruptibilityState.blockingBySTI = false
                         interruptibilityState.blockingByMovSS = false
@@ -160,7 +152,6 @@ extension VirtualMachine {
                         try vmcs.checkFieldsAreValid()
                     }
                 }
-
 
                 try hvError(hv_vcpu_run(vcpuId))
                 try registers.readRegisters(vcpuId: vcpuId)
@@ -170,16 +161,6 @@ extension VirtualMachine {
                 activityState = try vmcs.guestActivityState()
                 if activityState == .shutdown { return .shutdown }
                 guard let exitReason = try self.vmExit() else { continue }
-
-                // FIXME: Determine why first vmexit is an EPT violation
-                /*if exitCount == 1,
-                    case let .memoryViolation(violation) = exitReason {
-                    if violation.access == .instructionFetch && !violation.executable {
-                        // Ignore instructionFetch on exectable memory, EPT cold start
-                        // skip
-                        continue
-                    }
-                }*/
                 return exitReason
             }
         }
@@ -189,17 +170,6 @@ extension VirtualMachine {
             let instrLen = try vmcs.vmExitInstructionLength()
             registers.rip += UInt64(instrLen)
         }
-/*
-        func readInstructionBytes() throws -> X86Instruction {
-
-            let length = try vmcs.vmExitInstructionLength()
-            let physicalAddr = UInt64(registers.cs.base) + registers.rip
-            print("Reading \(length) bytes @ \(String(physicalAddr, radix: 16))")
-            let instruction = try vm.readMemory(at: physicalAddr, count: Int(length))
-            var decoder = Decoder(cpuMode: .realMode, bytes: instruction)
-            return try decoder.decode()
-        }
-         */
 
 
         /// Used to satisfy the IO In read performed by the VCPU
@@ -224,7 +194,7 @@ extension VirtualMachine {
         }
 
         public func queue(irq: UInt8) {
-            vm.logger.trace("queuing IRQ: \(irq)")
+            vm.logger.trace("Queuing IRQ: \(irq)")
             lock.lock()
             pendingInterrupt = VMCS.VMEntryInterruptionInfoField(vector: irq, type: .external, deliverErrorCode: false)
             lock.unlock()
@@ -306,11 +276,11 @@ extension VirtualMachine.VCPU {
             return value
         }
 
-        func writeRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t, _ value: UInt64) throws {
+        private func writeRegister(_ vcpuId: hv_vcpuid_t, _ register: hv_x86_reg_t, _ value: UInt64) throws {
             try hvError(hv_vcpu_write_register(vcpuId, register, value))
         }
 
-        func setupRegisters(vcpuId: hv_vcpuid_t) throws {
+        fileprivate func setupRegisters(vcpuId: hv_vcpuid_t) throws {
             try writeRegister(vcpuId, HV_X86_RAX, rax)
             try writeRegister(vcpuId, HV_X86_RBX, rbx)
             try writeRegister(vcpuId, HV_X86_RCX, rcx)
@@ -339,7 +309,7 @@ extension VirtualMachine.VCPU {
             try writeRegister(vcpuId, HV_X86_IDT_LIMIT, idtrLimit)
         }
 
-        mutating func readRegisters(vcpuId: hv_vcpuid_t) throws {
+        fileprivate mutating func readRegisters(vcpuId: hv_vcpuid_t) throws {
             rax = try readRegister(vcpuId, HV_X86_RAX)
             rbx = try readRegister(vcpuId, HV_X86_RBX)
             rcx = try readRegister(vcpuId, HV_X86_RCX)
@@ -369,7 +339,7 @@ extension VirtualMachine.VCPU {
         }
 
 
-        func setupSegmentRegisters(vmcs: VMCS) throws {
+        fileprivate func setupSegmentRegisters(vmcs: VMCS) throws {
             try vmcs.guestCSSelector(cs.selector)
             try vmcs.guestCSBase(cs.base)
             try vmcs.guestCSLimit(cs.limit)
@@ -412,7 +382,7 @@ extension VirtualMachine.VCPU {
         }
 
 
-        mutating func readSegmentRegisters(vmcs: VMCS) throws {
+        fileprivate mutating func readSegmentRegisters(vmcs: VMCS) throws {
             cs.selector = try vmcs.guestCSSelector()
             cs.base = try vmcs.guestCSBase()
             cs.limit = try vmcs.guestCSLimit()

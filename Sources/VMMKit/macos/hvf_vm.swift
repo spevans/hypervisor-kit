@@ -120,20 +120,6 @@ public final class VirtualMachine {
         return memRegion
     }
 
-    /*
-     func readMemory(at guestAddress: PhysicalAddress, count: Int) throws -> [UInt8] {
-     for region in memoryRegions {
-     if region.guestAddress <= guestAddress && region.guestAddress + region.size >= guestAddress + count {
-     let offset = guestAddress - region.guestAddress
-     let ptr = region.pointer.advanced(by: Int(offset))
-     let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
-     return Array<UInt8>(buffer)
-     }
-     }
-     throw HVError.invalidMemory
-     }
-     */
-
 
     @discardableResult
     public func createVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {

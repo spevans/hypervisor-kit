@@ -43,7 +43,7 @@ final class RealModeTests: XCTestCase {
         let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
 
         return (vm, vcpu)
-    }        
+    }
 
 
     private func runCPU(vcpu: VirtualMachine.VCPU, waitingFor timeinterval: DispatchTimeInterval) -> Bool {
@@ -65,7 +65,6 @@ final class RealModeTests: XCTestCase {
 
 
     private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16) -> Bool {
-        print("Running VCPU with ax:", ax)
         vcpu.registers.cs.selector = 0
         vcpu.registers.cs.base = 0
         vcpu.registers.ax = ax
@@ -95,8 +94,6 @@ final class RealModeTests: XCTestCase {
         let (vm, vcpu) = try createRealModeVM()
         let memRegion = vm.memoryRegions[0]
 
-        print(memRegion.dumpMemory(at: 0x320, count: 8))
-
         let src_data = memRegion.rawBuffer.baseAddress!.advanced(by: 0x320)
         XCTAssertEqual(src_data.advanced(by: 0).load(as: UInt8.self), 0xaa)
         XCTAssertEqual(src_data.advanced(by: 1).load(as: UInt8.self), 0xbb)
@@ -117,7 +114,6 @@ final class RealModeTests: XCTestCase {
 
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 1))
         vm.shutdownAllVcpus()
-        print(memRegion.dumpMemory(at: 0x320, count: 8))
         let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
         XCTAssertEqual(word, 0x1235)
 
@@ -139,7 +135,6 @@ final class RealModeTests: XCTestCase {
         vmExits.reserveCapacity(10)
         vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
             vmExits.append(vmExit)
-            print(vmExit)
             count += 1
             return (count >= 10 || vmExit == .hlt)  // true == finish
         }
@@ -254,13 +249,11 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            //print("RSI:", String(vcpu.registers.rsi, radix: 16))
             vmExit = vmExits.removeFirst()
         }
 
         for dword in dwords {
             if case let VMExit.ioOutOperation(port, data) = vmExit {
-                //print(data)
                 XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
                 XCTAssertEqual(port, 0x60)
             } else {
@@ -272,7 +265,6 @@ final class RealModeTests: XCTestCase {
         // Test unaligned data
         for dword in unalignedDwords {
             if case let VMExit.ioOutOperation(port, data) = vmExit {
-                //print(data)
                 XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
                 XCTAssertEqual(port, 0x60)
             } else {
@@ -288,7 +280,6 @@ final class RealModeTests: XCTestCase {
             } else {
                 XCTFail("Not an OUTS: \(vmExit)")
             }
-            //print("RSI:", String(vcpu.registers.rsi, radix: 16))
             vmExit = vmExits.removeFirst()
         }
 
@@ -311,8 +302,8 @@ final class RealModeTests: XCTestCase {
             if case let VMExit.ioOutOperation(_, data) = vmExit {
                 XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                print("DS:", String(vcpu.registers.ds.selector, radix: 16), String(vcpu.registers.ds.base, radix: 16))
-                print("CS:IP \(String(vcpu.registers.cs.base, radix: 16)):\(String(vcpu.registers.rip, radix: 16))")
+                logger.trace("DS: \(String(vcpu.registers.ds.selector, radix: 16)) \(String(vcpu.registers.ds.base, radix: 16))")
+                logger.trace("CS:IP \(String(vcpu.registers.cs.base, radix: 16)):\(String(vcpu.registers.rip, radix: 16))")
                 XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = vmExits.removeFirst()
@@ -360,6 +351,7 @@ final class RealModeTests: XCTestCase {
         XCTAssertTrue(vm.allVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
+
 
     func testIn() throws {
         let (vm, vcpu) = try createRealModeVM()
@@ -462,5 +454,4 @@ final class RealModeTests: XCTestCase {
         XCTAssertTrue(vm.allVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
-
 }

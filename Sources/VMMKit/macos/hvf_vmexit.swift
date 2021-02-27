@@ -134,12 +134,6 @@ extension VirtualMachine.VCPU {
                         }
                     }()
 
-
-                    //  let lma = LogicalMemoryAccess(addressSize: addressSize, segmentRegister: seg, register: .rsi)
-                    //  let linearAddress = self.linearAddress(lma)!
-                    //  let physicalAddress = self.physicalAddress(for: linearAddress)!
-                    //  print("Physical Address:", physicalAddress)
-
                     let rcx = registers.rcx
                     var count: UInt64 = {
                         guard isRep else { return 1 }
