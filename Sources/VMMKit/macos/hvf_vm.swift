@@ -28,6 +28,7 @@ enum HVError: Error {
     case invalidMemory
     case vcpuNotWaitingToStart
     case vcpusStillRunning
+    case vcpuHasBeenShutdown
 }
 
 // Hypervisor Framework return codes

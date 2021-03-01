@@ -15,9 +15,15 @@ import Foundation
 final class VMMKitTests: XCTestCase {
 
     func testCreateVM() throws {
-        let vm = try VirtualMachine(logger: logger)
-        _ = try vm.addMemory(at: 0x1000, size: 8192)
-        _ = try vm.addMemory(at: 0x4000, size: 4096)
+        let vm: VirtualMachine
+        do {
+            vm = try VirtualMachine(logger: logger)
+        } catch {
+            XCTFail("Failed to create VM: \(error)")
+            return
+        }
+        XCTAssertNoThrow(try vm.addMemory(at: 0x1000, size: 8192))
+        XCTAssertNoThrow(try vm.addMemory(at: 0x4000, size: 4096))
         let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
         XCTAssertEqual(vm.memoryRegions.count, 2)
         XCTAssertTrue(vcpu.shutdown())

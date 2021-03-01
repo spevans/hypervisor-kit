@@ -151,7 +151,7 @@ public enum VMExit: Equatable {
         public let writeable: Bool
         public let executable: Bool
         public let guestPhysicalAddress: PhysicalAddress
-        public let guestLinearAddress: UInt?
+        public let guestLinearAddress: UInt64?
 
         public var description: String {
             let perms = (readable ? "r" : "-") + (writeable ? "w" : "-") + (executable ? "x" : "-")

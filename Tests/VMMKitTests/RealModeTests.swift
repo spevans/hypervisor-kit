@@ -40,8 +40,9 @@ final class RealModeTests: XCTestCase {
         let memRegion = try vm.addMemory(at: 0x1000, size: 8192)
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
+        logger.debug("setting up realmode")
         let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
-
+        logger.debug("createRealModeVM done")
         return (vm, vcpu)
     }
 
@@ -65,10 +66,10 @@ final class RealModeTests: XCTestCase {
 
 
     private func runTest(vcpu: VirtualMachine.VCPU, ax: UInt16) -> Bool {
-        vcpu.registers.cs.selector = 0
-        vcpu.registers.cs.base = 0
-        vcpu.registers.ax = ax
-        vcpu.registers.rip = 0x1000
+        let registers = vcpu.registers
+        registers.cs = SegmentRegister(selector: 0x0, base: 0x00000, limit: 0xffff, accessRights: 0x9b)
+        registers.rax = UInt64(ax)
+        registers.rip = 0x1000
 
         return runCPU(vcpu: vcpu, waitingFor: .seconds(1))
     }
@@ -84,6 +85,8 @@ final class RealModeTests: XCTestCase {
             return true
         }
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 0))
+        let registers = try vcpu.readRegisters(.rip)
+        XCTAssertEqual(registers.rip, 0x100a)
         XCTAssertTrue(gotHLT)
         XCTAssertTrue(vm.allVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
@@ -111,7 +114,6 @@ final class RealModeTests: XCTestCase {
         vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
             return (vmExit == .hlt)
         }
-
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 1))
         vm.shutdownAllVcpus()
         let word = memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).load(as: UInt16.self)
@@ -229,7 +231,6 @@ final class RealModeTests: XCTestCase {
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 2))
         XCTAssertEqual(vmExits.count, 82)
 
-
         var vmExit = vmExits.removeFirst()
         for byte in bytes {
             if case let VMExit.ioOutOperation(port, data) = vmExit {
@@ -295,15 +296,20 @@ final class RealModeTests: XCTestCase {
         }
         #endif
 
-        vcpu.registers.ds.selector = 0x100
-        vcpu.registers.ds.base = 0x1000
+        let registers = try vcpu.readRegisters([.segmentRegisters, .rip])
+        var ds = registers.ds
+        ds.selector = 0x100
+        ds.base = 0x1000
+        registers.ds = ds
 
         for byte in dsOverrideBytes {
             if case let VMExit.ioOutOperation(_, data) = vmExit {
                 XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
             } else {
-                logger.trace("DS: \(String(vcpu.registers.ds.selector, radix: 16)) \(String(vcpu.registers.ds.base, radix: 16))")
-                logger.trace("CS:IP \(String(vcpu.registers.cs.base, radix: 16)):\(String(vcpu.registers.rip, radix: 16))")
+                let ds = registers.ds
+                let cs = registers.cs
+                logger.trace("DS: \(String(ds.selector, radix: 16)) \(String(ds.base, radix: 16))")
+                logger.trace("CS:IP \(String(cs.base, radix: 16)):\(String(registers.rip, radix: 16))")
                 XCTFail("Not an OUTS: \(vmExit)")
             }
             vmExit = vmExits.removeFirst()
@@ -397,15 +403,16 @@ final class RealModeTests: XCTestCase {
             }
 
             if vmExit == .hlt {
+                let registers = try vcpu.readRegisters(.rax)
                 switch testNumber {
                     case 1:
-                        XCTAssertEqual(vcpu.registers.rax, 0x12)
+                        XCTAssertEqual(registers.rax, 0x12)
 
                     case 2:
-                        XCTAssertEqual(vcpu.registers.rax, 0xABCD)
+                        XCTAssertEqual(registers.rax, 0xABCD)
 
                     case 3:
-                        XCTAssertEqual(vcpu.registers.rax, 0xDEADC0DE)
+                        XCTAssertEqual(registers.rax, 0xDEADC0DE)
                         // All tests are now complete, so no more exits required
                         return true
 
@@ -433,8 +440,11 @@ final class RealModeTests: XCTestCase {
         let (vm, vcpu) = try createRealModeVM()
         let memRegion = vm.memoryRegions[0]
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
-        vcpu.registers.rip = 0x1100
-        vcpu.registers.rflags.trap = true
+        let registers = try vcpu.readRegisters(.rflags)
+        logger.debug("setting rip")
+        registers.rip = 0x1100
+        logger.debug("rip set")
+        registers.rflags.trap = true
 
         var vmExit: VMExit?
         vcpu.vmExitHandler = { (vcpu, _vmExit) -> Bool in
@@ -442,9 +452,7 @@ final class RealModeTests: XCTestCase {
             return true
         }
         XCTAssertTrue(runCPU(vcpu: vcpu, waitingFor: .seconds(1)))
-
-
-        XCTAssertEqual(vcpu.registers.rip, 0x1100)
+        XCTAssertEqual(registers.rip, 0x1100)
         XCTAssertNotNil(vmExit)
         //XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
         //vcpu.registers.rip += 1

@@ -167,11 +167,12 @@ struct LogicalMemoryAccess {
 
 extension VirtualMachine.VCPU {
 
-    func linearAddress(_ memory: LogicalMemoryAccess) -> LinearAddress? {
+    func linearAddress(_ memory: LogicalMemoryAccess) throws -> LinearAddress? {
         // FIXME: Asssumes real mode for now
         // FIXME: Check for overflow / wraparound/ unrealmode
         // FIXME: Check segment access rights / limits
 
+        try registers.readRegisters(.all)
         let segmentRegister: SegmentRegister
         switch memory.segmentRegister {
             case .cs: segmentRegister = registers.cs
@@ -235,7 +236,8 @@ extension VirtualMachine.VCPU {
     }
 
 
-    func physicalAddress(for laddr: LinearAddress) -> PhysicalAddress? {
+    func physicalAddress(for laddr: LinearAddress) throws -> PhysicalAddress? {
+        try registers.readRegisters(.cr0)
         let cr0 = CPU.CR0Register(registers.cr0)
         if !cr0.paging {
             // No paging, Physical Address = Linear Address

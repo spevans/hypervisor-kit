@@ -28,6 +28,7 @@ enum HVError: Error {
     case irqAlreadyHandledByKernelPIC
     case vcpuNotWaitingToStart
     case vcpusStillRunning
+    case vcpuHasBeenShutdown
 }
 
 public final class VirtualMachine {

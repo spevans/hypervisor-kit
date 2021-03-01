@@ -43,12 +43,9 @@ final class VMCS {
         return try vmread(index)
     }
 
-    private func vmreadNatural(_ index: UInt32) throws -> UInt {
-        #if arch(x86_64)
-        return UInt(try vmread64(index))
-        #else
-        return UInt(try vmread32(index))
-        #endif
+    // FIXME, This should probably check the current processor mode
+    private func vmreadNatural(_ index: UInt32) throws -> UInt64 {
+        return try vmread64(index)
     }
 
     private func vmwrite16(_ index: UInt32, _ data: UInt16) throws {
@@ -64,12 +61,9 @@ final class VMCS {
         try vmwrite(index, data)
     }
 
-    private func vmwriteNatural(_ index: UInt32, _ data: UInt) throws {
-        #if arch(x86_64)
+    // FIXME, This should probably check the current processor mode
+    private func vmwriteNatural(_ index: UInt32, _ data: UInt64) throws {
         try vmwrite64(index, UInt64(data))
-        #else
-        try vmwrite32(index, UInt32(data))
-        #endif
     }
 
 
@@ -1095,19 +1089,19 @@ final class VMCS {
         try vmwrite32(0x4C00, data)
     }
 
-    func cr0mask() throws -> UInt {
+    func cr0mask() throws -> UInt64 {
         try vmreadNatural(0x6000)
     }
 
-    func cr0mask(_ data: UInt) throws {
+    func cr0mask(_ data: UInt64) throws {
         try vmwriteNatural(0x6000, data)
     }
 
-    func cr4mask() throws -> UInt {
+    func cr4mask() throws -> UInt64 {
         try vmreadNatural(0x6002)
     }
 
-    func cr4mask(_ data: UInt) throws {
+    func cr4mask(_ data: UInt64) throws {
         try vmwriteNatural(0x6002, data)
     }
 
@@ -1127,60 +1121,60 @@ final class VMCS {
         try vmwrite64(0x6006, data.value)
     }
 
-    func cr3TargetValue0() throws -> UInt {
+    func cr3TargetValue0() throws -> UInt64 {
         try vmreadNatural(0x6008)
     }
 
-    func cr3TargetValue0(_ data: UInt) throws {
+    func cr3TargetValue0(_ data: UInt64) throws {
         try vmwriteNatural(0x6008, data)
     }
 
-    func cr3TargetValue1() throws -> UInt {
+    func cr3TargetValue1() throws -> UInt64 {
         try vmreadNatural(0x600A)
     }
 
-    func cr3TargetValue1(_ data: UInt) throws {
+    func cr3TargetValue1(_ data: UInt64) throws {
         try vmwriteNatural(0x600A, data)
     }
 
-    func cr3TargetValue2() throws -> UInt {
+    func cr3TargetValue2() throws -> UInt64 {
         try vmreadNatural(0x600C)
     }
 
-    func cr3TargetValue2(_ data: UInt) throws {
+    func cr3TargetValue2(_ data: UInt64) throws {
         try vmwriteNatural(0x600C, data)
     }
 
-    func cr3TargetValue3() throws -> UInt {
+    func cr3TargetValue3() throws -> UInt64 {
         try vmreadNatural(0x600E)
     }
 
-    func cr3TargetValue3(_ data: UInt) throws {
+    func cr3TargetValue3(_ data: UInt64) throws {
         try vmwriteNatural(0x600E, data)
     }
 
     // Natural width Read-Only data fields
-    func exitQualification() throws -> UInt {
+    func exitQualification() throws -> UInt64 {
         try vmreadNatural(0x6400)
     }
 
-    func ioRCX() throws -> UInt {
+    func ioRCX() throws -> UInt64 {
         try vmreadNatural(0x6402)
     }
 
-    func ioRSI() throws -> UInt {
+    func ioRSI() throws -> UInt64 {
         try vmreadNatural(0x6404)
     }
 
-    func ioRDI() throws -> UInt {
+    func ioRDI() throws -> UInt64 {
         try vmreadNatural(0x6406)
     }
 
-    func ioRIP() throws -> UInt {
+    func ioRIP() throws -> UInt64 {
         try vmreadNatural(0x6408)
     }
 
-    func guestLinearAddress() throws -> UInt {
+    func guestLinearAddress() throws -> UInt64 {
         try vmreadNatural(0x640A)
     }
 
@@ -1209,107 +1203,107 @@ final class VMCS {
         try vmwrite64(0x6804, data.value)
     }
 
-    func guestESBase() throws -> UInt {
+    func guestESBase() throws -> UInt64 {
         try vmreadNatural(0x6806)
     }
 
-    func guestESBase(_ data: UInt) throws {
+    func guestESBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6806, data)
     }
 
-    func guestCSBase() throws -> UInt {
+    func guestCSBase() throws -> UInt64 {
         try vmreadNatural(0x6808)
     }
 
-    func guestCSBase(_ data: UInt) throws {
+    func guestCSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6808, data)
     }
 
-    func guestSSBase() throws -> UInt {
+    func guestSSBase() throws -> UInt64 {
         try vmreadNatural(0x680A)
     }
 
-    func guestSSBase(_ data: UInt) throws {
+    func guestSSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x680A, data)
     }
 
-    func guestDSBase() throws -> UInt {
+    func guestDSBase() throws -> UInt64 {
         try vmreadNatural(0x680C)
     }
 
-    func guestDSBase(_ data: UInt) throws {
+    func guestDSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x680C, data)
     }
 
-    func guestFSBase() throws -> UInt {
+    func guestFSBase() throws -> UInt64 {
         try vmreadNatural(0x680E)
     }
 
-    func guestFSBase(_ data: UInt) throws {
+    func guestFSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x680E, data)
     }
 
-    func guestGSBase() throws -> UInt {
+    func guestGSBase() throws -> UInt64 {
         try vmreadNatural(0x6810)
     }
 
-    func guestGSBase(_ data: UInt) throws {
+    func guestGSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6810, data)
     }
 
-    func guestLDTRBase() throws -> UInt {
+    func guestLDTRBase() throws -> UInt64 {
         try vmreadNatural(0x6812)
     }
 
-    func guestLDTRBase(_ data: UInt) throws {
+    func guestLDTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6812, data)
     }
 
-    func guestTRBase() throws -> UInt {
+    func guestTRBase() throws -> UInt64 {
         try vmreadNatural(0x6814)
     }
 
-    func guestTRBase(_ data: UInt) throws {
+    func guestTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6814, data)
     }
 
-    func guestGDTRBase() throws -> UInt {
+    func guestGDTRBase() throws -> UInt64 {
         try vmreadNatural(0x6816)
     }
 
-    func guestGDTRBase(_ data: UInt) throws {
+    func guestGDTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6816, data)
     }
 
-    func guestIDTRBase() throws -> UInt {
+    func guestIDTRBase() throws -> UInt64 {
         try vmreadNatural(0x6818)
     }
 
-    func guestIDTRBase(_ data: UInt) throws {
+    func guestIDTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6818, data)
     }
 
-    func guestDR7() throws -> UInt {
+    func guestDR7() throws -> UInt64 {
         try vmreadNatural(0x681A)
     }
 
-    func guestDR7(_ data: UInt) throws {
+    func guestDR7(_ data: UInt64) throws {
         try vmwriteNatural(0x681A, data)
     }
 
-    func guestRSP() throws -> UInt {
+    func guestRSP() throws -> UInt64 {
         try vmreadNatural(0x681C)
     }
 
-    func guestRSP(_ data: UInt) throws {
+    func guestRSP(_ data: UInt64) throws {
         try vmwriteNatural(0x681C, data)
     }
 
-    func guestRIP() throws -> UInt {
+    func guestRIP() throws -> UInt64 {
         try vmreadNatural(0x681E)
     }
 
-    func guestRIP(_ data: UInt) throws {
+    func guestRIP(_ data: UInt64) throws {
         try vmwriteNatural(0x681E, data)
     }
 
@@ -1318,12 +1312,12 @@ final class VMCS {
     }
 
     func guestRFlags(_ data: CPU.RFLAGS) throws {
-        try vmwriteNatural(0x6820, UInt(data.rawValue))
+        try vmwriteNatural(0x6820, data.rawValue)
     }
 
     struct PendingDebugExceptions {
         let bits: BitArray64
-        var rawValue: UInt { UInt(bits.rawValue) }
+        var rawValue: UInt64 { bits.rawValue }
 
         var b0: Bool { bits[0] == 1 }
         var b1: Bool { bits[1] == 1 }
@@ -1338,7 +1332,7 @@ final class VMCS {
         var reserved4: Int { Int(bits[17...63]) }
         var reserved: Int { reserved1 + reserved2 + reserved3 + reserved4 }
 
-        init(_ rawValue: UInt) {
+        init(_ rawValue: UInt64) {
             bits = BitArray64(rawValue)
         }
     }
@@ -1351,19 +1345,19 @@ final class VMCS {
         try vmwriteNatural(0x6822, data.rawValue)
     }
 
-    func guestIA32SysenterESP() throws -> UInt {
+    func guestIA32SysenterESP() throws -> UInt64 {
         try vmreadNatural(0x6824)
     }
 
-    func guestIA32SysenterESP(_ data: UInt) throws {
+    func guestIA32SysenterESP(_ data: UInt64) throws {
         try vmwriteNatural(0x6824, data)
     }
 
-    func guestIA32SysenterEIP() throws -> UInt {
+    func guestIA32SysenterEIP() throws -> UInt64 {
         try vmreadNatural(0x6826)
     }
 
-    func guestIA32SysenterEIP(_ data: UInt) throws {
+    func guestIA32SysenterEIP(_ data: UInt64) throws {
         try vmwriteNatural(0x6826, data)
     }
 
@@ -1392,75 +1386,75 @@ final class VMCS {
         try vmwrite64(0x6C04, data.value)
     }
 
-    func hostFSBase() throws -> UInt {
+    func hostFSBase() throws -> UInt64 {
         try vmreadNatural(0x6C06)
     }
 
-    func hostFSBase(_ data: UInt) throws {
+    func hostFSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6C06, data)
     }
 
-    func hostGSBase() throws -> UInt {
+    func hostGSBase() throws -> UInt64 {
         try vmreadNatural(0x6C08)
     }
 
-    func hostGSBase(_ data: UInt) throws {
+    func hostGSBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6C08, data)
     }
 
-    func hostTRBase() throws -> UInt {
+    func hostTRBase() throws -> UInt64 {
         try vmreadNatural(0x6C0A)
     }
 
-    func hostTRBase(_ data: UInt) throws {
+    func hostTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6C0A, data)
     }
 
-    func hostGDTRBase() throws -> UInt {
+    func hostGDTRBase() throws -> UInt64 {
         try vmreadNatural(0x6C0C)
     }
 
-    func hostGDTRBase(_ data: UInt) throws {
+    func hostGDTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6C0C, data)
     }
 
-    func hostIDTRBase() throws -> UInt {
+    func hostIDTRBase() throws -> UInt64 {
         try vmreadNatural(0x6C0E)
     }
 
-    func hostIDTRBase(_ data: UInt) throws {
+    func hostIDTRBase(_ data: UInt64) throws {
         try vmwriteNatural(0x6C0E, data)
     }
 
-    func hostIA32SysenterESP() throws -> UInt {
+    func hostIA32SysenterESP() throws -> UInt64 {
         try vmreadNatural(0x6C10)
     }
 
-    func hostIA32SysenterESP(_ data: UInt) throws {
+    func hostIA32SysenterESP(_ data: UInt64) throws {
         try vmwriteNatural(0x6C10, data)
     }
 
-    func hostIA32SysenterEIP() throws -> UInt {
+    func hostIA32SysenterEIP() throws -> UInt64 {
         try vmreadNatural(0x6C12)
     }
 
-    func hostIA32SysenterEIP(_ data: UInt) throws {
+    func hostIA32SysenterEIP(_ data: UInt64) throws {
         try vmwriteNatural(0x6C12, data)
     }
 
-    func hostRSP() throws -> UInt {
+    func hostRSP() throws -> UInt64 {
         try vmreadNatural(0x6C14)
     }
 
-    func hostRSP(_ data: UInt) throws {
+    func hostRSP(_ data: UInt64) throws {
         try vmwriteNatural(0x6C14, data)
     }
 
-    func hostRIP() throws -> UInt {
+    func hostRIP() throws -> UInt64 {
         try vmreadNatural(0x6C16)
     }
 
-    func hostRIP(_ data: UInt) throws {
+    func hostRIP(_ data: UInt64) throws {
         try vmwriteNatural(0x6C16, data)
     }
 
