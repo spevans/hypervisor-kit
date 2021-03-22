@@ -8,8 +8,33 @@
  *
  */
 
-struct BitArray8: CustomStringConvertible {
-    private(set) var rawValue: UInt8
+typealias BitArray8 = BitArray<UInt8>
+typealias BitArray16 = BitArray<UInt16>
+typealias BitArray32 = BitArray<UInt32>
+typealias BitArray64 = BitArray<UInt64>
+
+struct BitArray<T: FixedWidthInteger & UnsignedInteger> : BidirectionalCollection, MutableCollection, CustomStringConvertible {
+
+    typealias Index = Int
+    typealias Element = Int
+    typealias SubSequnce = Self
+
+    private(set) var rawValue: T
+
+    var startIndex: Self.Index { 0 }
+
+    var endIndex: Self.Index { rawValue.bitWidth }
+    var count: Int { rawValue.bitWidth }
+
+
+    func index(before i: Self.Index) -> Self.Index {
+        return i - 1
+    }
+
+    func index(after i: Self.Index) -> Self.Index {
+        return i + 1
+    }
+
 
     var description: String { return String(rawValue, radix: 2) }
 
@@ -19,14 +44,14 @@ struct BitArray8: CustomStringConvertible {
     }
 
     init(_ rawValue: Int) {
-        self.rawValue = UInt8(rawValue)
+        self.rawValue = T(rawValue)
     }
 
     init(_ rawValue: UInt) {
-        self.rawValue = UInt8(rawValue)
+        self.rawValue = T(rawValue)
     }
 
-    init(_ rawValue: UInt8) {
+    init(_ rawValue: T) {
         self.rawValue = rawValue
     }
 
@@ -34,17 +59,17 @@ struct BitArray8: CustomStringConvertible {
     subscript(index: Int) -> Int {
         get {
             precondition(index >= 0)
-            precondition(index < 8)
+            precondition(index < T.bitWidth)
 
-            return (rawValue & UInt8(1 << index) == 0) ? 0 : 1
+            return (rawValue & (T(1) << index) == 0) ? 0 : 1
         }
 
         set(newValue) {
             precondition(index >= 0)
-            precondition(index < 8)
+            precondition(index < T.bitWidth)
             precondition(newValue == 0 || newValue == 1)
 
-            let mask: UInt8 = 1 << index
+            let mask: T = 1 << index
             if (newValue == 1) {
                 rawValue |= mask
             } else {
@@ -54,13 +79,13 @@ struct BitArray8: CustomStringConvertible {
     }
 
 
-    subscript(index: ClosedRange<Int>) -> UInt8 {
+    subscript(index: ClosedRange<Int>) -> T {
         get {
-            var ret: UInt8 = 0
-            var bit: UInt8 = 1
+            var ret: T = 0
+            var bit: T = 1
 
             for i in index {
-                let mask: UInt8 = 1 << i
+                let mask: T = 1 << i
                 if rawValue & mask != 0 {
                     ret |= bit
                 }
@@ -69,9 +94,9 @@ struct BitArray8: CustomStringConvertible {
             return ret
         }
         set {
-            var bit: UInt8 = 1
+            var bit: T = 1
             for i in index {
-                let mask: UInt8 = 1 << i
+                let mask: T = 1 << i
                 if (newValue & bit) == 0 {
                     rawValue &= ~mask
                 } else {
@@ -82,294 +107,6 @@ struct BitArray8: CustomStringConvertible {
         }
     }
 
-
-    func toInt() -> Int {
-        return Int(rawValue)
-    }
-}
-
-
-struct BitArray16: CustomStringConvertible {
-    private(set) var rawValue: UInt16
-
-    var description: String { return String(rawValue, radix: 2) }
-
-
-    init() {
-        rawValue = 0
-    }
-
-    init(_ rawValue: Int) {
-        self.rawValue = UInt16(rawValue)
-    }
-
-    init(_ rawValue: UInt) {
-        self.rawValue = UInt16(rawValue)
-    }
-
-    init(_ rawValue: UInt8) {
-        self.rawValue = UInt16(rawValue)
-    }
-
-
-    init(_ rawValue: UInt16) {
-        self.rawValue = rawValue
-    }
-
-    subscript(index: Int) -> Int {
-        get {
-            precondition(index >= 0)
-            precondition(index < 16)
-
-            return (rawValue & UInt16(1 << index) == 0) ? 0 : 1
-        }
-
-        set(newValue) {
-            precondition(index >= 0)
-            precondition(index < 16)
-            precondition(newValue == 0 || newValue == 1)
-
-            let mask: UInt16 = 1 << index
-            if (newValue == 1) {
-                rawValue |= mask
-            } else {
-                rawValue &= ~mask
-            }
-        }
-    }
-
-
-    subscript(index: ClosedRange<Int>) -> UInt16 {
-        get {
-            var ret: UInt16 = 0
-            var bit: UInt16 = 1
-
-            for i in index {
-                let mask: UInt16 = 1 << i
-                if rawValue & mask != 0 {
-                    ret |= bit
-                }
-                bit <<= 1
-            }
-            return ret
-        }
-        set {
-            var bit: UInt16 = 1
-            for i in index {
-                let mask: UInt16 = 1 << i
-                if (newValue & bit) == 0 {
-                    rawValue &= ~mask
-                } else {
-                    rawValue |= mask
-                }
-                bit <<= 1
-            }
-        }
-    }
-
-    func toUInt8() -> UInt8 {
-        return UInt8(truncatingIfNeeded: rawValue)
-    }
-
-    func toInt() -> Int {
-        return Int(rawValue)
-    }
-}
-
-
-struct BitArray32: CustomStringConvertible {
-    private(set) var rawValue: UInt32
-
-    var description: String { return String(rawValue, radix: 2) }
-
-
-    init() {
-        rawValue = 0
-    }
-
-    init(_ rawValue: Int) {
-        self.rawValue = UInt32(rawValue)
-    }
-
-    init(_ rawValue: UInt) {
-        self.rawValue = UInt32(rawValue)
-    }
-
-    init(_ rawValue: UInt32) {
-        self.rawValue = rawValue
-    }
-
-    init(_ rawValue: UInt16) {
-        self.rawValue = UInt32(rawValue)
-    }
-
-    init(_ rawValue: UInt8) {
-        self.rawValue = UInt32(rawValue)
-    }
-
-    subscript(index: Int) -> Int {
-        get {
-            precondition(index >= 0)
-            precondition(index < 32)
-
-            return (rawValue & UInt32(1 << index) == 0) ? 0 : 1
-        }
-
-        set(newValue) {
-            precondition(index >= 0)
-            precondition(index < 32)
-            precondition(newValue == 0 || newValue == 1)
-
-            let mask: UInt32 = 1 << index
-            if (newValue == 1) {
-                rawValue |= mask
-            } else {
-                rawValue &= ~mask
-            }
-        }
-    }
-
-    subscript(index: ClosedRange<Int>) -> UInt32 {
-        get {
-            var ret: UInt32 = 0
-            var bit: UInt32 = 1
-
-            for i in index {
-                let mask: UInt32 = 1 << i
-                if rawValue & mask != 0 {
-                    ret |= bit
-                }
-                bit <<= 1
-            }
-            return ret
-        }
-        set {
-            var bit: UInt32 = 1
-            for i in index {
-                let mask: UInt32 = 1 << i
-                if (newValue & bit) == 0 {
-                    rawValue &= ~mask
-                } else {
-                    rawValue |= mask
-                }
-                bit <<= 1
-            }
-        }
-    }
-
-    func toUInt8() -> UInt8 {
-        return UInt8(truncatingIfNeeded: rawValue)
-    }
-
-    func toUInt16() -> UInt16 {
-        return UInt16(truncatingIfNeeded: rawValue)
-    }
-
-    func toUInt32() -> UInt32 {
-        return UInt32(rawValue)
-    }
-
-    func toInt() -> Int {
-        return Int(rawValue)
-    }
-}
-
-
-struct BitArray64: CustomStringConvertible {
-    private(set) var rawValue: UInt64
-
-    var description: String { return String(rawValue, radix: 2) }
-
-
-    init() {
-        rawValue = 0
-    }
-
-    init(_ rawValue: Int) {
-        self.rawValue = UInt64(rawValue)
-    }
-
-    init(_ rawValue: UInt) {
-        self.rawValue = UInt64(rawValue)
-    }
-
-    init(_ rawValue: UInt64) {
-        self.rawValue = rawValue
-    }
-
-    init(_ rawValue: UInt16) {
-        self.rawValue = UInt64(rawValue)
-    }
-
-    init(_ rawValue: UInt8) {
-        self.rawValue = UInt64(rawValue)
-    }
-
-    subscript(index: Int) -> Int {
-        get {
-            precondition(index >= 0)
-            precondition(index < 64)
-
-            return (rawValue & (UInt64(1) << index) == 0) ? 0 : 1
-        }
-
-        set {
-            precondition(index >= 0)
-            precondition(index < 64)
-            precondition(newValue == 0 || newValue == 1)
-
-            if (newValue == 1) {
-                rawValue |= (UInt64(1) << index)
-            } else {
-                rawValue &= ~(UInt64(1) << index)
-            }
-        }
-    }
-
-
-    subscript(index: ClosedRange<Int>) -> UInt64 {
-        get {
-            var ret: UInt64 = 0
-            var bit: UInt64 = 1
-
-            for i in index {
-                let mask: UInt64 = 1 << i
-                if rawValue & mask != 0 {
-                    ret |= bit
-                }
-                bit <<= 1
-            }
-            return ret
-        }
-        set {
-            var bit: UInt64 = 1
-            for i in index {
-                let mask: UInt64 = 1 << i
-                if (newValue & bit) == 0 {
-                    rawValue &= ~mask
-                } else {
-                    rawValue |= mask
-                }
-                bit <<= 1
-            }
-        }
-    }
-
-    func toUInt8() -> UInt8 {
-        return UInt8(truncatingIfNeeded: rawValue)
-    }
-
-    func toUInt16() -> UInt16 {
-        return UInt16(truncatingIfNeeded: rawValue)
-    }
-
-    func toUInt32() -> UInt32 {
-        return UInt32(truncatingIfNeeded: rawValue)
-    }
-
-    func toUInt64() -> UInt64 {
-        return rawValue
-    }
 
     func toInt() -> Int {
         return Int(rawValue)

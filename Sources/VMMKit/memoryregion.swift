@@ -122,14 +122,14 @@ public final class MemoryRegion {
         let buffer = UnsafeRawBufferPointer(start: ptr, count: count)
 
         var idx = 0
-        var output = "\(hexNum(offset + idx, width: 5)): "
+        var output = "\(hexNum(UInt16(offset + idx))): "
         for byte in buffer {
-            output += hexNum(byte, width: 2)
+            output += hexNum(byte)
             output += " "
             idx += 1
             if idx == count { break }
             if idx.isMultiple(of: 16) {
-                output += "\n\(hexNum(offset + idx, width: 5)): "
+                output += "\n\(hexNum(UInt16(offset + idx))): "
             }
         }
         return output

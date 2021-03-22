@@ -347,7 +347,7 @@ public struct CPU {
 
     public struct CR0Register: CustomStringConvertible {
         private(set) var bits: BitArray64
-        var value: UInt64 { bits.toUInt64() }
+        var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
             bits = BitArray64(value)
@@ -432,7 +432,7 @@ public struct CPU {
 
     struct CR3Register {
         private(set) var bits: BitArray64
-        var value: UInt64 { bits.toUInt64() }
+        var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
             bits = BitArray64(value)
@@ -465,7 +465,7 @@ public struct CPU {
 
     struct CR4Register: CustomStringConvertible {
         private(set) var bits: BitArray64
-        var value: UInt64 { bits.toUInt64() }
+        var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
             bits = BitArray64(value)

@@ -17,8 +17,9 @@ extension NSLock {
 }
 
 
-func hexNum<T: BinaryInteger>(_ value: T, width: Int) -> String {
+func hexNum<T: FixedWidthInteger & UnsignedInteger>(_ value: T) -> String {
     let num = String(value, radix: 16)
+    let width = T.bitWidth / 4
     if num.count <= width {
         return String(repeating: "0", count: width - num.count) + num
     }
