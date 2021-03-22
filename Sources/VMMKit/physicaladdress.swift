@@ -172,7 +172,7 @@ extension VirtualMachine.VCPU {
         // FIXME: Check for overflow / wraparound/ unrealmode
         // FIXME: Check segment access rights / limits
 
-        try registers.readRegisters(.all)
+        try registers.registerCacheControl.readRegisters(.all)
         let segmentRegister: SegmentRegister
         switch memory.segmentRegister {
             case .cs: segmentRegister = registers.cs
@@ -237,7 +237,7 @@ extension VirtualMachine.VCPU {
 
 
     func physicalAddress(for laddr: LinearAddress) throws -> PhysicalAddress? {
-        try registers.readRegisters(.cr0)
+        try registers.registerCacheControl.readRegisters(.cr0)
         let cr0 = CPU.CR0Register(registers.cr0)
         if !cr0.paging {
             // No paging, Physical Address = Linear Address

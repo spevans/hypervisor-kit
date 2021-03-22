@@ -59,11 +59,11 @@ extension VirtualMachine {
                     throw HVError.vmSubsystemFail
             }
             kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
-            registers = Registers(vcpu_fd: vcpu_fd)
+            registers = Registers(registerCacheControl: RegisterCacheControl(vcpu_fd: vcpu_fd))
         }
 
         public func readRegisters(_ registerSet: RegisterSet) throws -> Registers {
-            try registers.readRegisters(registerSet)
+            try registers.registerCacheControl.readRegisters(registerSet)
             return registers
         }
 
@@ -90,8 +90,8 @@ extension VirtualMachine {
 
             do {
                 // Get a final copy of the CPU registers
-                try registers.readRegisters(.all)
-                registers.makeReadOnly()
+                try registers.registerCacheControl.readRegisters(.all)
+                registers.registerCacheControl.makeReadOnly()
             } catch {
                 fatalError("Cant read CPU registers \(error)")
             }
@@ -111,9 +111,9 @@ extension VirtualMachine {
 
 
         private func runOnce() throws -> VMExit {
-            try registers.setupRegisters()
+            try registers.registerCacheControl.setupRegisters()
 
-            try registers.readRegisters(.rflags)
+            try registers.registerCacheControl.readRegisters(.rflags)
             if registers.rflags.interruptEnable {
                 if let irq = nextPendingIRQ() {
                     var interrupt = kvm_interrupt(irq: irq)
@@ -135,7 +135,7 @@ extension VirtualMachine {
             }
 
             // Reset the register cache
-            registers.clearCache()
+            registers.registerCacheControl.clearCache()
 
             guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
                 fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")

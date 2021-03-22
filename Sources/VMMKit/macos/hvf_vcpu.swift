@@ -74,11 +74,14 @@ extension VirtualMachine {
             try vmcs.cr0ReadShadow(CPU.CR0Register(0))
             try vmcs.cr4mask(0)
             try vmcs.cr4ReadShadow(CPU.CR4Register(0))
-            registers = Registers(vcpuId: vcpuId, vmcs: vmcs)
+            registers = Registers(registerCacheControl: RegisterCacheControl(vcpuId: vcpuId, vmcs: vmcs))
         }
 
+        /// readRegisters(registerSet:) must be called for a specific register before reading that register so that it can be loaded
+        /// from the vCPU. It is not required before writing to a full width register (eg RAX) but writing to a narrower register (EAX, AX, AH, AL)
+        /// does require it to be read first.
         public func readRegisters(_ registerSet: RegisterSet) throws -> Registers {
-            try registers.readRegisters(registerSet)
+            try registers.registerCacheControl.readRegisters(registerSet)
             return registers
         }
 
@@ -105,8 +108,8 @@ extension VirtualMachine {
             status = .shuttingDown
             do {
                 // Get a final copy of the CPU registers
-                try registers.readRegisters(.all)
-                registers.makeReadOnly()
+                try registers.registerCacheControl.readRegisters(.all)
+                registers.registerCacheControl.makeReadOnly()
             } catch {
                 vm.logger.error("Cannont read vCPU registers: \(error)")
             }
@@ -125,7 +128,7 @@ extension VirtualMachine {
 
         // This must be run on the vcpu's thread
         internal func preflightCheck() throws {
-            try registers.setupRegisters()
+            try registers.registerCacheControl.setupRegisters()
             try vmcs.checkFieldsAreValid()
         }
 
@@ -143,7 +146,7 @@ extension VirtualMachine {
                 guard let write = dataWrite else {
                     fatalError("Unsatisfied read \(read)")
                 }
-                try registers.readRegisters(.rax)
+                try registers.registerCacheControl.readRegisters(.rax)
                 switch write {
                     case .byte(let value): registers.al = value
                     case .word(let value): registers.ax = value
@@ -156,14 +159,14 @@ extension VirtualMachine {
 
             var activityState = try vmcs.guestActivityState()
             while true {
-                try registers.setupRegisters()
+                try registers.registerCacheControl.setupRegisters()
 
                 if activityState == .hlt {
                     // TODO: Need to wait for an interrupt to wake up or NMI of
                     vm.logger.trace("In HLT state")
                 }
 
-                try registers.readRegisters(.rflags)
+                try registers.registerCacheControl.readRegisters(.rflags)
                 if registers.rflags.interruptEnable {
                     if let interruptInfo = nextPendingIRQ() {
                         vm.logger.trace("Injecting interrupt: \(interruptInfo)")
@@ -178,7 +181,7 @@ extension VirtualMachine {
 
                 try hvError(hv_vcpu_run(vcpuId))
                 // Reset the register cache
-                registers.clearCache()
+                registers.registerCacheControl.clearCache()
 
                 exitCount += 1
                 activityState = try vmcs.guestActivityState()
@@ -191,7 +194,7 @@ extension VirtualMachine {
 
         public func skipInstruction() throws {
             let instrLen = try vmcs.vmExitInstructionLength()
-            try registers.readRegisters(.rip)
+            try registers.registerCacheControl.readRegisters(.rip)
             registers.rip += UInt64(instrLen)
         }
 

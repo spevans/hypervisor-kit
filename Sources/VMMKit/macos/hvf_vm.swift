@@ -48,7 +48,7 @@ func hvError(_ error: hv_return_t) throws {
 }
 
 
-public final class VirtualMachine {
+public final class VirtualMachine: VirtualMachineProtocol {
 
     static private(set) var vmx_cap_pinbased: UInt64 = 0
     static private(set) var vmx_cap_procbased: UInt64 = 0

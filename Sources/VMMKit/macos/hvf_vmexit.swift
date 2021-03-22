@@ -16,7 +16,7 @@ extension VirtualMachine.VCPU {
     private func readStringUnit(selector: SegmentRegister, addressWidth: Int, dataWidth: Int) throws -> VMExit.DataWrite {
         switch addressWidth {
             case 16:
-                try registers.readRegisters([.rsi, .rflags])
+                try registers.registerCacheControl.readRegisters([.rsi, .rflags])
                 var rsi = registers.rsi
                 var si = UInt16(truncatingIfNeeded: rsi)
                 let physicalAddress = PhysicalAddress(selector.base) + UInt(si)
@@ -52,7 +52,7 @@ extension VirtualMachine.VCPU {
     internal func vmExit() throws -> VMExit? {
         let exitReason = try vmcs.exitReason()
         if vm.logger.logLevel <= Logger.Level.trace {
-            try registers.readRegisters(.rip)
+            try registers.registerCacheControl.readRegisters(.rip)
             vm.logger.trace("vmExit: \(exitReason.exitReason), rip: 0x\(String(registers.rip, radix: 16))")
         }
 
@@ -128,7 +128,7 @@ extension VirtualMachine.VCPU {
                     let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
                     let addressSize = 16 << exitInfo[7...9]
                     let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
-                    try registers.readRegisters([.segmentRegisters, .rcx])
+                    try registers.registerCacheControl.readRegisters([.segmentRegisters, .rcx])
 
                     let segReg: SegmentRegister = {
                         switch segmentOverride {
@@ -185,7 +185,7 @@ extension VirtualMachine.VCPU {
                         return .ioInOperation(port, dataRead)
                     }
                 } else {
-                    try registers.readRegisters(.rax)
+                    try registers.registerCacheControl.readRegisters(.rax)
                     if let dataWrite = VMExit.DataWrite(bitWidth: bitWidth, value: registers.rax) {
                         try skipInstruction()
                         return .ioOutOperation(port, dataWrite)

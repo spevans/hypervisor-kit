@@ -88,7 +88,7 @@ extension VirtualMachine.VCPU {
             outputString += "\(name): \(w) "
         }
 
-        try registers.readRegisters(.all)
+        try registers.registerCacheControl.readRegisters(.all)
         showReg("CS", registers.cs.selector)
         showReg("SS", registers.ss.selector)
         showReg("DS", registers.ds.selector)

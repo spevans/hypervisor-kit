@@ -62,405 +62,168 @@ extension DescriptorTable {
     }
 }
 
-extension VirtualMachine.VCPU {
-    // Access to the register set. This acts as a cache of the register and segment register values
-    // to avoid excess ioctl() calls to get either of the 2 sets.
-    // When the vCPU has finished executing, the _registers in the vcpu object is instansiated with
-    // the final register values instead of the vcpu so that the final register values can be accessed.
-    public final class Registers: RegisterProtocol {
-        private var vcpu_fd: Int32?
-        private var updatedRegisters = RegisterSet()
-        private var _regs: kvm_regs?
-        private var _sregs: kvm_sregs?
+internal struct RegisterCacheControl: RegisterCacheControlProtocol {
 
-        private var _cs: SegmentRegister?
-        private var _ds: SegmentRegister?
-        private var _es: SegmentRegister?
-        private var _fs: SegmentRegister?
-        private var _gs: SegmentRegister?
-        private var _ss: SegmentRegister?
-        private var _taskRegister: SegmentRegister?
-        private var _ldtr: SegmentRegister?
-        private var _gdt: DescriptorTable?
-        private var _idt: DescriptorTable?
-        private var _rflags: CPU.RFLAGS?
+    private var vcpu_fd: Int32?
+    private var _regs: kvm_regs?
+    private var _sregs: kvm_sregs?
+    internal var cache = RegisterCache()
 
-        private var _rax: UInt64?
-        private var _rbx: UInt64?
-        private var _rcx: UInt64?
-        private var _rdx: UInt64?
-        private var _rsi: UInt64?
-        private var _rdi: UInt64?
-        private var _rsp: UInt64?
-        private var _rbp: UInt64?
-        private var _r8: UInt64?
-        private var _r9: UInt64?
-        private var _r10: UInt64?
-        private var _r11: UInt64?
-        private var _r12: UInt64?
-        private var _r13: UInt64?
-        private var _r14: UInt64?
-        private var _r15: UInt64?
-        private var _rip: UInt64?
-        private var _cr0: UInt64?
-        private var _cr2: UInt64?
-        private var _cr3: UInt64?
-        private var _cr4: UInt64?
-        private var _efer: UInt64?
+    static let regsRegisterSet: RegisterSet = [
+        .rax, .rbx, .rcx, .rdx, .rsi, .rdi, .rsp, .rbp, .r8, .r9, .r10, .r11, .r12, .r13, .r14, .r15, .rip, .rflags
+    ]
+    static let sregsRegisterSet: RegisterSet = [
+        .cs, .ds, .es, .fs, .gs, .ss, .taskRegister, .ldtr, .gdt, .idt, .cr0, .cr2, .cr4, .efer
+    ]
 
-        static let regsRegisterSet: RegisterSet = [
-            .rax, .rbx, .rcx, .rdx, .rsi, .rdi, .rsp, .rbp, .r8, .r9, .r10, .r11, .r12, .r13, .r14, .r15, .rip, .rflags
-        ]
-        static let sregsRegisterSet: RegisterSet = [
-            .cs, .ds, .es, .fs, .gs, .ss, .taskRegister, .ldtr, .gdt, .idt, .cr0, .cr2, .cr4, .efer
-        ]
+    internal init(vcpu_fd: Int32) {
+        self.vcpu_fd = vcpu_fd
+    }
 
-        // Initialise an empty set of registers, used before first vCPU run.
-        internal init(vcpu_fd: Int32) {
-            self.vcpu_fd = vcpu_fd
+    /// readRegisters(registerSet:) must be called for a specific register before reading that register so that it can be loaded11
+    /// from the vCPU. It is not required before writing to a full width register (eg RAX) but writing to a narrower register (EAX, AX, AH, AL)
+    /// does require it to be read first.
+    internal mutating func readRegisters(_ registerSet: RegisterSet) throws {
+        guard vcpu_fd != nil else {
+            // If these values are nil then this should be a Register created when the
+            // vcpu finished so all of the cache values should be set, so just return
+            return
         }
 
-        // readRegisters(registerSet:) must be called for a specific register berfore reading that register
-        // so its shadow ivar will be non-nil
-        public func readRegisters(_ registerSet: RegisterSet) throws {
-            guard vcpu_fd != nil else {
-                // If these values are nil then this should be a Register created when the
-                // vcpu finished so all of the cache values should be set, so just return
-                return
-            }
+        if !registerSet.isDisjoint(with: Self.regsRegisterSet) {
+            let regs = try getRegs()
+            if registerSet.contains(.rax), cache._rax == nil { cache._rax = regs.rax }
+            if registerSet.contains(.rbx), cache._rbx == nil { cache._rbx = regs.rbx }
+            if registerSet.contains(.rcx), cache._rcx == nil { cache._rcx = regs.rcx }
+            if registerSet.contains(.rdx), cache._rdx == nil { cache._rdx = regs.rdx }
+            if registerSet.contains(.rdi), cache._rdi == nil { cache._rdi = regs.rdi }
+            if registerSet.contains(.rsi), cache._rsi == nil { cache._rsi = regs.rsi }
+            if registerSet.contains(.rbp), cache._rbp == nil { cache._rbp = regs.rbp }
+            if registerSet.contains(.rsp), cache._rsp == nil { cache._rsp = regs.rsp }
+            if registerSet.contains(.r8),   cache._r8 == nil { cache._r8 = regs.r8 }
+            if registerSet.contains(.r9),   cache._r9 == nil { cache._r9 = regs.r9 }
+            if registerSet.contains(.r10), cache._r10 == nil { cache._r10 = regs.r10 }
+            if registerSet.contains(.r11), cache._r11 == nil { cache._r11 = regs.r11 }
+            if registerSet.contains(.r12), cache._r12 == nil { cache._r12 = regs.r12 }
+            if registerSet.contains(.r13), cache._r13 == nil { cache._r13 = regs.r13 }
+            if registerSet.contains(.r14), cache._r14 == nil { cache._r14 = regs.r14 }
+            if registerSet.contains(.r15), cache._r15 == nil { cache._r15 = regs.r15 }
+            if registerSet.contains(.rip), cache._rip == nil { cache._rip = regs.rip }
+            if registerSet.contains(.rflags), cache._rflags == nil { cache._rflags = CPU.RFLAGS(regs.rflags) }
+        }
 
-            if !registerSet.isDisjoint(with: Self.regsRegisterSet) {
-                let regs = try getRegs()
-                if registerSet.contains(.rax), _rax == nil { _rax = regs.rax }
-                if registerSet.contains(.rbx), _rbx == nil { _rbx = regs.rbx }
-                if registerSet.contains(.rcx), _rcx == nil { _rcx = regs.rcx }
-                if registerSet.contains(.rdx), _rdx == nil { _rdx = regs.rdx }
-                if registerSet.contains(.rdi), _rdi == nil { _rdi = regs.rdi }
-                if registerSet.contains(.rsi), _rsi == nil { _rsi = regs.rsi }
-                if registerSet.contains(.rbp), _rbp == nil { _rbp = regs.rbp }
-                if registerSet.contains(.rsp), _rsp == nil { _rsp = regs.rsp }
-                if registerSet.contains(.r8),   _r8 == nil { _r8 = regs.r8 }
-                if registerSet.contains(.r9),   _r9 == nil { _r9 = regs.r9 }
-                if registerSet.contains(.r10), _r10 == nil { _r10 = regs.r10 }
-                if registerSet.contains(.r11), _r11 == nil { _r11 = regs.r11 }
-                if registerSet.contains(.r12), _r12 == nil { _r12 = regs.r12 }
-                if registerSet.contains(.r13), _r13 == nil { _r13 = regs.r13 }
-                if registerSet.contains(.r14), _r14 == nil { _r14 = regs.r14 }
-                if registerSet.contains(.r15), _r15 == nil { _r15 = regs.r15 }
-                if registerSet.contains(.rip), _rip == nil { _rip = regs.rip }
-                if registerSet.contains(.rflags), _rflags == nil { _rflags = CPU.RFLAGS(regs.rflags) }
-            }
+        if !registerSet.isDisjoint(with: Self.sregsRegisterSet) {
+            let sregs = try getSregs()
+            if registerSet.contains(.cr0), cache._cr0 == nil { cache._cr0 = sregs.cr0 }
+            if registerSet.contains(.cr2), cache._cr2 == nil { cache._cr2 = sregs.cr2 }
+            if registerSet.contains(.cr3), cache._cr3 == nil { cache._cr3 = sregs.cr3 }
+            if registerSet.contains(.cr4), cache._cr4 == nil { cache._cr4 = sregs.cr4 }
+            if registerSet.contains(.efer), cache._efer == nil { cache._efer = sregs.efer }
 
-            if !registerSet.isDisjoint(with: Self.sregsRegisterSet) {
-                let sregs = try getSregs()
-                if registerSet.contains(.cr0), _cr0 == nil { _cr0 = sregs.cr0 }
-                if registerSet.contains(.cr2), _cr2 == nil { _cr2 = sregs.cr2 }
-                if registerSet.contains(.cr3), _cr3 == nil { _cr3 = sregs.cr3 }
-                if registerSet.contains(.cr4), _cr4 == nil { _cr4 = sregs.cr4 }
-                if registerSet.contains(.efer), _efer == nil { _efer = sregs.efer }
+            if registerSet.contains(.cs), cache._cs == nil { cache._cs = SegmentRegister(sregs.cs) }
+            if registerSet.contains(.ss), cache._ss == nil { cache._ss = SegmentRegister(sregs.ss) }
+            if registerSet.contains(.ds), cache._ds == nil { cache._ds = SegmentRegister(sregs.ds) }
+            if registerSet.contains(.es), cache._es == nil { cache._es = SegmentRegister(sregs.es) }
+            if registerSet.contains(.fs), cache._fs == nil { cache._fs = SegmentRegister(sregs.fs) }
+            if registerSet.contains(.gs), cache._gs == nil { cache._gs = SegmentRegister(sregs.gs) }
+            if registerSet.contains(.ldtr), cache._ldtr == nil { cache._ldtr = SegmentRegister(sregs.ldt) }
+            if registerSet.contains(.taskRegister), cache._taskRegister == nil { cache._taskRegister = SegmentRegister(sregs.tr) }
+            if registerSet.contains(.gdt), cache._gdt == nil { cache._gdt = DescriptorTable(sregs.gdt) }
+            if registerSet.contains(.idt), cache._idt == nil { cache._idt = DescriptorTable(sregs.idt) }
+        }
+    }
 
-                if registerSet.contains(.cs), _cs == nil { _cs = SegmentRegister(sregs.cs) }
-                if registerSet.contains(.ss), _ss == nil { _ss = SegmentRegister(sregs.ss) }
-                if registerSet.contains(.ds), _ds == nil { _ds = SegmentRegister(sregs.ds) }
-                if registerSet.contains(.es), _es == nil { _es = SegmentRegister(sregs.es) }
-                if registerSet.contains(.fs), _fs == nil { _fs = SegmentRegister(sregs.fs) }
-                if registerSet.contains(.gs), _gs == nil { _gs = SegmentRegister(sregs.gs) }
-                if registerSet.contains(.ldtr), _ldtr == nil { _ldtr = SegmentRegister(sregs.ldt) }
-                if registerSet.contains(.taskRegister), _taskRegister == nil { _taskRegister = SegmentRegister(sregs.tr) }
-                if registerSet.contains(.gdt), _gdt == nil { _gdt = DescriptorTable(sregs.gdt) }
-                if registerSet.contains(.idt), _idt == nil { _idt = DescriptorTable(sregs.idt) }
+    internal mutating func setupRegisters() throws {
+        guard let vcpu_fd = vcpu_fd else {
+            throw HVError.vcpuHasBeenShutdown
+        }
+
+        if !cache.updatedRegisters.isDisjoint(with: Self.regsRegisterSet) {
+            var regs = try getRegs()
+            if cache.updatedRegisters.contains(.rax) { regs.rax = cache._rax! }
+            if cache.updatedRegisters.contains(.rbx) { regs.rbx = cache._rbx! }
+            if cache.updatedRegisters.contains(.rcx) { regs.rcx = cache._rcx! }
+            if cache.updatedRegisters.contains(.rdx) { regs.rdx = cache._rdx! }
+            if cache.updatedRegisters.contains(.rdi) { regs.rdi = cache._rdi! }
+            if cache.updatedRegisters.contains(.rsi) { regs.rsi = cache._rsi! }
+            if cache.updatedRegisters.contains(.rbp) { regs.rbp = cache._rbp! }
+            if cache.updatedRegisters.contains(.rsp) { regs.rsp = cache._rsp! }
+            if cache.updatedRegisters.contains(.r8) { regs.r8 = cache._r8! }
+            if cache.updatedRegisters.contains(.r9) { regs.r9 = cache._r9! }
+            if cache.updatedRegisters.contains(.r10) { regs.r10 = cache._r10! }
+            if cache.updatedRegisters.contains(.r11) { regs.r11 = cache._r11! }
+            if cache.updatedRegisters.contains(.r12) { regs.r12 = cache._r12! }
+            if cache.updatedRegisters.contains(.r13) { regs.r13 = cache._r13! }
+            if cache.updatedRegisters.contains(.r14) { regs.r14 = cache._r14! }
+            if cache.updatedRegisters.contains(.r15) { regs.r15 = cache._r15! }
+            if cache.updatedRegisters.contains(.rip) { regs.rip = cache._rip! }
+            if cache.updatedRegisters.contains(.rflags) { regs.rflags = cache._rflags!.rawValue }
+
+            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &regs) >= 0 else {
+                throw HVError.setRegisters
             }
         }
 
-        public var cs: SegmentRegister {
-            get { _cs! }
-            set { _cs = newValue; updatedRegisters.insert(.cs) }
-        }
+        if !cache.updatedRegisters.isDisjoint(with: Self.sregsRegisterSet) {
+            var sregs = try getSregs()
 
-        public var ss: SegmentRegister {
-            get { _ss! }
-            set { _ss = newValue; updatedRegisters.insert(.ss) }
-        }
+            if cache.updatedRegisters.contains(.cr0) { sregs.cr0 = cache._cr0! }
+            if cache.updatedRegisters.contains(.cr2) { sregs.cr2 = cache._cr2! }
+            if cache.updatedRegisters.contains(.cr3) { sregs.cr3 = cache._cr3! }
+            if cache.updatedRegisters.contains(.cr4) { sregs.cr4 = cache._cr4! }
+            if cache.updatedRegisters.contains(.efer) { sregs.efer = cache._efer! }
+            if cache.updatedRegisters.contains(.cs) { sregs.cs = cache._cs!.kvmSegment }
+            if cache.updatedRegisters.contains(.ss) { sregs.ss = cache._ss!.kvmSegment }
+            if cache.updatedRegisters.contains(.ds) { sregs.ds = cache._ds!.kvmSegment }
+            if cache.updatedRegisters.contains(.es) { sregs.es = cache._es!.kvmSegment }
+            if cache.updatedRegisters.contains(.fs) { sregs.fs = cache._fs!.kvmSegment }
+            if cache.updatedRegisters.contains(.gs) { sregs.gs = cache._gs!.kvmSegment }
+            if cache.updatedRegisters.contains(.ldtr) { sregs.ldt = cache._ldtr!.kvmSegment }
+            if cache.updatedRegisters.contains(.taskRegister) { sregs.tr = cache._taskRegister!.kvmSegment }
+            if cache.updatedRegisters.contains(.gdt) { sregs.gdt = cache._gdt!.kvmDtable }
+            if cache.updatedRegisters.contains(.idt) { sregs.idt = cache._idt!.kvmDtable }
 
-        public var ds: SegmentRegister {
-            get { _ds! }
-            set { _ds = newValue; updatedRegisters.insert(.ds) }
-        }
-
-        public var es: SegmentRegister {
-            get { _es! }
-            set { _es = newValue; updatedRegisters.insert(.es) }
-        }
-
-        public var fs: SegmentRegister {
-            get { _fs! }
-            set { _fs = newValue; updatedRegisters.insert(.fs) }
-        }
-
-        public var gs: SegmentRegister {
-            get { _gs! }
-            set { _gs = newValue; updatedRegisters.insert(.gs) }
-        }
-
-        public var taskRegister: SegmentRegister {
-            get { _taskRegister! }
-            set { _taskRegister = newValue; updatedRegisters.insert(.taskRegister) }
-        }
-
-        public var ldtr: SegmentRegister {
-            get { _ldtr! }
-            set { _ldtr = newValue; updatedRegisters.insert(.ldtr) }
-        }
-
-        public var gdt: DescriptorTable {
-            get { _gdt! }
-            set { _gdt = newValue; updatedRegisters.insert(.gdt) }
-        }
-
-        public var idt: DescriptorTable {
-            get { _idt! }
-            set { _idt = newValue; updatedRegisters.insert(.idt) }
-        }
-
-        public var rflags: CPU.RFLAGS {
-            get { _rflags! }
-            set { _rflags = newValue; updatedRegisters.insert(.rflags) }
-        }
-
-        public var rax: UInt64 {
-            get { _rax! }
-            set { _rax = newValue; updatedRegisters.insert(.rax) }
-        }
-
-        public var rbx: UInt64 {
-            get { _rbx! }
-            set { _rbx = newValue; updatedRegisters.insert(.rbx) }
-        }
-
-        public var rcx: UInt64 {
-            get { _rcx! }
-            set { _rcx = newValue; updatedRegisters.insert(.rcx) }
-        }
-
-        public var rdx: UInt64 {
-            get { _rdx! }
-            set { _rdx = newValue; updatedRegisters.insert(.rdx) }
-        }
-
-        public var rdi: UInt64 {
-            get { _rdi! }
-            set { _rdi = newValue; updatedRegisters.insert(.rdi) }
-        }
-
-        public var rsi: UInt64 {
-            get { _rsi! }
-            set { _rsi = newValue; updatedRegisters.insert(.rsi) }
-        }
-
-        public var rbp: UInt64 {
-            get { _rbp! }
-            set { _rbp = newValue; updatedRegisters.insert(.rbp) }
-        }
-
-        public var rsp: UInt64 {
-            get { _rsp! }
-            set { _rsp = newValue; updatedRegisters.insert(.rsp) }
-        }
-
-        public var r8: UInt64 {
-            get { _r8! }
-            set { _r8 = newValue; updatedRegisters.insert(.r8) }
-        }
-
-        public var r9: UInt64 {
-            get { _r9! }
-            set { _r9 = newValue; updatedRegisters.insert(.r9) }
-        }
-
-        public var r10: UInt64 {
-            get { _r10! }
-            set { _r10 = newValue; updatedRegisters.insert(.r10) }
-        }
-
-        public var r11: UInt64 {
-            get { _r11! }
-            set { _r11 = newValue; updatedRegisters.insert(.r11) }
-        }
-
-        public var r12: UInt64 {
-            get { _r12! }
-            set { _r12 = newValue; updatedRegisters.insert(.r12) }
-        }
-
-        public var r13: UInt64 {
-            get { _r13! }
-            set { _r13 = newValue; updatedRegisters.insert(.r13) }
-        }
-
-        public var r14: UInt64 {
-            get { _r14! }
-            set { _r14 = newValue; updatedRegisters.insert(.r14) }
-        }
-
-        public var r15: UInt64 {
-            get { _r15! }
-            set { _r15 = newValue; updatedRegisters.insert(.r15) }
-        }
-
-        public var rip: UInt64 {
-            get { _rip! }
-            set { _rip = newValue; updatedRegisters.insert(.rip) }
-        }
-
-        public var cr0: UInt64 {
-            get { _cr0! }
-            set { _cr0 = newValue; updatedRegisters.insert(.cr0) }
-        }
-
-        public var cr2: UInt64 {
-            get { _cr2! }
-            set { _cr2 = newValue; updatedRegisters.insert(.cr2) }
-        }
-
-        public var cr3: UInt64 {
-            get { _cr3! }
-            set { _cr3 = newValue; updatedRegisters.insert(.cr3) }
-        }
-
-        public var cr4: UInt64 {
-            get { _cr4! }
-            set { _cr4 = newValue; updatedRegisters.insert(.cr4) }
-        }
-
-        public var efer: UInt64 {
-            get { _efer! }
-            set { _efer = newValue; updatedRegisters.insert(.efer) }
-        }
-
-        internal func clearCache() {
-            updatedRegisters = RegisterSet()
-            _regs = nil
-            _sregs = nil
-            _cs = nil
-            _ds = nil
-            _es = nil
-            _fs = nil
-            _gs = nil
-            _ss = nil
-            _taskRegister = nil
-            _ldtr = nil
-            _gdt = nil
-            _idt = nil
-            _rflags = nil
-            _rax = nil
-            _rbx = nil
-            _rcx = nil
-            _rdx = nil
-            _rsi = nil
-            _rdi = nil
-            _rsp = nil
-            _rbp = nil
-            _r8 = nil
-            _r9 = nil
-            _r10 = nil
-            _r11 = nil
-            _r12 = nil
-            _r13 = nil
-            _r14 = nil
-            _r15 = nil
-            _rip = nil
-            _cr0 = nil
-            _cr2 = nil
-            _cr3 = nil
-            _cr4 = nil
-            _efer = nil
-        }
-
-        internal func makeReadOnly() {
-            self.vcpu_fd = nil
-        }
-
-        internal func setupRegisters() throws {
-            guard let vcpu_fd = vcpu_fd else {
-                throw HVError.vcpuHasBeenShutdown
-            }
-
-            if !updatedRegisters.isDisjoint(with: Self.regsRegisterSet) {
-                var regs = try getRegs()
-                if updatedRegisters.contains(.rax) { regs.rax = _rax! }
-                if updatedRegisters.contains(.rbx) { regs.rbx = _rbx! }
-                if updatedRegisters.contains(.rcx) { regs.rcx = _rcx! }
-                if updatedRegisters.contains(.rdx) { regs.rdx = _rdx! }
-                if updatedRegisters.contains(.rdi) { regs.rdi = _rdi! }
-                if updatedRegisters.contains(.rsi) { regs.rsi = _rsi! }
-                if updatedRegisters.contains(.rbp) { regs.rbp = _rbp! }
-                if updatedRegisters.contains(.rsp) { regs.rsp = _rsp! }
-                if updatedRegisters.contains(.r8) { regs.r8 = _r8! }
-                if updatedRegisters.contains(.r9) { regs.r9 = _r9! }
-                if updatedRegisters.contains(.r10) { regs.r10 = _r10! }
-                if updatedRegisters.contains(.r11) { regs.r11 = _r11! }
-                if updatedRegisters.contains(.r12) { regs.r12 = _r12! }
-                if updatedRegisters.contains(.r13) { regs.r13 = _r13! }
-                if updatedRegisters.contains(.r14) { regs.r14 = _r14! }
-                if updatedRegisters.contains(.r15) { regs.r15 = _r15! }
-                if updatedRegisters.contains(.rip) { regs.rip = _rip! }
-                if updatedRegisters.contains(.rflags) { regs.rflags = _rflags!.rawValue }
-
-                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &regs) >= 0 else {
-                    throw HVError.setRegisters
-                }
-            }
-
-            if !updatedRegisters.isDisjoint(with: Self.sregsRegisterSet) {
-                var sregs = try getSregs()
-
-                if updatedRegisters.contains(.cr0) { sregs.cr0 = _cr0! }
-                if updatedRegisters.contains(.cr2) { sregs.cr2 = _cr2! }
-                if updatedRegisters.contains(.cr3) { sregs.cr3 = _cr3! }
-                if updatedRegisters.contains(.cr4) { sregs.cr4 = _cr4! }
-                if updatedRegisters.contains(.efer) { sregs.efer = _efer! }
-                if updatedRegisters.contains(.cs) { sregs.cs = _cs!.kvmSegment }
-                if updatedRegisters.contains(.ss) { sregs.ss = _ss!.kvmSegment }
-                if updatedRegisters.contains(.ds) { sregs.ds = _ds!.kvmSegment }
-                if updatedRegisters.contains(.es) { sregs.es = _es!.kvmSegment }
-                if updatedRegisters.contains(.fs) { sregs.fs = _fs!.kvmSegment }
-                if updatedRegisters.contains(.gs) { sregs.gs = _gs!.kvmSegment }
-                if updatedRegisters.contains(.ldtr) { sregs.ldt = _ldtr!.kvmSegment }
-                if updatedRegisters.contains(.taskRegister) { sregs.tr = _taskRegister!.kvmSegment }
-                if updatedRegisters.contains(.gdt) { sregs.gdt = _gdt!.kvmDtable }
-                if updatedRegisters.contains(.idt) { sregs.idt = _idt!.kvmDtable }
-
-                guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &sregs) >= 0 else {
-                    throw HVError.setRegisters
-                }
+            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &sregs) >= 0 else {
+                throw HVError.setRegisters
             }
         }
+        cache.updatedRegisters = []
+    }
 
-        private func getRegs() throws -> kvm_regs {
-            if let regs = _regs { return regs }
-            guard let vcpu_fd = vcpu_fd else {
-                throw HVError.vcpuHasBeenShutdown
-            }
-            var regs = kvm_regs()
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &regs) >= 0 else {
-                throw HVError.getRegisters
-            }
-            _regs = regs
-            return regs
-        }
+    internal mutating func clearCache() {
+        cache = RegisterCache()
+        _regs = nil
+        _sregs = nil
+    }
 
-        private func getSregs() throws -> kvm_sregs {
-            if let sregs = _sregs { return sregs }
-            guard let vcpu_fd = vcpu_fd else {
-                throw HVError.vcpuHasBeenShutdown
-            }
-            var sregs = kvm_sregs()
-            guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &sregs) >= 0 else {
-                throw HVError.getRegisters
-            }
-            _sregs = sregs
-            return sregs
+    internal mutating func makeReadOnly() {
+        self.vcpu_fd = nil
+    }
+
+    private mutating func getRegs() throws -> kvm_regs {
+        if let regs = _regs { return regs }
+        guard let vcpu_fd = vcpu_fd else {
+            throw HVError.vcpuHasBeenShutdown
         }
+        var regs = kvm_regs()
+        guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &regs) >= 0 else {
+            throw HVError.getRegisters
+        }
+        _regs = regs
+        return regs
+    }
+
+    private mutating func getSregs() throws -> kvm_sregs {
+        if let sregs = _sregs { return sregs }
+        guard let vcpu_fd = vcpu_fd else {
+            throw HVError.vcpuHasBeenShutdown
+        }
+        var sregs = kvm_sregs()
+        guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &sregs) >= 0 else {
+            throw HVError.getRegisters
+        }
+        _sregs = sregs
+        return sregs
     }
 }
 
