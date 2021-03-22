@@ -84,10 +84,10 @@ public final class MemoryRegion {
     static private let KVM_MEM_LOG_DIRTY_PAGES = 1
     static private let KVM_MEM_READONLY        = 2
 
-    internal let region: kvm_userspace_memory_region
+    internal let kvmRegion: kvm_userspace_memory_region
 
-    var guestAddress: PhysicalAddress { PhysicalAddress(region.guest_phys_addr) }
-    var size: UInt64 { region.memory_size }
+    var guestAddress: PhysicalAddress { PhysicalAddress(kvmRegion.guest_phys_addr) }
+    var size: UInt64 { kvmRegion.memory_size }
 
 
     init(size: UInt64, at address: UInt64, slot: Int, readOnly: Bool = false) throws {
@@ -102,7 +102,7 @@ public final class MemoryRegion {
 
         let flags = readOnly ? MemoryRegion.KVM_MEM_READONLY : 0
 
-        region = kvm_userspace_memory_region(slot: UInt32(slot), flags: UInt32(flags),
+        kvmRegion = kvm_userspace_memory_region(slot: UInt32(slot), flags: UInt32(flags),
                                              guest_phys_addr: address,
                                              memory_size: UInt64(size),
                                              userspace_addr: UInt64(UInt(bitPattern: ptr)))

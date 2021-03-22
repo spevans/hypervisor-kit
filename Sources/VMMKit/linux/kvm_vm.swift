@@ -9,8 +9,6 @@
 #if os(Linux)
 
 import CBits
-import Foundation
-import Dispatch
 import Logging
 
 private let KVM_DEVICE = "/dev/kvm"
@@ -31,15 +29,7 @@ enum HVError: Error {
     case vcpuHasBeenShutdown
 }
 
-public final class VirtualMachine {
-
-    private var _shutdown = false
-    internal let logger: Logger
-    private let vm_fd: Int32
-
-    public private(set) var vcpus: [VCPU] = []
-    public private(set) var memoryRegions: [MemoryRegion] = []
-
+extension VirtualMachine {
 
     static var apiVersion: Int32? = {
         return try? ioctl2arg(vmFD(), _IOCTL_KVM_GET_API_VERSION)
@@ -62,94 +52,55 @@ public final class VirtualMachine {
     }
 
 
-    public init(logger: Logger) throws {
-        self.logger = logger
-
+    internal func _createVM() throws {
         guard let dev_fd = try? Self.vmFD() else {
-            logger.error("Cannot open \(KVM_DEVICE)")
-            throw HVError.vmSubsystemFail
+            throw HVError.vmSubsystemFail // Cannot open \(KVM_DEVICE)")
         }
-        guard let apiVersion =  VirtualMachine.apiVersion, apiVersion >= 0 else {
-            fatalError("Bad API version")
+        guard let apiVersion = VirtualMachine.apiVersion, apiVersion >= 0 else {
+            close(dev_fd)
+            throw HVError.vmSubsystemFail   // "Bad API version"
         }
-        vm_fd = ioctl2arg(dev_fd, _IOCTL_KVM_CREATE_VM)
-        guard vm_fd >= 0 else {
-            logger.error("Cannont create VM")
-            throw HVError.vmSubsystemFail
+        let fd = ioctl2arg(dev_fd, _IOCTL_KVM_CREATE_VM)
+        guard fd >= 0 else {
+            close(dev_fd)
+            throw HVError.vmSubsystemFail // "Cannont create VM")
         }
+        vm_fd = fd
     }
 
 
-    deinit {
-        guard _shutdown == true else {
-            fatalError("VM has not been shutdown().")
-        }
-    }
-
-
-    public func shutdown() throws {
-        logger.info("Shutting down VM - deinit")
-        precondition(_shutdown == false)
-        guard allVcpusShutdown() else {
-            throw HVError.vcpusStillRunning
-        }
-
+    internal func _shutdownVM() throws {
         close(vm_fd)
-        vcpus = []
-        memoryRegions = []
-        _shutdown = true
+        vm_fd = -1
     }
 
 
-    public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
-        logger.info("Adding \(size) bytes at address 0x\(String(guestAddress, radix: 16))")
-
-        precondition(guestAddress & 0xfff == 0)
-        precondition(size & 0xfff == 0)
+    internal func _createMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool) throws -> MemoryRegion {
         let memRegion = try MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count)
 
-        var kvmRegion = memRegion.region
+        var kvmRegion = memRegion.kvmRegion
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
             throw HVError.vmMemoryError
         }
-        memoryRegions.append(memRegion)
-        logger.debug("Added memory")
         return memRegion
     }
 
-
-    @discardableResult
-    public func createVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {
-
-        var vcpu: VCPU? = nil
-        var createError: Error? = nil
-        let semaphore = DispatchSemaphore(value: 0)
-        let logger = self.logger
-
-        let thread = Thread {
-            let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
-            guard vcpu_fd >= 0 else {
-                logger.error("Cannot create vCPU")
-                createError = HVError.vmSubsystemFail
-                return
-            }
-            do {
-                let _vcpu = try VCPU(vm: self, vcpu_fd: vcpu_fd)
-                vcpu = _vcpu
-                startup(_vcpu)
-                _vcpu.status = .waitingToStart
-                semaphore.signal()
-                _vcpu.runVCPU()
-            } catch {
-                createError = error
-                return
-            }
+    internal func _destroyMemory(region: MemoryRegion) throws {
+        var kvmRegion = region.kvmRegion
+        kvmRegion.memory_size = 0
+        guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+            throw HVError.vmMemoryError
         }
-        thread.start()
-        semaphore.wait()
-        if let error = createError { throw error }
-        vcpus.append(vcpu!)
-        return vcpu!
+    }
+
+
+    /// This runs inside its own thread.
+    internal func _createVCPU() throws -> VCPU {
+        let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
+        guard vcpu_fd >= 0 else {
+            throw HVError.vmSubsystemFail
+        }
+        return try VCPU(vm: self, vcpu_fd: vcpu_fd)
     }
 
 

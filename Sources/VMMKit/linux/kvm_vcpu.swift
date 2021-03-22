@@ -67,7 +67,11 @@ extension VirtualMachine {
             return registers
         }
 
-        // This runs in its own thread created in VirtualMachine.createVCPU()
+        // This must be run on the vcpu's thread
+        internal func preflightCheck() throws {
+        }
+
+        // This runs in its own thread created in VirtualMachine.addVCPU()
         internal func runVCPU() {
             semaphore.wait()
             status = .running

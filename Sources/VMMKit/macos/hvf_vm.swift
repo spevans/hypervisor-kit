@@ -9,8 +9,6 @@
 #if os(macOS)
 
 import Hypervisor
-import Foundation
-import Dispatch
 import Logging
 
 
@@ -48,7 +46,7 @@ func hvError(_ error: hv_return_t) throws {
 }
 
 
-public final class VirtualMachine: VirtualMachineProtocol {
+extension VirtualMachine {
 
     static private(set) var vmx_cap_pinbased: UInt64 = 0
     static private(set) var vmx_cap_procbased: UInt64 = 0
@@ -56,24 +54,19 @@ public final class VirtualMachine: VirtualMachineProtocol {
     static private(set) var vmx_cap_entry: UInt64 = 0
     static private(set) var vmx_cap_exit: UInt64 = 0
 
-    private var _shutdown = false
-    internal let logger: Logger
-    public private(set) var vcpus: [VCPU] = []
-    public private(set) var memoryRegions: [MemoryRegion] = []
 
+    internal func _createVM() throws {
 
-    public init(logger: Logger) throws {
-
-        self.logger = logger
         func printCap(_ name: String, _ value: UInt64) {
             let hi = String(UInt32(value >> 32), radix: 16)
             let lo = String(UInt32(value & 0xffff_ffff), radix: 16)
             logger.debug("\(name): \(hi)\t\(lo)")
         }
 
+        var vmCreated = false
         do {
             try hvError(hv_vm_create(hv_vm_options_t(HV_VM_DEFAULT)))
-            logger.debug("VM Created")
+            vmCreated = true
             /* get hypervisor enforced capabilities of the machine, (see Intel docs) */
             try hvError(hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &VirtualMachine.vmx_cap_pinbased))
             try hvError(hv_vmx_read_capability(HV_VMX_CAP_PROCBASED, &VirtualMachine.vmx_cap_procbased))
@@ -81,73 +74,31 @@ public final class VirtualMachine: VirtualMachineProtocol {
             try hvError(hv_vmx_read_capability(HV_VMX_CAP_ENTRY, &VirtualMachine.vmx_cap_entry))
             try hvError(hv_vmx_read_capability(HV_VMX_CAP_EXIT, &VirtualMachine.vmx_cap_exit))
         } catch {
+            if vmCreated {
+                hv_vm_destroy()
+            }
             throw error
         }
     }
 
 
-    deinit {
-        guard _shutdown == true else {
-            fatalError("VM has not been shutdown().")
-        }
-    }
-
-
-    public func shutdown() throws {
-        logger.info("Shutting down VM - deinit")
-        precondition(_shutdown == false)
-        guard allVcpusShutdown() else {
-            throw HVError.vcpusStillRunning
-        }
-        vcpus = []
-
-        while let memory = memoryRegions.last {
-            try hvError(hv_vm_unmap(memory.guestAddress.rawValue, Int(memory.size)))
-            memoryRegions.removeLast()
-        }
-
+    internal func _shutdownVM() throws {
         try hvError(hv_vm_destroy())
-        _shutdown = true
     }
 
 
-    public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
-        logger.info("Adding \(size) bytes at address 0x\(String(guestAddress, radix: 16))")
-        precondition(guestAddress & 0xfff == 0)
-        precondition(size & 0xfff == 0)
+    internal func _createMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool) throws -> MemoryRegion {
+        return try MemoryRegion(size: size, at: guestAddress, readOnly: readOnly)
+    }
 
-        let memRegion = try MemoryRegion(size: size, at: guestAddress, readOnly: readOnly)
-        memoryRegions.append(memRegion)
-        return memRegion
+    internal func _destroyMemory(region: MemoryRegion) throws {
+        try hvError(hv_vm_unmap(region.guestAddress.rawValue, Int(region.size)))
     }
 
 
-    @discardableResult
-    public func createVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {
-
-        var vcpu: VCPU? = nil
-        var createError: Error? = nil
-        let semaphore = DispatchSemaphore(value: 0)
-
-        let thread = Thread {
-            do {
-                let _vcpu = try VCPU.init(vm: self)
-                vcpu = _vcpu
-                startup(_vcpu)
-                try _vcpu.preflightCheck()
-                _vcpu.status = .waitingToStart
-                semaphore.signal()
-                _vcpu.runVCPU()
-            } catch {
-                createError = error
-                return
-            }
-        }
-        thread.start()
-        semaphore.wait()
-        if let error = createError { throw error }
-        vcpus.append(vcpu!)
-        return vcpu!
+    /// This runs inside its own thread.
+    internal func _createVCPU() throws -> VCPU {
+        try VCPU.init(vm: self)
     }
 
 }

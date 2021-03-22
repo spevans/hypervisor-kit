@@ -24,7 +24,7 @@ final class VMMKitTests: XCTestCase {
         }
         XCTAssertNoThrow(try vm.addMemory(at: 0x1000, size: 8192))
         XCTAssertNoThrow(try vm.addMemory(at: 0x4000, size: 4096))
-        let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
+        let vcpu = try vm.addVCPU(startup: { $0.setupRealMode() })
         XCTAssertEqual(vm.memoryRegions.count, 2)
         XCTAssertTrue(vcpu.shutdown())
         XCTAssertNoThrow(try vm.shutdown())

@@ -41,7 +41,7 @@ final class RealModeTests: XCTestCase {
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
         logger.debug("setting up realmode")
-        let vcpu = try vm.createVCPU(startup: { $0.setupRealMode() })
+        let vcpu = try vm.addVCPU(startup: { $0.setupRealMode() })
         logger.debug("createRealModeVM done")
         return (vm, vcpu)
     }
@@ -88,7 +88,7 @@ final class RealModeTests: XCTestCase {
         let registers = try vcpu.readRegisters(.rip)
         XCTAssertEqual(registers.rip, 0x100a)
         XCTAssertTrue(gotHLT)
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 
@@ -123,7 +123,7 @@ final class RealModeTests: XCTestCase {
         XCTAssertEqual(dest_data.advanced(by: 1).load(as: UInt8.self), 0xbb)
         XCTAssertEqual(dest_data.advanced(by: 2).load(as: UInt8.self), 0xcc)
         XCTAssertEqual(dest_data.advanced(by: 3).load(as: UInt8.self), 0xdd)
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 
@@ -142,7 +142,7 @@ final class RealModeTests: XCTestCase {
         }
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 3))
         XCTAssertEqual(count, 10)
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
     #endif
@@ -354,7 +354,7 @@ final class RealModeTests: XCTestCase {
         XCTAssertEqual(vmExit, .hlt)
         #endif
 
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 
@@ -431,7 +431,7 @@ final class RealModeTests: XCTestCase {
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 3))
         XCTAssertEqual(testNumber, 3)
 
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 
@@ -459,7 +459,7 @@ final class RealModeTests: XCTestCase {
         // XCTAssertEqual(try vcpu.vmcs.vmExitInstructionLength(), 1)
         //vcpu.registers.rip += 1
 
-        XCTAssertTrue(vm.allVcpusShutdown())
+        XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 }
