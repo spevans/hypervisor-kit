@@ -134,7 +134,7 @@ extension VirtualMachine {
 
 
         public func start() throws {
-            guard status == .waitingToStart else { throw HVError.vcpuNotWaitingToStart }
+            guard status == .waitingToStart else { throw VMError.vcpuNotWaitingToStart }
             semaphore.signal()
         }
 

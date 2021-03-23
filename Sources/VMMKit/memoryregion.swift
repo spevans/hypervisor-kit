@@ -7,17 +7,11 @@
 //
 
 import Foundation
-
+import CBits
 #if os(macOS)
 import Hypervisor
 #endif
 
-import CBits
-
-
-enum HVKError: Error {
-    case memoryError
-}
 
 public final class MemoryRegion {
 
@@ -44,7 +38,7 @@ public final class MemoryRegion {
         var ptr: UnsafeMutableRawPointer? = nil
 
         guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, let _pointer = ptr else {
-            throw HVKError.memoryError
+            throw VMError.memoryAllocationFailure
         }
         pointer = _pointer
 
@@ -95,7 +89,7 @@ public final class MemoryRegion {
         var ptr: UnsafeMutableRawPointer? = nil
 
         guard posix_memalign(&ptr, MemoryRegion.pageSize, Int(size)) == 0, ptr != nil else {
-            throw HVKError.memoryError
+            throw VMError.memoryAllocationFailure
         }
         pointer = ptr!
         self.readOnly = readOnly
@@ -116,7 +110,7 @@ public final class MemoryRegion {
 
     public func loadBinary(from binary: Data, atOffset offset: UInt64 = 0) throws {
         guard binary.count <= size - offset else {
-            throw HVKError.memoryError
+            throw VMError.memoryRegionTooSmall
         }
         let buffer = UnsafeMutableRawBufferPointer(start: pointer.advanced(by: Int(offset)), count: binary.count)
         binary.copyBytes(to: buffer)

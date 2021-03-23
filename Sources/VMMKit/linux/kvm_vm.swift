@@ -11,23 +11,8 @@
 import CBits
 import Logging
 
-private let KVM_DEVICE = "/dev/kvm"
 
-enum HVError: Error {
-    case vmSubsystemFail
-    case badIOCTL(Int)
-    case setRegisters
-    case getRegisters
-    case vmRunError
-    case vmMemoryError
-    case invalidMemory
-    case irqAlreadyQueued
-    case irqNumberInvalid
-    case irqAlreadyHandledByKernelPIC
-    case vcpuNotWaitingToStart
-    case vcpusStillRunning
-    case vcpuHasBeenShutdown
-}
+private let KVM_DEVICE = "/dev/kvm"
 
 extension VirtualMachine {
 
@@ -45,7 +30,7 @@ extension VirtualMachine {
         if _vmfd == -1 {
             _vmfd = open2arg(KVM_DEVICE, O_RDWR)
             guard _vmfd >= 0 else {
-                throw HVError.vmSubsystemFail
+                throw VMError.kvmCannotAccessSubsystem
             }
         }
         return _vmfd
@@ -53,17 +38,15 @@ extension VirtualMachine {
 
 
     internal func _createVM() throws {
-        guard let dev_fd = try? Self.vmFD() else {
-            throw HVError.vmSubsystemFail // Cannot open \(KVM_DEVICE)")
-        }
-        guard let apiVersion = VirtualMachine.apiVersion, apiVersion >= 0 else {
+        let dev_fd = try Self.vmFD()
+        guard let apiVersion = VirtualMachine.apiVersion, apiVersion >= 12 else {
             close(dev_fd)
-            throw HVError.vmSubsystemFail   // "Bad API version"
+            throw VMError.kvmApiTooOld
         }
         let fd = ioctl2arg(dev_fd, _IOCTL_KVM_CREATE_VM)
         guard fd >= 0 else {
             close(dev_fd)
-            throw HVError.vmSubsystemFail // "Cannont create VM")
+            throw VMError.kvmCannotCreateVM
         }
         vm_fd = fd
     }
@@ -80,7 +63,7 @@ extension VirtualMachine {
 
         var kvmRegion = memRegion.kvmRegion
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            throw HVError.vmMemoryError
+            throw VMError.kvmMemoryError
         }
         return memRegion
     }
@@ -89,7 +72,7 @@ extension VirtualMachine {
         var kvmRegion = region.kvmRegion
         kvmRegion.memory_size = 0
         guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            throw HVError.vmMemoryError
+            throw VMError.kvmMemoryError
         }
     }
 
@@ -98,7 +81,7 @@ extension VirtualMachine {
     internal func _createVCPU() throws -> VCPU {
         let vcpu_fd = ioctl2arg(self.vm_fd, _IOCTL_KVM_CREATE_VCPU)
         guard vcpu_fd >= 0 else {
-            throw HVError.vmSubsystemFail
+            throw VMError.kvmCannotCreateVcpu
         }
         return try VCPU(vm: self, vcpu_fd: vcpu_fd)
     }
@@ -108,13 +91,13 @@ extension VirtualMachine {
         // Enabling IRQCHIP stops vmexits due to HLT
         guard ioctl2arg(vm_fd, _IOCTL_KVM_CREATE_IRQCHIP) == 0 else {
             logger.error("Cant add IRQCHIP")
-            throw HVError.vmSubsystemFail
+            throw VMError.kvmCannotAddPic
         }
 
         var pit_config = kvm_pit_config()
         guard ioctl3arg(vm_fd, _IOCTL_KVM_CREATE_PIT2, &pit_config) == 0 else {
             logger.error("Cant create PIT")
-            throw HVError.vmSubsystemFail
+            throw VMError.kvmCannotAddPit
         }
     }
 }

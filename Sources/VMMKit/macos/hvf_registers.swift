@@ -134,7 +134,7 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
 
     internal mutating func setupRegisters() throws {
         guard let vcpuId = self.vcpuId, let vmcs = self.vmcs else {
-            throw HVError.vcpuHasBeenShutdown
+            throw VMError.vcpuHasBeenShutdown
         }
 
         if cache.updatedRegisters.contains(.cs) {

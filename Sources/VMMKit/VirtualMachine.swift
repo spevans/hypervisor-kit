@@ -24,10 +24,19 @@ public final class VirtualMachine {
     public private(set) var memoryRegions: [MemoryRegion] = []
 
 
+    /// Initialise the VM subsystem
+    ///
+    /// - parameter logger: `Logger` object for `debug` and `trace` messages.
+    /// - throws: `VMError.vmCreateVMFailure`
     public init(logger: Logger) throws {
         self.logger = logger
-        try self._createVM()
-        isShutdown = false
+        do {
+            try self._createVM()
+            isShutdown = false
+        } catch {
+            logger.debug("Cannot create VM: \(error)")
+            throw VMError.vmCreateVMFailure
+        }
     }
 
     deinit {
@@ -46,16 +55,22 @@ public final class VirtualMachine {
     /// - returns: The new `MemoryRegion`.
     /// - precondition: `guestAddress` must be page aligned.
     /// - precondition: `size` is non-zero and is a multiple of the page size of the VM.
+    /// - throws: `VMError.addMemoryFailure`.
     public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
         logger.trace("Adding \(size) bytes at address 0x\(String(guestAddress, radix: 16))")
 
         precondition(guestAddress & 0xfff == 0)
         precondition(size > 0)
         precondition(size & 0xfff == 0)
-        let memRegion = try _createMemory(at: guestAddress, size: size, readOnly: readOnly)
-        memoryRegions.append(memRegion)
-        logger.trace("Added memory")
-        return memRegion
+        do {
+            let memRegion = try _createMemory(at: guestAddress, size: size, readOnly: readOnly)
+            memoryRegions.append(memRegion)
+            logger.trace("Added memory")
+            return memRegion
+        } catch {
+            logger.debug("Cannot add MemoryRegion: \(error)")
+            throw VMError.addMemoryFailure
+        }
     }
 
     /// Returns the memory region containing a specific physical address in the address space of the VM.
@@ -82,7 +97,7 @@ public final class VirtualMachine {
                 return region.pointer.advanced(by: Int(offset))
             }
         }
-        throw HVError.invalidMemory
+        throw VMError.invalidMemoryRegion
     }
 
     /// Add a VCPU to the Virtual Machine.
@@ -93,6 +108,7 @@ public final class VirtualMachine {
     /// ```
     /// - parameter startup: vCPU setup executed adter it has been created.
     /// - returns: The `VCPU` that has been added to the VM.
+    /// - throws: `VMError.vcpuCreateFailure`.
     @discardableResult
     public func addVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {
         var vcpu: VCPU? = nil
@@ -117,10 +133,9 @@ public final class VirtualMachine {
         thread.start()
         semaphore.wait()
         if let error = createError {
-            logger.error("Cannot create VCPU: \(error)")
-            throw error
+            logger.debug("Cannot create VCPU: \(error)")
+            throw VMError.vcpuCreateFailure
         }
-
         vcpus.append(vcpu!)
         return vcpu!
     }
@@ -157,21 +172,26 @@ public final class VirtualMachine {
     /// All MemoryRegions and VCPUS are deallocated by this method and the underlying
     /// hypervisor is shutdown by the OS.
     /// ```
-    /// - throws:HVError.vcpusStillRunning if any vCPU is still running.
+    /// - throws: `VMError.vcpusStillRunning` if any vCPU is still running.
+    /// - throws: `VMError.vmShutdownFailure` if an internal  subsystem error occurs.
     public func shutdown() throws {
         logger.trace("Shutting down VM - deinit")
         precondition(isShutdown == false)
         guard areVcpusShutdown() else {
-            throw HVError.vcpusStillRunning
+            throw VMError.vcpusStillRunning
         }
 
-        vcpus = []
-        for region in memoryRegions {
-            try _destroyMemory(region: region)
+        do {
+            vcpus = []
+            for region in memoryRegions {
+                try _destroyMemory(region: region)
+            }
+            memoryRegions = []
+            try _shutdownVM()
+            isShutdown = true
+        } catch {
+            logger.debug("Error Shutting down VM: \(error)")
+            throw VMError.vmShutdownFailure
         }
-        memoryRegions = []
-
-        try _shutdownVM()
-        isShutdown = true
     }
 }

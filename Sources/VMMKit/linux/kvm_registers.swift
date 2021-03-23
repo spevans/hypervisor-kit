@@ -135,7 +135,7 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
 
     internal mutating func setupRegisters() throws {
         guard let vcpu_fd = vcpu_fd else {
-            throw HVError.vcpuHasBeenShutdown
+            throw VMError.vcpuHasBeenShutdown
         }
 
         if !cache.updatedRegisters.isDisjoint(with: Self.regsRegisterSet) {
@@ -160,7 +160,7 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
             if cache.updatedRegisters.contains(.rflags) { regs.rflags = cache._rflags!.rawValue }
 
             guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_REGS, &regs) >= 0 else {
-                throw HVError.setRegisters
+                throw VMError.kvmSetRegisters
             }
         }
 
@@ -184,7 +184,7 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
             if cache.updatedRegisters.contains(.idt) { sregs.idt = cache._idt!.kvmDtable }
 
             guard ioctl3arg(vcpu_fd, _IOCTL_KVM_SET_SREGS, &sregs) >= 0 else {
-                throw HVError.setRegisters
+                throw VMError.kvmSetSpecialRegisters
             }
         }
         cache.updatedRegisters = []
@@ -203,11 +203,11 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
     private mutating func getRegs() throws -> kvm_regs {
         if let regs = _regs { return regs }
         guard let vcpu_fd = vcpu_fd else {
-            throw HVError.vcpuHasBeenShutdown
+            throw VMError.vcpuHasBeenShutdown
         }
         var regs = kvm_regs()
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_REGS, &regs) >= 0 else {
-            throw HVError.getRegisters
+            throw VMError.kvmGetRegisters
         }
         _regs = regs
         return regs
@@ -216,11 +216,11 @@ internal struct RegisterCacheControl: RegisterCacheControlProtocol {
     private mutating func getSregs() throws -> kvm_sregs {
         if let sregs = _sregs { return sregs }
         guard let vcpu_fd = vcpu_fd else {
-            throw HVError.vcpuHasBeenShutdown
+            throw VMError.vcpuHasBeenShutdown
         }
         var sregs = kvm_sregs()
         guard ioctl3arg(vcpu_fd, _IOCTL_KVM_GET_SREGS, &sregs) >= 0 else {
-            throw HVError.getRegisters
+            throw VMError.kvmGetSpecialRegisters
         }
         _sregs = sregs
         return sregs

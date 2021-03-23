@@ -12,36 +12,19 @@ import Hypervisor
 import Logging
 
 
-enum HVError: Error {
-    case hvError
-    case hvBusy
-    case hvBadArgument
-    case hvNoResources
-    case hvNoDevice
-    case hvDenied
-    case hvUnsupported
-    case hvUnknownError(UInt32)
-    case noMemory
-    case vmRunError
-    case invalidMemory
-    case vcpuNotWaitingToStart
-    case vcpusStillRunning
-    case vcpuHasBeenShutdown
-}
-
 // Hypervisor Framework return codes
 func hvError(_ error: hv_return_t) throws {
     let error = UInt32(bitPattern: error)
     switch error {
         case 0: return  // HV_SUCCESS
-        case 0xfae94001: throw HVError.hvError
-        case 0xfae94002: throw HVError.hvBusy
-        case 0xfae94003: throw HVError.hvBadArgument
-        case 0xfae94005: throw HVError.hvNoResources
-        case 0xfae94006: throw HVError.hvNoDevice
-        case 0xfae94007: throw HVError.hvDenied
-        case 0xfae9400f: throw HVError.hvUnsupported
-        default:         throw HVError.hvUnknownError(error)
+        case 0xfae94001: throw VMError.hvError
+        case 0xfae94002: throw VMError.hvBusy
+        case 0xfae94003: throw VMError.hvBadArgument
+        case 0xfae94005: throw VMError.hvNoResources
+        case 0xfae94006: throw VMError.hvNoDevice
+        case 0xfae94007: throw VMError.hvDenied
+        case 0xfae9400f: throw VMError.hvUnsupported
+        default:         throw VMError.hvUnknownError(error)
     }
 }
 

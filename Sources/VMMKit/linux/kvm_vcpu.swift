@@ -48,7 +48,7 @@ extension VirtualMachine {
 
             guard let mmapSize = VirtualMachine.vcpuMmapSize else {
                 vm.logger.error("Cannot vCPU mmap size")
-                throw HVError.vmSubsystemFail
+                throw VMError.kvmCannotGetVcpuSize
             }
             kvm_run_mmap_size = mmapSize
 
@@ -56,7 +56,7 @@ extension VirtualMachine {
                 ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
                     close(vcpu_fd)
                     vm.logger.error("Cannot mmap vcpu")
-                    throw HVError.vmSubsystemFail
+                    throw VMError.kvmCannotMmapVcpu
             }
             kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
             registers = Registers(registerCacheControl: RegisterCacheControl(vcpu_fd: vcpu_fd))
@@ -109,7 +109,7 @@ extension VirtualMachine {
 
 
         public func start() throws {
-            guard status == .waitingToStart else { throw HVError.vcpuNotWaitingToStart }
+            guard status == .waitingToStart else { throw VMError.vcpuNotWaitingToStart }
             semaphore.signal()
         }
 
@@ -125,9 +125,9 @@ extension VirtualMachine {
                     let result = ioctl3arg(vcpu_fd, _IOCTL_KVM_INTERRUPT, &interrupt)
                     switch result {
                         case 0: break
-                        case -EEXIST: throw HVError.irqAlreadyQueued
-                        case -EINVAL: throw HVError.irqNumberInvalid
-                        case -ENXIO: throw HVError.irqAlreadyHandledByKernelPIC
+                        case -EEXIST: throw VMError.irqAlreadyQueued
+                        case -EINVAL: throw VMError.irqNumberInvalid
+                        case -ENXIO: throw VMError.irqAlreadyHandledByKernelPIC
                         default: fatalError("KVM_INTERRUPT returned \(result)") // Includes EFAULT for bad memory location
                     }
                 }
@@ -135,7 +135,7 @@ extension VirtualMachine {
 
             let ret = ioctl2arg(vcpu_fd, _IOCTL_KVM_RUN)
             guard ret >= 0 else {
-                throw HVError.vmRunError
+                throw VMError.kvmRunError
             }
 
             // Reset the register cache
