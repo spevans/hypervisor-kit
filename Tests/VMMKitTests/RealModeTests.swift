@@ -41,7 +41,7 @@ final class RealModeTests: XCTestCase {
         let testCode = try realModeTestCode()
         try memRegion.loadBinary(from: testCode, atOffset: 0)
         logger.debug("setting up realmode")
-        let vcpu = try vm.addVCPU(startup: { $0.setupRealMode() })
+        let vcpu = try vm.addVCPU()
         logger.debug("createRealModeVM done")
         return (vm, vcpu)
     }

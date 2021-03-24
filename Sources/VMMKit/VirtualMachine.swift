@@ -106,11 +106,10 @@ public final class VirtualMachine {
     /// is executed to setup the vCPU and then it waits until the `.start()` method is called
     /// to begin executing code.
     /// ```
-    /// - parameter startup: vCPU setup executed adter it has been created.
     /// - returns: The `VCPU` that has been added to the VM.
     /// - throws: `VMError.vcpuCreateFailure`.
     @discardableResult
-    public func addVCPU(startup: @escaping (VCPU) -> ()) throws -> VCPU {
+    public func addVCPU() throws -> VCPU {
         var vcpu: VCPU? = nil
         var createError: Error? = nil
         let semaphore = DispatchSemaphore(value: 0)
@@ -119,7 +118,7 @@ public final class VirtualMachine {
             do {
                 let _vcpu = try self._createVCPU()
                 vcpu = _vcpu
-                startup(_vcpu)
+                _vcpu.setupRealMode()
                 try _vcpu.preflightCheck()
                 _vcpu.status = .waitingToStart
                 semaphore.signal()

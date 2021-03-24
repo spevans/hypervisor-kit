@@ -28,6 +28,9 @@ public enum VMError: Error {
     /// Trying to read or write the vCPU registers when the vCPU has already been shutdown.
     case vcpuHasBeenShutdown
 
+    /// Error reading the registers from the vCPU.
+    case vcpuReadRegisterFailed
+
     /// Physical address is not valid in any `MemoryRegion`.
     case invalidMemoryRegion
 

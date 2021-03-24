@@ -13,196 +13,80 @@ import Foundation
 import Dispatch
 
 
-extension VirtualMachine {
-    public final class VCPU: VCPUProtocol {
+extension VirtualMachine.VCPU {
 
-        private let vcpu_fd: Int32
-        private let kvmRunPtr: KVM_RUN_PTR
-        private let kvm_run_mmap_size: Int32
-
-        private let lock = NSLock()
-        internal let semaphore = DispatchSemaphore(value: 0)
-        private var pendingIRQ: UInt32?
-
-        private var _shutdownRequested = false
-        internal var shutdownRequested: Bool {
-            get { lock.performLocked { _shutdownRequested } }
-            set { lock.performLocked { _shutdownRequested = newValue } }
-        }
-
-        private var _status: VCPUStatus = .setup
-        internal var status: VCPUStatus {
-            get { lock.performLocked { _status } }
-            set { lock.performLocked { _status = newValue } }
-        }
-
-        public unowned let vm: VirtualMachine
-        public let registers: Registers
-        public var vmExitHandler: ((VirtualMachine.VCPU, VMExit) throws -> Bool) = { _, _ in true }
-        public var completionHandler: (() -> ())?
+    // This must be run on the vcpu's thread
+    internal func preflightCheck() throws {
+    }
 
 
-        init(vm: VirtualMachine, vcpu_fd: Int32) throws {
-            self.vcpu_fd = vcpu_fd
-            self.vm = vm
+    internal func destroy() throws {
+        munmap(kvmRunPtr, Int(kvm_run_mmap_size))
+        close(vcpu_fd)
+    }
 
-            guard let mmapSize = VirtualMachine.vcpuMmapSize else {
-                vm.logger.error("Cannot vCPU mmap size")
-                throw VMError.kvmCannotGetVcpuSize
-            }
-            kvm_run_mmap_size = mmapSize
 
-            guard let ptr = mmap(nil, Int(kvm_run_mmap_size), PROT_READ | PROT_WRITE, MAP_SHARED, vcpu_fd, 0),
-                ptr != UnsafeMutableRawPointer(bitPattern: -1) else {
-                    close(vcpu_fd)
-                    vm.logger.error("Cannot mmap vcpu")
-                    throw VMError.kvmCannotMmapVcpu
-            }
-            kvmRunPtr = ptr.bindMemory(to: kvm_run.self, capacity: 1)
-            registers = Registers(registerCacheControl: RegisterCacheControl(vcpu_fd: vcpu_fd))
-        }
+    internal func runOnce() throws -> VMExit {
+        try registers.registerCacheControl.setupRegisters()
 
-        public func readRegisters(_ registerSet: RegisterSet) throws -> Registers {
-            try registers.registerCacheControl.readRegisters(registerSet)
-            return registers
-        }
-
-        // This must be run on the vcpu's thread
-        internal func preflightCheck() throws {
-        }
-
-        // This runs in its own thread created in VirtualMachine.addVCPU()
-        internal func runVCPU() {
-            semaphore.wait()
-            status = .running
-            // Shutdown might be requested before the vCPU is run, if so never enter the loop
-            var finished = shutdownRequested
-
-            while !finished {
-                do {
-                    let vmExit = try self.runOnce()
-                    finished = try vmExitHandler(self, vmExit)
-                    if !finished {
-                        finished = shutdownRequested
-                    }
-                } catch {
-                    fatalError("processVMExit failed with \(error)")
+        try registers.registerCacheControl.readRegisters(.rflags)
+        if registers.rflags.interruptEnable {
+            if let irq = nextPendingIRQ() {
+                var interrupt = kvm_interrupt(irq: UInt32(irq))
+                vm.logger.trace("_IOCTL_KVM_INTERRUPT: \(interrupt)")
+                let result = ioctl3arg(vcpu_fd, _IOCTL_KVM_INTERRUPT, &interrupt)
+                switch result {
+                    case 0: break
+                    case -EEXIST: throw VMError.irqAlreadyQueued
+                    case -EINVAL: throw VMError.irqNumberInvalid
+                    case -ENXIO: throw VMError.irqAlreadyHandledByKernelPIC
+                    default: fatalError("KVM_INTERRUPT returned \(result)") // Includes EFAULT for bad memory location
                 }
             }
-            status = .shuttingDown
-            munmap(kvmRunPtr, Int(kvm_run_mmap_size))
-
-            do {
-                // Get a final copy of the CPU registers
-                try registers.registerCacheControl.readRegisters(.all)
-                registers.registerCacheControl.makeReadOnly()
-            } catch {
-                fatalError("Cant read CPU registers \(error)")
-            }
-            close(vcpu_fd)
-            status = .shutdown
-            if let handler = completionHandler {
-                handler()
-            }
-            Thread.exit()
         }
 
-
-        public func start() throws {
-            guard status == .waitingToStart else { throw VMError.vcpuNotWaitingToStart }
-            semaphore.signal()
+        let ret = ioctl2arg(vcpu_fd, _IOCTL_KVM_RUN)
+        guard ret >= 0 else {
+            throw VMError.kvmRunError
         }
 
+        // Reset the register cache
+        registers.registerCacheControl.clearCache()
 
-        private func runOnce() throws -> VMExit {
-            try registers.registerCacheControl.setupRegisters()
-
-            try registers.registerCacheControl.readRegisters(.rflags)
-            if registers.rflags.interruptEnable {
-                if let irq = nextPendingIRQ() {
-                    var interrupt = kvm_interrupt(irq: irq)
-                    vm.logger.trace("_IOCTL_KVM_INTERRUPT: \(interrupt)")
-                    let result = ioctl3arg(vcpu_fd, _IOCTL_KVM_INTERRUPT, &interrupt)
-                    switch result {
-                        case 0: break
-                        case -EEXIST: throw VMError.irqAlreadyQueued
-                        case -EINVAL: throw VMError.irqNumberInvalid
-                        case -ENXIO: throw VMError.irqAlreadyHandledByKernelPIC
-                        default: fatalError("KVM_INTERRUPT returned \(result)") // Includes EFAULT for bad memory location
-                    }
-                }
-            }
-
-            let ret = ioctl2arg(vcpu_fd, _IOCTL_KVM_RUN)
-            guard ret >= 0 else {
-                throw VMError.kvmRunError
-            }
-
-            // Reset the register cache
-            registers.registerCacheControl.clearCache()
-
-            guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
-                fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
-            }
-
-            return exitReason.vmExit(kvmRunPtr: kvmRunPtr)
+        guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
+            fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
         }
 
-        public func skipInstruction() throws {
-            fatalError("TODO")
+        return exitReason.vmExit(kvmRunPtr: kvmRunPtr)
+    }
+
+    public func skipInstruction() throws {
+        fatalError("TODO")
+    }
+
+    /// Used to satisfy the IO In read performed by the VCPU
+    public func setIn(data: VMExit.DataWrite) {
+        let io = kvmRunPtr.pointee.io
+        let dataOffset = io.data_offset
+        let bitWidth = io.size * 8
+        if io.count != 1 { fatalError("IO op with count != 1") }
+
+        guard io.direction == 0 else {  // In
+            fatalError("setIn() when IO Op is an OUT")
         }
 
-        /// Used to satisfy the IO In read performed by the VCPU
-        public func setIn(data: VMExit.DataWrite) {
-            let io = kvmRunPtr.pointee.io
-            let dataOffset = io.data_offset
-            let bitWidth = io.size * 8
-            if io.count != 1 { fatalError("IO op with count != 1") }
-
-            guard io.direction == 0 else {  // In
-                fatalError("setIn() when IO Op is an OUT")
-            }
-
-            guard data.bitWidth == bitWidth else {
-                fatalError("Bitwith mismatch, have \(data.bitWidth) want \(bitWidth)")
-            }
-
-            let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
-
-            switch data {
-                case .byte(let value): ptr.storeBytes(of: value, as: UInt8.self)
-                case .word(let value): ptr.storeBytes(of: value, as: UInt16.self)
-                case .dword(let value): ptr.storeBytes(of: value, as: UInt32.self)
-                case .qword(let value): ptr.storeBytes(of: value, as: UInt64.self)
-            }
+        guard data.bitWidth == bitWidth else {
+            fatalError("Bitwith mismatch, have \(data.bitWidth) want \(bitWidth)")
         }
 
-        /// Queues a hardware interrupt. irq is the interrupt number, not pin or line.
-        /// IE IRQ0x0 => INT0H  IRQ0x30 => INT30H etc
-        public func queue(irq: UInt8) {
-            vm.logger.trace("queuing IRQ: \(irq)")
-            lock.lock()
-            pendingIRQ = UInt32(irq)
-            lock.unlock()
-        }
+        let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
 
-        public func clearPendingIRQ() {
-            vm.logger.trace("Clearing pending irq")
-            lock.lock()
-            pendingIRQ = nil
-            lock.unlock()
+        switch data {
+            case .byte(let value): ptr.storeBytes(of: value, as: UInt8.self)
+            case .word(let value): ptr.storeBytes(of: value, as: UInt16.self)
+            case .dword(let value): ptr.storeBytes(of: value, as: UInt32.self)
+            case .qword(let value): ptr.storeBytes(of: value, as: UInt64.self)
         }
-
-        private func nextPendingIRQ() -> UInt32? {
-            lock.lock()
-            defer { lock.unlock() }
-            if let irq = pendingIRQ {
-                pendingIRQ = nil
-                return irq
-            }
-            return nil
-        }
-
     }
 }
 
