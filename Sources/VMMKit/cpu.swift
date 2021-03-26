@@ -7,6 +7,7 @@
 //
 
 import CBits
+import BABAB
 
 let kb: UInt = 1024
 let mb: UInt = 1048576

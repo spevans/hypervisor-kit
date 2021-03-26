@@ -8,6 +8,8 @@
 
 #if os(macOS)
 
+import BABAB
+
 struct VMXExit: Error {
     let value: BitArray32
 

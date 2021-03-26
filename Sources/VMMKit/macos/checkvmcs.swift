@@ -10,6 +10,7 @@
 #if os(macOS)
 
 import Hypervisor
+import BABAB
 
 
 extension VMCS {

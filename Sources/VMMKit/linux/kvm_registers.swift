@@ -11,6 +11,7 @@
 #if os(Linux)
 
 import CBits
+import BABAB
 
 extension SegmentRegister {
 

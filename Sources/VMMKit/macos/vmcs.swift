@@ -9,6 +9,7 @@
 #if os(macOS)
 
 import Hypervisor
+import BABAB
 
 final class VMCS {
 

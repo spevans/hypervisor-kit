@@ -8,6 +8,7 @@
 
 #if os(macOS)
 import CBits
+import BABAB
 import Logging
 
 extension VirtualMachine.VCPU {
