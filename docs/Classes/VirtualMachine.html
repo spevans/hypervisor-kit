@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>VirtualMachine Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/VirtualMachine" class="dashAnchor"></a>
+    <a title="VirtualMachine Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">HypervisorKit Docs</a> (50% documented)</p>
+        <p class="header-right"><a href="https://github.com/spevans/hypervisor-kit"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">HypervisorKit Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        VirtualMachine Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/MemoryRegion.html">MemoryRegion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine.html">VirtualMachine</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/VMError.html">VMError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html">VMExit</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataRead.html">– DataRead</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataWrite.html">– DataWrite</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/ExceptionInfo.html">– ExceptionInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO5DebugV">– Debug</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO9TPRAccessV">– TPRAccess</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO6HyperVV">– HyperV</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO11SystemEventV">– SystemEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/MemoryViolation.html">– MemoryViolation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/VirtualMachine.html">VirtualMachine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/CPU.html">CPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/RFLAGS.html">– RFLAGS</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/CR0Register.html">– CR0Register</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/DescriptorTable.html">DescriptorTable</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InternalError.html">InternalError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/PhysicalAddress.html">PhysicalAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/RegisterSet.html">RegisterSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SegmentRegister.html">SegmentRegister</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13LinearAddressa">LinearAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit10RawAddressa">RawAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13VMExitHandlera">VMExitHandler</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>VirtualMachine</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">VirtualMachine</span></code></pre>
+
+                </div>
+              </div>
+            <p>A type representing a full VM (virtual machine) including cpus and memory.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC5vcpusSayAC4VCPUCGvp"></a>
+                    <a name="//apple_ref/swift/Property/vcpus" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC5vcpusSayAC4VCPUCGvp">vcpus</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">vcpus</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/VirtualMachine/VCPU.html">VCPU</a></span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC13memoryRegionsSayAA12MemoryRegionCGvp"></a>
+                    <a name="//apple_ref/swift/Property/memoryRegions" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC13memoryRegionsSayAA12MemoryRegionCGvp">memoryRegions</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">memoryRegions</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MemoryRegion.html">MemoryRegion</a></span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC6loggerAC7Logging6LoggerV_tKcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(logger:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC6loggerAC7Logging6LoggerV_tKcfc">init(logger:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initialise the VM subsystem</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/VMError.html#/s:13HypervisorKit7VMErrorO17vmCreateVMFailureyA2CmF">VMError.vmCreateVMFailure</a></code>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">logger</span><span class="p">:</span> <span class="kt">Logger</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>logger</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code>Logger</code> object for <code>debug</code> and <code>trace</code> messages.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC9addMemory2at4size8readOnlyAA0F6RegionCs6UInt64V_AKSbtKF"></a>
+                    <a name="//apple_ref/swift/Method/addMemory(at:size:readOnly:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC9addMemory2at4size8readOnlyAA0F6RegionCs6UInt64V_AKSbtKF">addMemory(at:<wbr>size:<wbr>readOnly:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Adds a memory region into the physical address space of the VM.</p>
+<pre class="highlight swift"><code><span class="kt">The</span> <span class="kt">VM</span> <span class="n">requires</span> <span class="n">at</span> <span class="n">least</span> <span class="n">one</span> <span class="kt">MemoryRegion</span> <span class="n">to</span> <span class="n">be</span> <span class="n">added</span> <span class="n">before</span> <span class="n">starting</span> <span class="n">the</span> <span class="n">vCPU</span><span class="o">.</span>
+</code></pre>
+<div class="aside aside-precondition">
+    <p class="aside-title">Precondition</p>
+    <code>guestAddress</code> must be page aligned.
+
+</div><div class="aside aside-precondition">
+    <p class="aside-title">Precondition</p>
+    <code>size</code> is non-zero and is a multiple of the page size of the VM.
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/VMError.html#/s:13HypervisorKit7VMErrorO16addMemoryFailureyA2CmF">VMError.addMemoryFailure</a></code>.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">addMemory</span><span class="p">(</span><span class="n">at</span> <span class="nv">guestAddress</span><span class="p">:</span> <span class="kt">UInt64</span><span class="p">,</span> <span class="nv">size</span><span class="p">:</span> <span class="kt">UInt64</span><span class="p">,</span> <span class="nv">readOnly</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MemoryRegion.html">MemoryRegion</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>guestAddress</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Physical Address inside the VM where the region will start.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>size</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Size in bytes of the memory region.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>readOnly</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Flag to indicate if the memory should be treated as ROM or RAM by the Virtual CPUs.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The new <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code>.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC12memoryRegion10containingAA06MemoryF0CSgAA15PhysicalAddressV_tF"></a>
+                    <a name="//apple_ref/swift/Method/memoryRegion(containing:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC12memoryRegion10containingAA06MemoryF0CSgAA15PhysicalAddressV_tF">memoryRegion(containing:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the memory region containing a specific physical address in the address space of the VM.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">memoryRegion</span><span class="p">(</span><span class="n">containing</span> <span class="nv">guestAddress</span><span class="p">:</span> <span class="kt"><a href="../Structs/PhysicalAddress.html">PhysicalAddress</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MemoryRegion.html">MemoryRegion</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>guestAddress</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The Physical Address in the VM.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code> containing the address or <code>nil</code> if no region is found.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC6memory2at5countSvAA15PhysicalAddressV_s6UInt64VtKF"></a>
+                    <a name="//apple_ref/swift/Method/memory(at:count:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC6memory2at5countSvAA15PhysicalAddressV_s6UInt64VtKF">memory(at:<wbr>count:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns an <code>UnsafeMutableRawPointer</code> to a region of bytes at a specified physical address.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code>HVError.invalidMemory</code> if the region in not inside a specif <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code>.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">memory</span><span class="p">(</span><span class="n">at</span> <span class="nv">guestAddress</span><span class="p">:</span> <span class="kt"><a href="../Structs/PhysicalAddress.html">PhysicalAddress</a></span><span class="p">,</span> <span class="nv">count</span><span class="p">:</span> <span class="kt">UInt64</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">UnsafeMutableRawPointer</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>guestAddress</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Physical Address inside the VM where the region will start.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>count</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The size in bytes of the region.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An <code>UnsafeMutableRawPointer</code> pointing to a region of <code>count</code> bytes.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC7addVCPUAC0F0CyKF"></a>
+                    <a name="//apple_ref/swift/Method/addVCPU()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC7addVCPUAC0F0CyKF">addVCPU()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Add a VCPU to the Virtual Machine.</p>
+<pre class="highlight swift"><code><span class="kt">Creates</span> <span class="n">a</span> <span class="k">new</span> <span class="kt">Thread</span> <span class="n">and</span> <span class="n">initialises</span> <span class="n">a</span> <span class="n">vCPU</span> <span class="k">in</span> <span class="n">that</span> <span class="n">thread</span><span class="o">.</span> <span class="kt">The</span> <span class="p">`</span><span class="nv">startup</span><span class="p">`</span> <span class="n">function</span>
+<span class="k">is</span> <span class="n">executed</span> <span class="n">to</span> <span class="n">setup</span> <span class="n">the</span> <span class="n">vCPU</span> <span class="n">and</span> <span class="n">then</span> <span class="n">it</span> <span class="n">waits</span> <span class="n">until</span> <span class="n">the</span> <span class="err">`</span><span class="o">.</span><span class="nf">start</span><span class="p">()</span><span class="err">`</span> <span class="n">method</span> <span class="k">is</span> <span class="n">called</span>
+<span class="n">to</span> <span class="n">begin</span> <span class="n">executing</span> <span class="n">code</span><span class="o">.</span>
+</code></pre>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/VMError.html#/s:13HypervisorKit7VMErrorO17vcpuCreateFailureyA2CmF">VMError.vcpuCreateFailure</a></code>.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">addVCPU</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/VirtualMachine/VCPU.html">VCPU</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The <code><a href="../Classes/VirtualMachine/VCPU.html">VCPU</a></code> that has been added to the VM.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC16areVcpusShutdownSbyF"></a>
+                    <a name="//apple_ref/swift/Method/areVcpusShutdown()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC16areVcpusShutdownSbyF">areVcpusShutdown()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Query all of the vCPUs to determine if they have been shutdown</p>
+<pre class="highlight swift"><code><span class="kt">Use</span> <span class="n">this</span> <span class="n">method</span> <span class="n">to</span> <span class="n">check</span> <span class="n">the</span> <span class="n">shutdown</span> <span class="n">status</span> <span class="n">of</span> <span class="n">all</span> <span class="n">of</span> <span class="n">the</span> <span class="n">vCPUs</span><span class="o">.</span>
+<span class="kt">Before</span> <span class="n">shutting</span> <span class="n">down</span> <span class="n">the</span> <span class="kt">VirtualMachine</span><span class="p">,</span> <span class="n">all</span> <span class="n">of</span> <span class="n">the</span> <span class="n">vCPUs</span> <span class="n">must</span> <span class="n">be</span>
+<span class="k">in</span> <span class="n">the</span> <span class="n">shutdown</span> <span class="n">state</span><span class="o">.</span>
+<span class="kt">The</span> <span class="err">`</span><span class="o">.</span><span class="n">shutdownAllVcpus</span><span class="err">`</span> <span class="n">method</span> <span class="n">can</span> <span class="n">be</span> <span class="n">called</span> <span class="n">to</span> <span class="n">shutdown</span> <span class="n">all</span> <span class="n">the</span>
+<span class="n">vCPUS</span><span class="o">.</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">areVcpusShutdown</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p><code>true</code> if all vCPUs have been shutdown, <code>false</code> if any are still running.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC16shutdownAllVcpusSbyF"></a>
+                    <a name="//apple_ref/swift/Method/shutdownAllVcpus()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC16shutdownAllVcpusSbyF">shutdownAllVcpus()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Request all of the vCPUs to enter the shutdown state.</p>
+<pre class="highlight swift"><code><span class="kt">Use</span> <span class="n">this</span> <span class="n">method</span> <span class="n">to</span> <span class="n">request</span> <span class="n">all</span> <span class="n">vCPUs</span> <span class="n">to</span> <span class="n">shutdown</span><span class="o">.</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">shutdownAllVcpus</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p><code>true</code> if all vCPUs have been shutdown, <code>false</code> if any are still running.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC8shutdownyyKF"></a>
+                    <a name="//apple_ref/swift/Method/shutdown()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC8shutdownyyKF">shutdown()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shutdown the VM.</p>
+<pre class="highlight swift"><code><span class="nf">shutdown</span><span class="p">()</span> <span class="n">must</span> <span class="n">be</span> <span class="n">called</span> <span class="n">before</span> <span class="n">the</span> <span class="kt">VirtualMachine</span> <span class="n">object</span> <span class="k">is</span> <span class="n">deallocated</span><span class="o">.</span>
+<span class="kt">Before</span> <span class="n">calling</span><span class="p">,</span> <span class="n">all</span> <span class="n">vCPUS</span> <span class="n">must</span> <span class="n">be</span> <span class="n">individually</span> <span class="n">shutdown</span> <span class="n">and</span> <span class="n">a</span> <span class="n">check</span> <span class="k">is</span> <span class="n">run</span>
+<span class="n">to</span> <span class="n">ensure</span> <span class="n">the</span> <span class="n">vCPUS</span> <span class="n">are</span> <span class="k">in</span> <span class="n">the</span> <span class="n">shutdown</span> <span class="n">state</span><span class="o">.</span>
+<span class="kt">All</span> <span class="kt">MemoryRegions</span> <span class="n">and</span> <span class="kt">VCPUS</span> <span class="n">are</span> <span class="n">deallocated</span> <span class="n">by</span> <span class="n">this</span> <span class="n">method</span> <span class="n">and</span> <span class="n">the</span> <span class="n">underlying</span>
+<span class="n">hypervisor</span> <span class="k">is</span> <span class="n">shutdown</span> <span class="n">by</span> <span class="n">the</span> <span class="kt">OS</span><span class="o">.</span>
+</code></pre>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/VMError.html#/s:13HypervisorKit7VMErrorO17vcpusStillRunningyA2CmF">VMError.vcpusStillRunning</a></code> if any vCPU is still running.
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/VMError.html#/s:13HypervisorKit7VMErrorO17vmShutdownFailureyA2CmF">VMError.vmShutdownFailure</a></code> if an internal  subsystem error occurs.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">shutdown</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC"></a>
+                    <a name="//apple_ref/swift/Class/VCPU" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC">VCPU</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Classes/VirtualMachine/VCPU.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">VCPU</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Extension/VCPU" class="dashAnchor"></a>
+                    <a class="token" href="#/">VCPU</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Classes/VirtualMachine/VCPU.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="https://github.com/spevans" target="_blank" rel="external">Simon Evans</a>. All rights reserved. (Last updated: 2021-03-30)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

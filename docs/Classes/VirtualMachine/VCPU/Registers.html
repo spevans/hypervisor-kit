@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Registers Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../../../js/jquery.min.js" defer></script>
+    <script src="../../../js/jazzy.js" defer></script>
+    
+    <script src="../../../js/lunr.min.js" defer></script>
+    <script src="../../../js/typeahead.jquery.js" defer></script>
+    <script src="../../../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/Registers" class="dashAnchor"></a>
+    <a title="Registers Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../../../index.html">HypervisorKit Docs</a> (50% documented)</p>
+        <p class="header-right"><a href="https://github.com/spevans/hypervisor-kit"><img src="../../../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../../../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../../../index.html">HypervisorKit Reference</a>
+        <img id="carat" src="../../../img/carat.png" />
+        Registers Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../../../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../../Classes/MemoryRegion.html">MemoryRegion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Classes/VirtualMachine.html">VirtualMachine</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../../../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMError.html">VMError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit.html">VMExit</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit/DataRead.html">– DataRead</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit/DataWrite.html">– DataWrite</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit/ExceptionInfo.html">– ExceptionInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit.html#/s:13HypervisorKit6VMExitO5DebugV">– Debug</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit.html#/s:13HypervisorKit6VMExitO9TPRAccessV">– TPRAccess</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit.html#/s:13HypervisorKit6VMExitO6HyperVV">– HyperV</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit.html#/s:13HypervisorKit6VMExitO11SystemEventV">– SystemEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Enums/VMExit/MemoryViolation.html">– MemoryViolation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../../../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../../Extensions/VirtualMachine.html">VirtualMachine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../../../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../../Structs/CPU.html">CPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/CPU/RFLAGS.html">– RFLAGS</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/CPU/CR0Register.html">– CR0Register</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/DescriptorTable.html">DescriptorTable</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/InternalError.html">InternalError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/PhysicalAddress.html">PhysicalAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/RegisterSet.html">RegisterSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Structs/SegmentRegister.html">SegmentRegister</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../../../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Typealiases.html#/s:13HypervisorKit13LinearAddressa">LinearAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Typealiases.html#/s:13HypervisorKit10RawAddressa">RawAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../../Typealiases.html#/s:13HypervisorKit13VMExitHandlera">VMExitHandler</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Registers</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">Registers</span></code></pre>
+
+                </div>
+              </div>
+            <p>Access to the vCPU register set. This acts as a cache of the register and segment register values,
+to avoid excess operating system calls to read the values from the vm subsystem.
+When the vCPU has finished executing, the <code><a href="../../../Classes/VirtualMachine/VCPU.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9registersAE9RegistersCvp">VCPU.registers</a></code> holds the final
+register values of the vCPU.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2als5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/al" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2als5UInt8Vvp">al</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The AL register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">.rax</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">al</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ahs5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ah" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ahs5UInt8Vvp">ah</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The AH register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">.rax</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ah</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2axs6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ax" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2axs6UInt16Vvp">ax</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The AX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">.rax</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ax</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3eaxs6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/eax" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3eaxs6UInt32Vvp">eax</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EAX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">.rax</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">eax</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bls5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/bl" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bls5UInt8Vvp">bl</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The BL register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">.rax</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">bl</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bhs5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/bh" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bhs5UInt8Vvp">bh</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The BH register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbxs6UInt64Vvp">.rbx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">bh</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bxs6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/bx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bxs6UInt16Vvp">bx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The BX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbxs6UInt64Vvp">.rbx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">bx</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ebxs6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ebx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ebxs6UInt32Vvp">ebx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EBX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbxs6UInt64Vvp">.rbx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ebx</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2cls5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cl" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2cls5UInt8Vvp">cl</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CL register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp">.rcx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cl</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2chs5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ch" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2chs5UInt8Vvp">ch</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CH register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp">.rcx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ch</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2cxs6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2cxs6UInt16Vvp">cx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp">.rcx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cx</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ecxs6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ecx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ecxs6UInt32Vvp">ecx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The ECX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp">.rcx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ecx</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dls5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/dl" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dls5UInt8Vvp">dl</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The DL register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp">.rdx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dl</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dhs5UInt8Vvp"></a>
+                    <a name="//apple_ref/swift/Property/dh" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dhs5UInt8Vvp">dh</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The DH register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp">.rdx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dh</span><span class="p">:</span> <span class="kt">UInt8</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dxs6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/dx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dxs6UInt16Vvp">dx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The DX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp">.rdx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dx</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3edxs6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/edx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3edxs6UInt32Vvp">edx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EDX register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp">.rdx</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">edx</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dis6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/di" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dis6UInt16Vvp">di</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The DI register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdis6UInt64Vvp">.rdi</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">di</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3edis6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/edi" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3edis6UInt32Vvp">edi</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EDI register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdis6UInt64Vvp">.rdi</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">edi</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2sis6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/si" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2sis6UInt16Vvp">si</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The SI register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsis6UInt64Vvp">.rsi</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">si</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3esis6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/esi" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3esis6UInt32Vvp">esi</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The ESI register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsis6UInt64Vvp">.rsi</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">esi</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bps6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/bp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2bps6UInt16Vvp">bp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The BP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbps6UInt64Vvp">.rbp</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">bp</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ebps6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ebp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3ebps6UInt32Vvp">ebp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EBP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbps6UInt64Vvp">.rbp</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ebp</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2sps6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/sp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2sps6UInt16Vvp">sp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The SP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsps6UInt64Vvp">.rsp</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">sp</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3esps6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/esp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3esps6UInt32Vvp">esp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The ESP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsps6UInt64Vvp">.rsp</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">esp</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ips6UInt16Vvp"></a>
+                    <a name="//apple_ref/swift/Property/ip" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ips6UInt16Vvp">ip</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The IP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rips6UInt64Vvp">.rip</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ip</span><span class="p">:</span> <span class="kt">UInt16</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3eips6UInt32Vvp"></a>
+                    <a name="//apple_ref/swift/Property/eip" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3eips6UInt32Vvp">eip</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EIP register value in the vCPU.</p>
+
+<p>Reading or writing this value requires calling <code>readRegisters</code> with <code><a href="../../../Classes/VirtualMachine/VCPU/Registers.html#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rips6UInt64Vvp">.rip</a></code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">eip</span><span class="p">:</span> <span class="kt">UInt32</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2csAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/cs" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2csAA15SegmentRegisterVvp">cs</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CS SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.cs</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cs</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ssAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/ss" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2ssAA15SegmentRegisterVvp">ss</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The SS SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.ss</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ss</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dsAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/ds" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2dsAA15SegmentRegisterVvp">ds</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The DS SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.ds</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ds</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2esAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/es" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2esAA15SegmentRegisterVvp">es</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The ES SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.es</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">es</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2fsAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/fs" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2fsAA15SegmentRegisterVvp">fs</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The FS SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.fs</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">fs</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2gsAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/gs" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2gsAA15SegmentRegisterVvp">gs</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The GS SegmentRegister value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.gs</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">gs</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC12taskRegisterAA07SegmentH0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/taskRegister" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC12taskRegisterAA07SegmentH0Vvp">taskRegister</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The TR (TaskRegister)  value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.taskRegister</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">taskRegister</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC4ldtrAA15SegmentRegisterVvp"></a>
+                    <a name="//apple_ref/swift/Property/ldtr" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC4ldtrAA15SegmentRegisterVvp">ldtr</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The LDTR (Local Descriptor Table Register) value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.ldtr</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ldtr</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/SegmentRegister.html">SegmentRegister</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3gdtAA15DescriptorTableVvp"></a>
+                    <a name="//apple_ref/swift/Property/gdt" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3gdtAA15DescriptorTableVvp">gdt</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The GDT (Global Descriptor Table)  value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.gdt</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">gdt</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/DescriptorTable.html">DescriptorTable</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3idtAA15DescriptorTableVvp"></a>
+                    <a name="//apple_ref/swift/Property/idt" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3idtAA15DescriptorTableVvp">idt</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The IDT (Interrupt Descriptor Table)  value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.idt</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">idt</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/DescriptorTable.html">DescriptorTable</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC6rflagsAA3CPUV6RFLAGSVvp"></a>
+                    <a name="//apple_ref/swift/Property/rflags" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC6rflagsAA3CPUV6RFLAGSVvp">rflags</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CPU Flags value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rflags</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rflags</span><span class="p">:</span> <span class="kt"><a href="../../../Structs/CPU.html">CPU</a></span><span class="o">.</span><span class="kt">RFLAGS</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rax" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3raxs6UInt64Vvp">rax</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RAX register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rax</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rax</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbxs6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rbx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbxs6UInt64Vvp">rbx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RBX register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rbx</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rbx</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rcx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rcxs6UInt64Vvp">rcx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RCX register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rcx</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rcx</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rdx" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdxs6UInt64Vvp">rdx</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RDX register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.radx</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rdx</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdis6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rdi" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rdis6UInt64Vvp">rdi</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RDI register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rdi</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rdi</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsis6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rsi" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsis6UInt64Vvp">rsi</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RSI register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rsi</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rsi</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbps6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rbp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rbps6UInt64Vvp">rbp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RBP register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rbp</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rbp</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsps6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rsp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rsps6UInt64Vvp">rsp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RSP register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rsp</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rsp</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2r8s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r8" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2r8s6UInt64Vvp">r8</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R8 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r8</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r8</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2r9s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r9" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC2r9s6UInt64Vvp">r9</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R9 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r9</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r9</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r10s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r10" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r10s6UInt64Vvp">r10</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R10 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r10</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r10</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r11s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r11" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r11s6UInt64Vvp">r11</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R11 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r11</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r11</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r12s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r12" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r12s6UInt64Vvp">r12</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R12 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r12</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r12</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r13s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r13" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r13s6UInt64Vvp">r13</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R13 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r13</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r13</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r14s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r14" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r14s6UInt64Vvp">r14</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R14 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r14</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r14</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r15s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/r15" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3r15s6UInt64Vvp">r15</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The R15 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.r15</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">r15</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rips6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/rip" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3rips6UInt64Vvp">rip</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The RIP register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.rip</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">rip</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr0s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cr0" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr0s6UInt64Vvp">cr0</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CR0 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.cr0</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cr0</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr2s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cr2" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr2s6UInt64Vvp">cr2</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CR2 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.cr2</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cr2</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr3s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cr3" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr3s6UInt64Vvp">cr3</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CR3 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.cr3</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cr3</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr4s6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cr4" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC3cr4s6UInt64Vvp">cr4</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The CR4 register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.cr4</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cr4</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC4efers6UInt64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/efer" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit14VirtualMachineC4VCPUC9RegistersC4efers6UInt64Vvp">efer</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The EFER register value in the vCPU.</p>
+
+<p>Reading this value requires calling <code>readRegisters</code> with <code>.efer</code> in the <code><a href="../../../Structs/RegisterSet.html">RegisterSet</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">efer</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="https://github.com/spevans" target="_blank" rel="external">Simon Evans</a>. All rights reserved. (Last updated: 2021-03-30)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

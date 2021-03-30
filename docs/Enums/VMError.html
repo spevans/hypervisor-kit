@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>VMError Enumeration Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Enum/VMError" class="dashAnchor"></a>
+    <a title="VMError Enumeration Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">HypervisorKit Docs</a> (50% documented)</p>
+        <p class="header-right"><a href="https://github.com/spevans/hypervisor-kit"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">HypervisorKit Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        VMError Enumeration Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/MemoryRegion.html">MemoryRegion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine.html">VirtualMachine</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/VMError.html">VMError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html">VMExit</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataRead.html">– DataRead</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataWrite.html">– DataWrite</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/ExceptionInfo.html">– ExceptionInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO5DebugV">– Debug</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO9TPRAccessV">– TPRAccess</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO6HyperVV">– HyperV</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO11SystemEventV">– SystemEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/MemoryViolation.html">– MemoryViolation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/VirtualMachine.html">VirtualMachine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/CPU.html">CPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/RFLAGS.html">– RFLAGS</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/CR0Register.html">– CR0Register</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/DescriptorTable.html">DescriptorTable</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InternalError.html">InternalError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/PhysicalAddress.html">PhysicalAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/RegisterSet.html">RegisterSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SegmentRegister.html">SegmentRegister</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13LinearAddressa">LinearAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit10RawAddressa">RawAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13VMExitHandlera">VMExitHandler</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>VMError</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">VMError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+
+                </div>
+              </div>
+            <p>A type that enumerates errors thrown by <code>HypervisorKit</code>.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17vmCreateVMFailureyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vmCreateVMFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17vmCreateVMFailureyA2CmF">vmCreateVMFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Failed to initialise the VM subsystem.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vmCreateVMFailure</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17vmShutdownFailureyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vmShutdownFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17vmShutdownFailureyA2CmF">vmShutdownFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errror shutting down the VM subsystem.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vmShutdownFailure</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17vcpuCreateFailureyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vcpuCreateFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17vcpuCreateFailureyA2CmF">vcpuCreateFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>General failure adding a vCPU to the VM.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vcpuCreateFailure</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO21vcpuNotWaitingToStartyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vcpuNotWaitingToStart" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO21vcpuNotWaitingToStartyA2CmF">vcpuNotWaitingToStart</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Trying to <code>start()</code> a vCPU that is not waiting to be started. Either it is being setup or has
+already been started.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vcpuNotWaitingToStart</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17vcpusStillRunningyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vcpusStillRunning" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17vcpusStillRunningyA2CmF">vcpusStillRunning</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Trying to <code>shutdown()</code> the VM but one or more vCPUs are still running.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vcpusStillRunning</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO19vcpuHasBeenShutdownyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vcpuHasBeenShutdown" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO19vcpuHasBeenShutdownyA2CmF">vcpuHasBeenShutdown</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Trying to read or write the vCPU registers when the vCPU has already been shutdown.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vcpuHasBeenShutdown</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO22vcpuReadRegisterFailedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/vcpuReadRegisterFailed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO22vcpuReadRegisterFailedyA2CmF">vcpuReadRegisterFailed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Error reading the registers from the vCPU.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">vcpuReadRegisterFailed</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO19invalidMemoryRegionyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/invalidMemoryRegion" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO19invalidMemoryRegionyA2CmF">invalidMemoryRegion</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Physical address is not valid in any <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">invalidMemoryRegion</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO23memoryAllocationFailureyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/memoryAllocationFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO23memoryAllocationFailureyA2CmF">memoryAllocationFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Cannot allocate memory to add to a VM.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">memoryAllocationFailure</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO20memoryRegionTooSmallyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/memoryRegionTooSmall" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO20memoryRegionTooSmallyA2CmF">memoryRegionTooSmall</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code> is too small to load binary data into it.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">memoryRegionTooSmall</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO16addMemoryFailureyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/addMemoryFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO16addMemoryFailureyA2CmF">addMemoryFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A error occured adding a<code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code> to the VM.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">addMemoryFailure</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO24kvmCannotAccessSubsystemyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotAccessSubsystem" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO24kvmCannotAccessSubsystemyA2CmF">kvmCannotAccessSubsystem</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Cannot open <code>/dev/kvm</code></p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotAccessSubsystem</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO12kvmApiTooOldyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmApiTooOld" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO12kvmApiTooOldyA2CmF">kvmApiTooOld</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Getting API version using <code>KVM_GET_API_VERSION</code> failed or API is not version 12.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmApiTooOld</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17kvmCannotCreateVMyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotCreateVM" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17kvmCannotCreateVMyA2CmF">kvmCannotCreateVM</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Creating Virtual Machine using<code>KVM_CREATE_VM</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotCreateVM</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO14kvmMemoryErroryA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmMemoryError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO14kvmMemoryErroryA2CmF">kvmMemoryError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Setting <code><a href="../Classes/MemoryRegion.html">MemoryRegion</a></code> using <code>KVM_SET_USER_MEMORY_REGION</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmMemoryError</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO15kvmCannotAddPicyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotAddPic" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO15kvmCannotAddPicyA2CmF">kvmCannotAddPic</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Adding virtual PIC chip using <code>KVM_CREATE_IRQCHIP</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotAddPic</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO15kvmCannotAddPityA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotAddPit" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO15kvmCannotAddPityA2CmF">kvmCannotAddPit</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Adding virtual PIT chip using <code>KVM_CREATE_PIT2</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotAddPit</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO19kvmCannotCreateVcpuyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotCreateVcpu" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO19kvmCannotCreateVcpuyA2CmF">kvmCannotCreateVcpu</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Creating a vCPU using <code>KVM_CREATE_VCPU</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotCreateVcpu</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO20kvmCannotGetVcpuSizeyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotGetVcpuSize" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO20kvmCannotGetVcpuSizeyA2CmF">kvmCannotGetVcpuSize</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Getting vCPU <code>mmap</code> region size using <code>KVM_GET_VCPU_MMAP_SIZE</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotGetVcpuSize</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO17kvmCannotMmapVcpuyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmCannotMmapVcpu" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO17kvmCannotMmapVcpuyA2CmF">kvmCannotMmapVcpu</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: <code>mmap</code> of VCPU  failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmCannotMmapVcpu</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO11kvmRunErroryA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmRunError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO11kvmRunErroryA2CmF">kvmRunError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Runnign vCPU using <code>KVM_RUN</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmRunError</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO16irqAlreadyQueuedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/irqAlreadyQueued" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO16irqAlreadyQueuedyA2CmF">irqAlreadyQueued</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Queuing IRQ using <code>KVM_INTERRUPT</code> returned <code>EEXIST</code>. IRQ has already been queued.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">irqAlreadyQueued</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO16irqNumberInvalidyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/irqNumberInvalid" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO16irqNumberInvalidyA2CmF">irqNumberInvalid</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Queuing IRQ using <code>KVM_INTERRUPT</code> returned <code>EINVAL</code>. IRQ number is invalid.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">irqNumberInvalid</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO28irqAlreadyHandledByKernelPICyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/irqAlreadyHandledByKernelPIC" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO28irqAlreadyHandledByKernelPICyA2CmF">irqAlreadyHandledByKernelPIC</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Queuing IRQ using <code>KVM_INTERRUPT</code> returned <code>ENXIO</code>. IRQ queuing is handled by the KVM PIC.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">irqAlreadyHandledByKernelPIC</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO15kvmGetRegistersyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmGetRegisters" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO15kvmGetRegistersyA2CmF">kvmGetRegisters</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Reading vCPU registers using<code>KVM_GET_REGS</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmGetRegisters</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO15kvmSetRegistersyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmSetRegisters" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO15kvmSetRegistersyA2CmF">kvmSetRegisters</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Writing vCPU registers using<code>KVM_SET_REGS</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmSetRegisters</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO22kvmGetSpecialRegistersyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmGetSpecialRegisters" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO22kvmGetSpecialRegistersyA2CmF">kvmGetSpecialRegisters</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Reading vCPU special registers using<code>KVM_GET_SREGS</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmGetSpecialRegisters</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO22kvmSetSpecialRegistersyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/kvmSetSpecialRegisters" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO22kvmSetSpecialRegistersyA2CmF">kvmSetSpecialRegisters</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>KVM: Writing vCPU special registers using<code>KVM_SET_SREGS</code> failed.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">kvmSetSpecialRegisters</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO7hvErroryA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO7hvErroryA2CmF">hvError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvError</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO6hvBusyyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvBusy" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO6hvBusyyA2CmF">hvBusy</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvBusy</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO13hvBadArgumentyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvBadArgument" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO13hvBadArgumentyA2CmF">hvBadArgument</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvBadArgument</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO13hvNoResourcesyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvNoResources" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO13hvNoResourcesyA2CmF">hvNoResources</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvNoResources</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO10hvNoDeviceyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvNoDevice" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO10hvNoDeviceyA2CmF">hvNoDevice</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvNoDevice</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO8hvDeniedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvDenied" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO8hvDeniedyA2CmF">hvDenied</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvDenied</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO13hvUnsupportedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hvUnsupported" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO13hvUnsupportedyA2CmF">hvUnsupported</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hvUnsupported</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit7VMErrorO14hvUnknownErroryACs6UInt32VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/hvUnknownError(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit7VMErrorO14hvUnknownErroryACs6UInt32VcACmF">hvUnknownError(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">hvUnknownError</span><span class="p">(</span><span class="kt">UInt32</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="https://github.com/spevans" target="_blank" rel="external">Simon Evans</a>. All rights reserved. (Last updated: 2021-03-30)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

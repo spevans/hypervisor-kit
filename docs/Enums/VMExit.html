@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>VMExit Enumeration Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Enum/VMExit" class="dashAnchor"></a>
+    <a title="VMExit Enumeration Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">HypervisorKit Docs</a> (50% documented)</p>
+        <p class="header-right"><a href="https://github.com/spevans/hypervisor-kit"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">HypervisorKit Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        VMExit Enumeration Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/MemoryRegion.html">MemoryRegion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine.html">VirtualMachine</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/VirtualMachine/VCPU.html">– VCPU</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/VMError.html">VMError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html">VMExit</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataRead.html">– DataRead</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/DataWrite.html">– DataWrite</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/ExceptionInfo.html">– ExceptionInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO5DebugV">– Debug</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO9TPRAccessV">– TPRAccess</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO6HyperVV">– HyperV</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO11SystemEventV">– SystemEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VMExit/MemoryViolation.html">– MemoryViolation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/VirtualMachine.html">VirtualMachine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/CPU.html">CPU</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/RFLAGS.html">– RFLAGS</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CPU/CR0Register.html">– CR0Register</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/DescriptorTable.html">DescriptorTable</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InternalError.html">InternalError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/PhysicalAddress.html">PhysicalAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/RegisterSet.html">RegisterSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SegmentRegister.html">SegmentRegister</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13LinearAddressa">LinearAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit10RawAddressa">RawAddress</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:13HypervisorKit13VMExitHandlera">VMExitHandler</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>VMExit</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">VMExit</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                </div>
+              </div>
+            <p>Undocumented</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO8DataReadO"></a>
+                    <a name="//apple_ref/swift/Enum/DataRead" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO8DataReadO">DataRead</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Enums/VMExit/DataRead.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataRead</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9DataWriteO"></a>
+                    <a name="//apple_ref/swift/Enum/DataWrite" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9DataWriteO">DataWrite</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Enums/VMExit/DataWrite.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataWrite</span> <span class="p">:</span> <span class="kt">Equatable</span><span class="p">,</span> <span class="kt">CustomStringConvertible</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO13ExceptionInfoV"></a>
+                    <a name="//apple_ref/swift/Struct/ExceptionInfo" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO13ExceptionInfoV">ExceptionInfo</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Enums/VMExit/ExceptionInfo.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">ExceptionInfo</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO5DebugV"></a>
+                    <a name="//apple_ref/swift/Struct/Debug" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO5DebugV">Debug</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Debug</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9TPRAccessV"></a>
+                    <a name="//apple_ref/swift/Struct/TPRAccess" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9TPRAccessV">TPRAccess</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">TPRAccess</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO6HyperVV"></a>
+                    <a name="//apple_ref/swift/Struct/HyperV" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO6HyperVV">HyperV</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">HyperV</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO11SystemEventV"></a>
+                    <a name="//apple_ref/swift/Struct/SystemEvent" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO11SystemEventV">SystemEvent</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SystemEvent</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO15MemoryViolationV"></a>
+                    <a name="//apple_ref/swift/Struct/MemoryViolation" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO15MemoryViolationV">MemoryViolation</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Enums/VMExit/MemoryViolation.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">MemoryViolation</span> <span class="p">:</span> <span class="kt">Equatable</span><span class="p">,</span> <span class="kt">CustomStringConvertible</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO7unknownyACs6UInt64VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/unknown(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO7unknownyACs6UInt64VcACmF">unknown(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">unknown</span><span class="p">(</span><span class="kt">UInt64</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9exceptionyA2C13ExceptionInfoVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/exception(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9exceptionyA2C13ExceptionInfoVcACmF">exception(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">exception</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit/ExceptionInfo.html">ExceptionInfo</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO13ioInOperationyACs6UInt16V_AC8DataReadOtcACmF"></a>
+                    <a name="//apple_ref/swift/Element/ioInOperation(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO13ioInOperationyACs6UInt16V_AC8DataReadOtcACmF">ioInOperation(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">ioInOperation</span><span class="p">(</span><span class="kt"><a href="../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/VMExit/DataRead.html">DataRead</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO14ioOutOperationyACs6UInt16V_AC9DataWriteOtcACmF"></a>
+                    <a name="//apple_ref/swift/Element/ioOutOperation(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO14ioOutOperationyACs6UInt16V_AC9DataWriteOtcACmF">ioOutOperation(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">ioOutOperation</span><span class="p">(</span><span class="kt"><a href="../Typealiases.html#/s:13HypervisorKit6IOPorta">IOPort</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/VMExit/DataWrite.html">DataWrite</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO5debugyA2C5DebugVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/debug(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO5debugyA2C5DebugVcACmF">debug(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">debug</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO5DebugV">Debug</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO3hltyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/hlt" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO3hltyA2CmF">hlt</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">hlt</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO17mmioReadOperationyAcA15PhysicalAddressV_AC04DataE0OtcACmF"></a>
+                    <a name="//apple_ref/swift/Element/mmioReadOperation(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO17mmioReadOperationyAcA15PhysicalAddressV_AC04DataE0OtcACmF">mmioReadOperation(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">mmioReadOperation</span><span class="p">(</span><span class="kt"><a href="../Structs/PhysicalAddress.html">PhysicalAddress</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/VMExit/DataRead.html">DataRead</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO18mmioWriteOperationyAcA15PhysicalAddressV_AC04DataE0OtcACmF"></a>
+                    <a name="//apple_ref/swift/Element/mmioWriteOperation(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO18mmioWriteOperationyAcA15PhysicalAddressV_AC04DataE0OtcACmF">mmioWriteOperation(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">mmioWriteOperation</span><span class="p">(</span><span class="kt"><a href="../Structs/PhysicalAddress.html">PhysicalAddress</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/VMExit/DataWrite.html">DataWrite</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO13irqWindowOpenyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/irqWindowOpen" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO13irqWindowOpenyA2CmF">irqWindowOpen</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">irqWindowOpen</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO8shutdownyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/shutdown" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO8shutdownyA2CmF">shutdown</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">shutdown</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO11entryFailedyACs6UInt64VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/entryFailed(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO11entryFailedyACs6UInt64VcACmF">entryFailed(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">entryFailed</span><span class="p">(</span><span class="kt">UInt64</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9interruptyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/interrupt" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9interruptyA2CmF">interrupt</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">interrupt</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO6setTpryA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/setTpr" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO6setTpryA2CmF">setTpr</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">setTpr</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9tprAccessyA2C9TPRAccessVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/tprAccess(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9tprAccessyA2C9TPRAccessVcACmF">tprAccess(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">tprAccess</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO9TPRAccessV">TPRAccess</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO3nmiyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/nmi" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO3nmiyA2CmF">nmi</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">nmi</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/internalError(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">internalError(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO15memoryViolationyA2C06MemoryE0VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/memoryViolation(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO15memoryViolationyA2C06MemoryE0VcACmF">memoryViolation(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">memoryViolation</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit/MemoryViolation.html">MemoryViolation</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO11systemEventyA2C06SystemE0VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/systemEvent(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO11systemEventyA2C06SystemE0VcACmF">systemEvent(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">systemEvent</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO11SystemEventV">SystemEvent</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO9ioapicEOIyACs5UInt8VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/ioapicEOI(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO9ioapicEOIyACs5UInt8VcACmF">ioapicEOI(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">ioapicEOI</span><span class="p">(</span><span class="kt">UInt8</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13HypervisorKit6VMExitO6hyperVyA2C6HyperVVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/hyperV(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13HypervisorKit6VMExitO6hyperVyA2C6HyperVVcACmF">hyperV(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">hyperV</span><span class="p">(</span><span class="kt"><a href="../Enums/VMExit.html#/s:13HypervisorKit6VMExitO6HyperVV">HyperV</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="https://github.com/spevans" target="_blank" rel="external">Simon Evans</a>. All rights reserved. (Last updated: 2021-03-30)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>
