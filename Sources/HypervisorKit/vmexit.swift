@@ -179,7 +179,6 @@ public enum VMExit: Equatable {
     #if os(Linux)
     case internalError(InternalError)
     #endif
-    case memoryViolation(MemoryViolation)
     case systemEvent(SystemEvent)
     case ioapicEOI(UInt8)
     case hyperV(HyperV)

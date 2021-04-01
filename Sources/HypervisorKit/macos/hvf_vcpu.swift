@@ -80,7 +80,7 @@ extension VirtualMachine.VCPU {
     }
 
 
-    public func skipInstruction() throws {
+    internal func skipInstruction() throws {
         let instrLen = try vmcs.vmExitInstructionLength()
         try registers.registerCacheControl.readRegisters(.rip)
         registers.rip += UInt64(instrLen)

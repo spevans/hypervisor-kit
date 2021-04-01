@@ -60,10 +60,6 @@ extension VirtualMachine.VCPU {
         return exitReason.vmExit(kvmRunPtr: kvmRunPtr)
     }
 
-    public func skipInstruction() throws {
-        fatalError("TODO")
-    }
-
     /// Used to satisfy the IO In read performed by the VCPU
     public func setIn(data: VMExit.DataWrite) {
         let io = kvmRunPtr.pointee.io

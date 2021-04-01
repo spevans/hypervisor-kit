@@ -266,16 +266,13 @@ extension VirtualMachine.VCPU {
                             return .mmioReadOperation(gpa, read)
 
                         case .instructionFetch:
-                            // Instruction fetch to MMIO
-                            let violation = VMExit.MemoryViolation(
-                                access: access,
-                                readable: exitQ[3] == 1,
-                                writeable: exitQ[4] == 1,
-                                executable: exitQ[5] == 1,
-                                guestPhysicalAddress: gpa,
-                                guestLinearAddress: (exitQ[7] == 1) ? try vmcs.guestLinearAddress() : nil
-                            )
-                            return .memoryViolation(violation)
+                            let registers = try readRegisters([.cs, .rip])
+                            // Instruction fetch to MMIO - TODO - decide how to handle this properly.
+                            let linear = registers.cs.base + registers.rip
+                            let addr = "CS:RIP: \(hexNum(registers.cs.selector)):\(hexNum(registers.rip)): \(hexNum(linear))"
+                            vm.logger.error("EPT violation, instruction fetch on unmapped memory @ \(gpa), \(addr)")
+                            try skipInstruction()
+                            return nil
                     }
                 }
 

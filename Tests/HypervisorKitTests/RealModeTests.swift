@@ -441,9 +441,8 @@ final class RealModeTests: XCTestCase {
         let memRegion = vm.memoryRegions[0]
         memRegion.rawBuffer.baseAddress!.advanced(by: 0x200).storeBytes(of: 0x1234, as: UInt16.self)
         let registers = try vcpu.readRegisters(.rflags)
-        logger.debug("setting rip")
+        registers.cs = SegmentRegister(selector: 0x0, base: 0x00000, limit: 0xffff, accessRights: 0x9b)
         registers.rip = 0x1100
-        logger.debug("rip set")
         registers.rflags.trap = true
 
         var vmExit: VMExit?
