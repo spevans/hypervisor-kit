@@ -197,9 +197,18 @@ extension VirtualMachine.VCPU {
                 fatalError("Cant process .ioInstruction")
 
 
+            case .vmentryFailInvalidGuestState:
+                // This will only occur is there is a bug.
+                var reason = ""
+                do {
+                    try vmcs.checkFieldsAreValid()
+                } catch {
+                    reason = ": \(error)"
+                }
+                fatalError("Invalid guest state\(reason)")
+
             case .rdmsr: fallthrough
             case .wrmsr: fallthrough
-            case .vmentryFailInvalidGuestState: fallthrough
             case .vmentryFailMSRLoading: fallthrough
             case .mwait: fallthrough
             case .monitorTrapFlag: fallthrough
