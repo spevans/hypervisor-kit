@@ -46,13 +46,15 @@ extension VirtualMachine.VCPU {
         while true {
             try registers.registerCacheControl.setupRegisters()
 
-            if activityState == .hlt {
-                // TODO: Need to wait for an interrupt to wake up or NMI of
-                vm.logger.trace("In HLT state")
-            }
-
             try registers.registerCacheControl.readRegisters(.rflags)
             if registers.rflags.interruptEnable {
+                if hltState {
+                    // TODO, better check for NMI/IRQ and STI
+                    vm.logger.trace("In HLT state waiting for IRQ")
+                    waitForPendingIRQ()
+                    vm.logger.trace("IRQ is not pending")
+                    hltState = false
+                }
                 if let irq = nextPendingIRQ() {
                     let interruptInfo = VMCS.VMEntryInterruptionInfoField(vector: irq, type: .external, deliverErrorCode: false)
                     vm.logger.trace("Injecting interrupt: \(interruptInfo)")

@@ -15,3 +15,11 @@ extension NSLock {
         return try closure()
     }
 }
+
+extension NSCondition {
+    internal func performLocked<T>(_ closure: () throws -> T) rethrows -> T {
+        self.lock()
+        defer { self.unlock() }
+        return try closure()
+    }
+}

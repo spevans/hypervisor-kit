@@ -36,6 +36,7 @@ extension VirtualMachine {
         internal var dataRead: VMExit.DataRead?
         internal var dataWrite: VMExit.DataWrite?
         internal var exitCount: UInt64 = 0
+        internal var hltState = false
 #elseif os(Linux)
         internal let vcpu_fd: Int32
         internal let kvmRunPtr: KVM_RUN_PTR
@@ -45,6 +46,7 @@ extension VirtualMachine {
 
         private let lock = NSLock()
         private var pendingIRQ: UInt8?
+        private let pendingIRQLock = NSCondition()
         internal let semaphore = DispatchSemaphore(value: 0)
 
         private var _shutdownRequested = false
@@ -197,20 +199,32 @@ extension VirtualMachine {
         /// - parameter irq:The pending IRQ to queue.
         public func queue(irq: UInt8) {
             vm.logger.trace("queuing IRQ: \(irq)")
-            lock.performLocked { pendingIRQ = irq }
+            pendingIRQLock.performLocked {
+                pendingIRQ = irq
+                pendingIRQLock.signal()
+            }
         }
 
         /// Clears any IRQ that is pending.
         public func clearPendingIRQ() {
             vm.logger.trace("Clearing pending irq")
-            lock.performLocked { pendingIRQ = nil }
+            pendingIRQLock.performLocked { pendingIRQ = nil }
         }
 
         internal func nextPendingIRQ() -> UInt8? {
-            return lock.performLocked {
+            return pendingIRQLock.performLocked {
                 defer { pendingIRQ = nil }
                 return pendingIRQ
             }
+        }
+
+        internal func waitForPendingIRQ() {
+            pendingIRQLock.performLocked {
+                while pendingIRQ == nil {
+                    pendingIRQLock.wait()
+                }
+            }
+            pendingIRQLock.unlock()
         }
 
         // Set the initial vCPU register values for Real mode.

@@ -94,7 +94,9 @@ extension VirtualMachine.VCPU {
             case .getsec: fatalError("VMExit handler for '\(exitReason.exitReason)' not implemented")
 
             case .hlt:
+                hltState = true
                 try skipInstruction()
+                // Pass the hlt up to the virtual machine manager for further processing.
                 return VMExit.hlt
 
             case .invd: fallthrough
