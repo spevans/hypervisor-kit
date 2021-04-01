@@ -230,7 +230,11 @@ extension VirtualMachine.VCPU {
                     switch access {
                         case .write:
                             // set the dirty bit for the page and ignore this vmexit
-                            region.setWriteTo(address: gpa)
+                            if region.readOnly {
+                                try skipInstruction()
+                            } else {
+                                region.setWriteTo(address: gpa)
+                            }
                             return nil
 
                         case .instructionFetch:

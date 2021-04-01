@@ -28,6 +28,7 @@ public final class MemoryRegion {
     public let guestAddress: PhysicalAddress
     public let size: UInt64
 
+    // If memory region is not read-only, then set a flag when a page in the memory region is first written to.
     private var dirtyPageLog: [Bool] = []
     private let pageCount: Int
 
@@ -59,14 +60,16 @@ public final class MemoryRegion {
         guestAddress = PhysicalAddress(address)
         self.size = size
         self.pageCount = Int((size + UInt64(MemoryRegion.pageSize) - 1) / UInt64(MemoryRegion.pageSize))
-        dirtyPageLog.reserveCapacity(pageCount)
-        for _ in 0..<pageCount {
-            dirtyPageLog.append(false)
+        if !readOnly {
+            dirtyPageLog.reserveCapacity(pageCount)
+            for _ in 0..<pageCount {
+                dirtyPageLog.append(false)
+            }
         }
     }
 
     public func setWriteTo(address guestPhysicalAddress: PhysicalAddress) {
-        precondition(self.isWriteable)
+        guard self.isWriteable else { return }
         let page = (guestPhysicalAddress - self.guestAddress) / MemoryRegion.pageSize
         dirtyPageLog[page] = true
     }
