@@ -82,6 +82,10 @@ extension VirtualMachine.VCPU {
                 // External interrupts just cause a VMexit but there is nothing to process here
                 return nil  // ignore it
 
+            case .cpuid:
+                try self.emulateCpuid()
+                return nil
+
             case .tripleFault: fallthrough
             case .initSignal: fallthrough
             case .startupIPI: fallthrough
@@ -90,7 +94,6 @@ extension VirtualMachine.VCPU {
             case .intWindow: fallthrough
             case .nmiWindow: fallthrough
             case .taskSwitch: fallthrough
-            case .cpuid: fallthrough
             case .getsec: fatalError("VMExit handler for '\(exitReason.exitReason)' not implemented")
 
             case .hlt:
@@ -297,6 +300,19 @@ extension VirtualMachine.VCPU {
             case .tpause: fatalError("\(exitReason.exitReason) not implemented")
 
         }
+    }
+
+    func emulateCpuid() throws {
+        let registers = try readRegisters([.rax, .rbx, .rcx, .rdx])
+        let eax = registers.eax
+        let ecx = registers.ecx
+        var result = cpuid_result()
+        cpuid2(eax, ecx, &result)
+        registers.eax = result.regs.eax
+        registers.ebx = result.regs.ebx
+        registers.ecx = result.regs.ecx
+        registers.edx = result.regs.edx
+        try skipInstruction()
     }
 }
 

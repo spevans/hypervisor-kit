@@ -107,3 +107,27 @@ cpuid(const uint32_t function, union cpuid_result * _Nonnull result)
         return result->bytes;
 }
 
+// Returns a pointer to the char array for ease of converting to a String
+static inline const char * _Nonnull
+cpuid2(const uint32_t function, const uint32_t extra, union cpuid_result * _Nonnull result)
+{
+        uint32_t eax, ebx, ecx, edx;
+        asm volatile ("cpuid"
+                      : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+                      : "a" (function), "c" (extra)
+                      : );
+        result->regs.eax = eax;
+        result->regs.ebx = ebx;
+        if (function == 0) {
+                result->regs.ecx = edx;
+                result->regs.edx = ecx;
+        } else {
+                result->regs.ecx = ecx;
+                result->regs.edx = edx;
+        }
+
+        result->bytes[32] = '\0';
+
+        return result->bytes;
+}
+

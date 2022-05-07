@@ -237,7 +237,9 @@ extension VirtualMachine {
             registers.cr4 = CPU.CR4Register(0x2000).value
 
             registers.rip = 0xFFF0
-            registers.rflags = CPU.RFLAGS(2)
+            var cpuFlags = CPU.RFLAGS()
+            cpuFlags.identification = true
+            registers.rflags = cpuFlags
             registers.rsp = 0x0
             registers.rax = 0x0
 
