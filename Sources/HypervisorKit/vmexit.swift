@@ -35,6 +35,15 @@ public enum VMExit: Equatable {
                 case .qword: return 64
             }
         }
+
+        public var bytes: Int {
+            switch self {
+                case .byte:  return 1
+                case .word:  return 2
+                case .dword: return 4
+                case .qword: return 8
+            }
+        }
     }
 
     public enum DataWrite: Equatable, CustomStringConvertible {
@@ -42,6 +51,22 @@ public enum VMExit: Equatable {
         case word(UInt16)
         case dword(UInt32)
         case qword(UInt64)
+
+        public init(_ data: UInt8) {
+            self = .byte(data)
+        }
+
+        public init(_ data: UInt16) {
+            self = .word(data)
+        }
+
+        public init(_ data: UInt32) {
+            self = .dword(data)
+        }
+
+        public init(_ data: UInt64) {
+            self = .qword(data)
+        }
 
         public init?(bitWidth: UInt8, value: UInt64) {
             switch bitWidth {
@@ -68,6 +93,15 @@ public enum VMExit: Equatable {
                 case .word:  return 16
                 case .dword: return 32
                 case .qword: return 64
+            }
+        }
+
+        public var bytes: Int {
+            switch self {
+                case .byte:  return 1
+                case .word:  return 2
+                case .dword: return 4
+                case .qword: return 8
             }
         }
     }
@@ -163,8 +197,6 @@ public enum VMExit: Equatable {
 
     case unknown(UInt64)
     case exception(ExceptionInfo)
-    case ioInOperation(IOPort, DataRead)
-    case ioOutOperation(IOPort, DataWrite)
     case debug(Debug)
     case hlt
     case mmioReadOperation(PhysicalAddress, DataRead)

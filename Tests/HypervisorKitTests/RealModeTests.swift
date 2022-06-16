@@ -221,78 +221,60 @@ final class RealModeTests: XCTestCase {
 
 
         var vmExits: [VMExit] = []
-        vmExits.reserveCapacity(100)
 
         vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
             vmExits.append(vmExit)
             return (vmExit == .hlt)
         }
 
-        XCTAssertTrue(runTest(vcpu: vcpu, ax: 2))
-        XCTAssertEqual(vmExits.count, 82)
+        var dataWrites: [(IOPort, VMExit.DataWrite)] = []
+        dataWrites.reserveCapacity(82)
+        vm.pioOutHandler = { (port, dataWrite) in
+            dataWrites.append((port, dataWrite))
+        }
 
-        var vmExit = vmExits.removeFirst()
+        XCTAssertTrue(runTest(vcpu: vcpu, ax: 2))
+        XCTAssertEqual(dataWrites.count, 81)
+        XCTAssertEqual(vmExits.count, 1)
+
+        var (port, dataWrite) = dataWrites.removeFirst()
         for byte in bytes {
-            if case let VMExit.ioOutOperation(port, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-                XCTAssertEqual(port, 0x60)
-            } else {
-                XCTFail("Not an OUTS")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            XCTAssertEqual(port, 0x60)
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
 
         for word in words {
-            if case let VMExit.ioOutOperation(port, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.word(word))
-                XCTAssertEqual(port, 0x60)
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.word(word))
+            XCTAssertEqual(port, 0x60)
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         for dword in dwords {
-            if case let VMExit.ioOutOperation(port, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
-                XCTAssertEqual(port, 0x60)
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.dword(dword))
+            XCTAssertEqual(port, 0x60)
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         // Test unaligned data
         for dword in unalignedDwords {
-            if case let VMExit.ioOutOperation(port, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.dword(dword))
-                XCTAssertEqual(port, 0x60)
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.dword(dword))
+            XCTAssertEqual(port, 0x60)
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         for word in unalignedWords {
-            if case let VMExit.ioOutOperation(port, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.word(word))
-                XCTAssertEqual(port, 0x60)
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.word(word))
+            XCTAssertEqual(port, 0x60)
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         // Test Segment Overrides
         #if true
         for byte in csOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            (port, dataWrite) = dataWrites.removeFirst()
         }
         #endif
 
@@ -303,104 +285,44 @@ final class RealModeTests: XCTestCase {
         registers.ds = ds
 
         for byte in dsOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                let ds = registers.ds
-                let cs = registers.cs
-                logger.trace("DS: \(String(ds.selector, radix: 16)) \(String(ds.base, radix: 16))")
-                logger.trace("CS:IP \(String(cs.base, radix: 16)):\(String(registers.rip, radix: 16))")
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            (port, dataWrite) = dataWrites.removeFirst()
         }
         #if true
         for byte in esOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         for byte in fsOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         for byte in gsOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
-            }
-            vmExit = vmExits.removeFirst()
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            (port, dataWrite) = dataWrites.removeFirst()
         }
 
         for byte in ssOverrideBytes {
-            if case let VMExit.ioOutOperation(_, data) = vmExit {
-                XCTAssertEqual(data, VMExit.DataWrite.byte(byte))
-            } else {
-                XCTFail("Not an OUTS: \(vmExit)")
+            XCTAssertEqual(dataWrite, VMExit.DataWrite.byte(byte))
+            if !dataWrites.isEmpty {
+                (port, dataWrite) = dataWrites.removeFirst()
             }
-            vmExit = vmExits.removeFirst()
         }
 
-        XCTAssertEqual(vmExit, .hlt)
+        XCTAssertEqual(vmExits.first, .hlt)
         #endif
 
         XCTAssertTrue(vm.areVcpusShutdown())
         XCTAssertNoThrow(try vm.shutdown())
     }
 
-
     func testIn() throws {
         let (vm, vcpu) = try createRealModeVM()
 
         var testNumber = 1
         vcpu.vmExitHandler = { (vcpu, vmExit) -> Bool in
-
-            if case let VMExit.ioInOperation(port, dataRead) = vmExit {
-                switch testNumber {
-                    case 1:     // IN 0x60, AL
-                        XCTAssertEqual(port, 0x60)
-                        guard VMExit.DataRead.byte == dataRead else {
-                            XCTFail("dataRead is not a .byte but a \(dataRead)")
-                            return true
-                        }
-                        XCTAssertEqual(dataRead, VMExit.DataRead.byte, "IN 0x60, AL")
-                        vcpu.setIn(data: VMExit.DataWrite.byte(0x12))
-
-                    case 2:     // IN 0x60, AX
-                        XCTAssertEqual(port, 0x60)
-                        guard VMExit.DataRead.word == dataRead else {
-                            XCTFail("dataRead is not a .word but a \(dataRead)")
-                            return true
-                        }
-                        XCTAssertEqual(dataRead, VMExit.DataRead.word)
-                        vcpu.setIn(data: VMExit.DataWrite.word(0xabcd))
-
-                    case 3:     // IN 0x60, EAX
-                        XCTAssertEqual(port, 0x60)
-                        guard VMExit.DataRead.dword == dataRead else {
-                            XCTFail("dataRead is not a .dword but a \(dataRead)")
-                            return true
-                        }
-                        XCTAssertEqual(dataRead, VMExit.DataRead.dword)
-                        vcpu.setIn(data: VMExit.DataWrite.dword(0xDEADC0DE))
-
-                    default:
-                        XCTFail("Unexpected testNumber: \(testNumber)")
-                        return true
-                }
-
-                return false    // Keep going, dont finish yet
-            }
 
             if vmExit == .hlt {
                 let registers = try vcpu.readRegisters(.rax)
@@ -423,9 +345,45 @@ final class RealModeTests: XCTestCase {
                 testNumber += 1
                 return false
             }
-
             XCTFail("Unexpected vmExit: \(vmExit)")
             return true
+        }
+
+        vm.pioInHandler = { (port, dataRead) in
+
+            var result = VMExit.DataWrite.byte(0xff)
+            switch testNumber {
+                case 1:     // IN 0x60, AL
+                    XCTAssertEqual(port, 0x60)
+                    guard VMExit.DataRead.byte == dataRead else {
+                        XCTFail("dataRead is not a .byte but a \(dataRead)")
+                        break
+                    }
+                    XCTAssertEqual(dataRead, VMExit.DataRead.byte, "IN 0x60, AL")
+                    result = VMExit.DataWrite.byte(0x12)
+
+                case 2:     // IN 0x60, AX
+                    XCTAssertEqual(port, 0x60)
+                    guard VMExit.DataRead.word == dataRead else {
+                        XCTFail("dataRead is not a .word but a \(dataRead)")
+                        break
+                    }
+                    XCTAssertEqual(dataRead, VMExit.DataRead.word)
+                    result = VMExit.DataWrite.word(0xabcd)
+
+                case 3:     // IN 0x60, EAX
+                    XCTAssertEqual(port, 0x60)
+                    guard VMExit.DataRead.dword == dataRead else {
+                        XCTFail("dataRead is not a .dword but a \(dataRead)")
+                        break
+                    }
+                    XCTAssertEqual(dataRead, VMExit.DataRead.dword)
+                    result = VMExit.DataWrite.dword(0xDEADC0DE)
+
+                default:
+                    XCTFail("Unexpected testNumber: \(testNumber)")
+            }
+            return result
         }
 
         XCTAssertTrue(runTest(vcpu: vcpu, ax: 3))

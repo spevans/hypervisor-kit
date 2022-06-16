@@ -3,7 +3,7 @@
 //  HypervisorKit
 //
 //  Created by Simon Evans on 01/01/2020.
-//  Copyright © 2020 Simon Evans. All rights reserved.
+//  Copyright © 2020 - 2022 Simon Evans. All rights reserved.
 //
 //  Main class encapsulating a VM.
 //
@@ -11,6 +11,12 @@
 import Logging
 import Dispatch
 import Foundation
+
+
+public typealias PIOOutHandler = ((IOPort, VMExit.DataWrite) throws -> Void)
+public typealias PIOInHandler = ((IOPort, VMExit.DataRead) throws -> VMExit.DataWrite)
+public typealias MMIOOutHandler = ((PhysicalAddress, VMExit.DataWrite) throws -> Void)
+public typealias MMIOInHandler = ((PhysicalAddress, VMExit.DataRead) throws -> VMExit.DataWrite)
 
 /// A type representing a full VM (virtual machine) including cpus and memory.
 public final class VirtualMachine {
@@ -22,7 +28,10 @@ public final class VirtualMachine {
 
     public private(set) var vcpus: [VCPU] = []
     public private(set) var memoryRegions: [MemoryRegion] = []
-
+    public var pioOutHandler: PIOOutHandler?
+    public var pioInHandler: PIOInHandler?
+    public var mmioOutHandler: MMIOOutHandler?
+    public var mmioInHandler: MMIOInHandler?
 
     /// Initialise the VM subsystem
     ///

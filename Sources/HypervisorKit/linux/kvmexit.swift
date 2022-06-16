@@ -3,7 +3,7 @@
 //  HypervisorKit
 //
 //  Created by Simon Evans on 10/12/2019.
-//  Copyright © 2019 Simon Evans. All rights reserved.
+//  Copyright © 2019 - 2022 Simon Evans. All rights reserved.
 //
 
 #if os(Linux)
@@ -41,10 +41,17 @@ enum KVMExit: UInt32 {
     case systemEvent = 24
     case ioapicEoi = 26
     case hyperV = 27
+}
 
 
-    func vmExit(kvmRunPtr: KVM_RUN_PTR) -> VMExit {
-        switch self {
+extension VirtualMachine.VCPU {
+
+    internal func vmExit() throws -> VMExit? {
+        guard let exitReason = KVMExit(rawValue: kvmRunPtr.pointee.exit_reason) else {
+            fatalError("Invalid KVM exit reason: \(kvmRunPtr.pointee.exit_reason)")
+        }
+
+        switch exitReason {
 
             case .unknown:
                 return VMExit.unknown(kvmRunPtr.pointee.hw.hardware_exit_reason)
@@ -54,25 +61,48 @@ enum KVMExit: UInt32 {
 
             case .io:
                 let io = kvmRunPtr.pointee.io
-                let dataOffset = io.data_offset
+                var dataOffset = Int(io.data_offset)
                 let bitWidth = io.size * 8
-                if io.count != 1 { fatalError("IO op with count != 1") }
 
                 if io.direction == 0 {  // In
-                    if let data = VMExit.DataRead(bitWidth: bitWidth) {
-                        return VMExit.ioInOperation(io.port, data)
-                    }
-                } else {
-                    let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: Int(dataOffset))
+                    if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                        var count = io.count
+                        while count > 0 {
+                            let data = try self.vm.pioInHandler!(io.port, dataRead)
+                            guard data.bitWidth == bitWidth else {
+                                fatalError("Bitwith mismatch, have \(data.bitWidth) want \(bitWidth)")
+                            }
 
-                    switch bitWidth {
-                        case 8: return VMExit.ioOutOperation(io.port, .byte(ptr.load(as: UInt8.self)))
-                        case 16: return VMExit.ioOutOperation(io.port, .word(ptr.load(as: UInt16.self)))
-                        case 32: return VMExit.ioOutOperation(io.port, .dword(ptr.load(as: UInt32.self)))
-                        case 64: return VMExit.ioOutOperation(io.port, .qword(ptr.load(as: UInt64.self)))
-                        default: break
+                            let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: dataOffset)
+                            switch data {
+                                case .byte(let value): ptr.storeBytes(of: value, as: UInt8.self)
+                                case .word(let value): ptr.storeBytes(of: value, as: UInt16.self)
+                                case .dword(let value): ptr.storeBytes(of: value, as: UInt32.self)
+                                case .qword(_): fatalError("Illegal bitWidth \(bitWidth) for IN")
+                            }
+                            dataOffset += Int(io.size)
+                            count -= 1
+                        }
                     }
-            }
+
+                } else {
+                    var count = io.count
+                    while count > 0 {
+
+                        let ptr = UnsafeMutableRawPointer(kvmRunPtr).advanced(by: dataOffset)
+                        let dataWrite: VMExit.DataWrite
+                        switch bitWidth {
+                            case 8: dataWrite = .byte(ptr.load(as: UInt8.self))
+                            case 16: dataWrite = .word(ptr.load(as: UInt16.self))
+                            case 32: dataWrite = .dword(ptr.load(as: UInt32.self))
+                            default: fatalError("Illegal bitWidth \(bitWidth) for OUT")
+                        }
+                        try self.vm.pioOutHandler!(io.port, dataWrite)
+                        dataOffset += Int(io.size)
+                        count -= 1
+                    }
+                }
+                return nil
 
             case .debug:
                 let debugInfo = kvmRunPtr.pointee.debug.arch
@@ -138,7 +168,6 @@ enum KVMExit: UInt32 {
             case .hyperV:
                 return VMExit.hyperV(VMExit.HyperV())
         }
-        fatalError("Cant process: \(self)")
     }
 }
 

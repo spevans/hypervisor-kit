@@ -33,8 +33,6 @@ extension VirtualMachine {
 #if os(macOS)
         internal let vcpuId: hv_vcpuid_t
         internal let vmcs: VMCS
-        internal var dataRead: VMExit.DataRead?
-        internal var dataWrite: VMExit.DataWrite?
         internal var exitCount: UInt64 = 0
         internal var hltState = false
 #elseif os(Linux)

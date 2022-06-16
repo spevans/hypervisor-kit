@@ -14,39 +14,67 @@ import Logging
 extension VirtualMachine.VCPU {
 
     // Read from Segment:[{R,E},SI]
-    private func readStringUnit(selector: SegmentRegister, addressWidth: Int, dataWidth: Int) throws -> VMExit.DataWrite {
+    // TODO check for page access/address wrap/crossing any boundaries
+    private func readStringUnit(selector: SegmentRegister, addressWidth: Int, data: VMExit.DataRead) throws -> VMExit.DataWrite {
+        try registers.registerCacheControl.readRegisters([.rsi, .rflags])
+        let ptr: UnsafeRawPointer
+
         switch addressWidth {
             case 16:
-                try registers.registerCacheControl.readRegisters([.rsi, .rflags])
                 var rsi = registers.rsi
                 var si = UInt16(truncatingIfNeeded: rsi)
                 let physicalAddress = PhysicalAddress(selector.base) + UInt(si)
-                let ptr = try vm.memory(at: physicalAddress, count: UInt64(dataWidth))
-                let bytes = UInt16(dataWidth / 8)
+                let bytes = UInt16(data.bytes)
+                ptr = UnsafeRawPointer(try vm.memory(at: physicalAddress, count: UInt64(bytes)))
                 si = registers.rflags.direction ? si &- bytes : si &+ bytes
                 rsi &= ~UInt64(0xffff)
                 rsi |= UInt64(si)
                 registers.rsi = rsi
 
-                switch dataWidth {
-                    case 8: return .byte(ptr.load(as: UInt8.self))
-                    case 16:
-                        // Check for alignment
-                        if physicalAddress.isAligned(to: MemoryLayout<UInt16>.size) {
-                            return .word(ptr.load(as: UInt16.self))
-                        } else {
-                            return .word(unaligned_load16(ptr))
-                        }
-                    case 32:
-                        if physicalAddress.isAligned(to: MemoryLayout<UInt32>.size) {
-                            return .dword(ptr.load(as: UInt32.self))
-                        } else {
-                            return .dword(unaligned_load32(ptr))
-                        }
-                    default: fatalError("bad width")
-            }
             default: fatalError("Cant handle: \(addressWidth)")
         }
+
+        switch data {
+            case .byte: return .byte(ptr.load(as: UInt8.self))
+            case .word: return .word(ptr.unalignedLoad(as: UInt16.self))
+            case .dword: return .dword(ptr.unalignedLoad(as: UInt32.self))
+            case .qword: return .qword(ptr.unalignedLoad(as: UInt64.self))
+        }
+    }
+
+    // Write to Segment:[{R,E},DI]
+    private func writeStringUnit(selector: SegmentRegister, addressWidth: Int, data: VMExit.DataWrite) throws {
+        try registers.registerCacheControl.readRegisters([.rdi, .rflags])
+        let ptr: UnsafeMutableRawPointer
+
+        switch addressWidth {
+            case 16:
+                var rdi = registers.rdi
+                var di = UInt16(truncatingIfNeeded: rdi)
+                let physicalAddress = PhysicalAddress(selector.base) + UInt(di)
+                let bytes = UInt16(data.bytes)
+                ptr = try vm.memory(at: physicalAddress, count: UInt64(bytes))
+                di = registers.rflags.direction ? di &- bytes : di &+ bytes
+                rdi &= ~UInt64(0xffff)
+                rdi |= UInt64(di)
+                registers.rdi = rdi
+
+            default: fatalError("Cant handle: \(addressWidth)")
+        }
+
+        switch data {
+            case .byte(let value):
+                ptr.storeBytes(of: value, as: UInt8.self)
+
+            case .word(let value):
+                ptr.unalignedStoreBytes(of: value, toByteOffset: 0, as: UInt16.self)
+
+            case .dword(let value):
+                ptr.unalignedStoreBytes(of: value, toByteOffset: 0, as: UInt32.self)
+
+            case .qword(let value):
+                ptr.unalignedStoreBytes(of: value, toByteOffset: 0, as: UInt64.self)
+            }
     }
 
 
@@ -121,84 +149,8 @@ extension VirtualMachine.VCPU {
             case .drAccess: fatalError("VMExit handler for '\(exitReason.exitReason)' not implemented")
 
             case .ioInstruction:
-                let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
-
-                let bitWidth = 8 * (UInt8(exitQ[0...2]) + 1)
-                let isIn = Bool(exitQ[3])
-                let isString = Bool(exitQ[4])
-                let port = UInt16(exitQ[16...31])
-
-                if isString {
-                    let isRep = Bool(exitQ[5])
-
-                    let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
-                    let addressSize = 16 << exitInfo[7...9]
-                    let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
-                    try registers.registerCacheControl.readRegisters([.segmentRegisters, .rcx])
-
-                    let segReg: SegmentRegister = {
-                        switch segmentOverride {
-                            case .es: return registers.es
-                            case .cs: return registers.cs
-                            case .ss: return registers.ss
-                            case .ds: return registers.ds
-                            case .fs: return registers.fs
-                            case .gs: return registers.gs
-                        }
-                    }()
-
-                    let rcx = registers.rcx
-                    var count: UInt64 = {
-                        guard isRep else { return 1 }
-                        if addressSize == 16 { return rcx & 0xffff }
-                        if addressSize == 32 { return rcx & 0xffff_fffff }
-                        return rcx
-                    }()
-
-                    if isRep && count == 0 {
-                        try skipInstruction()
-                        return nil
-                    }
-
-                    if isIn {
-                        if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
-                            if !isRep { try skipInstruction() }
-                            return .ioInOperation(port, dataRead)
-                        }
-                    } else {
-                        let data = try readStringUnit(selector: segReg, addressWidth: 16, dataWidth: Int(bitWidth))
-
-                        if isRep {
-                            count -= 1
-                            if addressSize == 16 {
-                                registers.rcx = (rcx & ~0xffff) | count
-                            } else if addressSize == 32 {
-                                registers.rcx = (rcx & ~0xffff_ffff) | count
-                            } else {
-                                registers.rcx = count
-                            }
-                        } else {
-                            try skipInstruction()
-                        }
-                        return .ioOutOperation(port, data)
-                    }
-                }
-
-                if isIn {
-                    if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
-                        self.dataRead = dataRead
-                        try skipInstruction()
-                        return .ioInOperation(port, dataRead)
-                    }
-                } else {
-                    try registers.registerCacheControl.readRegisters(.rax)
-                    if let dataWrite = VMExit.DataWrite(bitWidth: bitWidth, value: registers.rax) {
-                        try skipInstruction()
-                        return .ioOutOperation(port, dataWrite)
-                    }
-                }
-                fatalError("Cant process .ioInstruction")
-
+                try self.pioInstruction()
+                return nil
 
             case .vmentryFailInvalidGuestState:
                 // This will only occur is there is a bug.
@@ -299,6 +251,100 @@ extension VirtualMachine.VCPU {
             case .umwait: fallthrough
             case .tpause: fatalError("\(exitReason.exitReason) not implemented")
 
+        }
+    }
+
+    private func pioInstruction() throws {
+        let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
+
+        let bitWidth = 8 * (UInt8(exitQ[0...2]) + 1)
+        let isIn = Bool(exitQ[3])
+        let isString = Bool(exitQ[4])
+        let port = UInt16(exitQ[16...31])
+
+        if isString {
+            let isRep = Bool(exitQ[5])
+
+            let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
+            let addressSize = 16 << exitInfo[7...9]
+            let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
+            try registers.registerCacheControl.readRegisters([.segmentRegisters, .rcx, .rflags])
+
+            let segReg: SegmentRegister = {
+                switch segmentOverride {
+                    case .es: return registers.es
+                    case .cs: return registers.cs
+                    case .ss: return registers.ss
+                    case .ds: return registers.ds
+                    case .fs: return registers.fs
+                    case .gs: return registers.gs
+                }
+            }()
+
+            let rcx = registers.rcx
+            var count: UInt64 = {
+                guard isRep else { return 1 }
+                if addressSize == 16 { return rcx & 0xffff }
+                if addressSize == 32 { return rcx & 0xffff_fffff }
+                return rcx
+            }()
+
+            if isRep && count == 0 {
+                try skipInstruction()
+                return
+            }
+
+            let counterChange: UInt64 = {
+                guard isRep else { return 0 }
+                if self.registers.rflags.direction {
+                    return 1
+                } else {
+                    return UInt64.max   // Will use unchecked &+ to simulate -1
+                }
+            }()
+
+            let dataRead = VMExit.DataRead(bitWidth: bitWidth)!
+
+            if isIn {
+                var a: [VMExit.DataWrite] = []
+                a.reserveCapacity(Int(count))
+                while count > 0 {
+                    let write = try self.vm.pioInHandler!(port, dataRead)
+                    a.append(write)
+                    try writeStringUnit(selector: segReg, addressWidth: 16, data: write)
+                    count -= 1
+                    registers.rcx &+= counterChange
+                }
+            } else {
+                while count > 0 {
+                    let dataWrite = try readStringUnit(selector: segReg, addressWidth: 16, data: dataRead)
+                    try self.vm.pioOutHandler!(port, dataWrite)
+                    count -= 1
+                    registers.rcx &+= counterChange
+                }
+            }
+            try skipInstruction()
+            return
+        }
+
+        if isIn {
+            if let dataRead = VMExit.DataRead(bitWidth: bitWidth) {
+                let write = try self.vm.pioInHandler!(port, dataRead)
+                try registers.registerCacheControl.readRegisters(.rax)
+                switch write {
+                    case .byte(let value): registers.al = value
+                    case .word(let value): registers.ax = value
+                    case .dword(let value): registers.eax = value
+                    case .qword(_): fatalError("Invalid PIO width")
+                }
+                try skipInstruction()
+            }
+        } else {
+            try registers.registerCacheControl.readRegisters(.rax)
+            if let dataWrite = VMExit.DataWrite(bitWidth: bitWidth, value: registers.rax) {
+                try self.vm.pioOutHandler!(port, dataWrite)
+                try skipInstruction()
+            }
         }
     }
 
