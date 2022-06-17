@@ -57,25 +57,45 @@ extension VirtualMachine {
         vm_fd = -1
     }
 
+    public func setMemoryRegionProtection(gpa: PhysicalAddress, size: UInt64, readable: Bool, writable: Bool) throws {
+        if let memoryRegion = self.memoryRegion(containing: gpa) {
+            try memoryRegion.modifySubRegion(gpa: gpa, size: size) { (subRegion) -> MemoryRegion.SubRegion in
+                if subRegion.isWritable != writable {
+                    var kvmRegion = subRegion.kvmRegion
+                    kvmRegion.flags = !writable ? MemoryRegion.KVM_MEM_READONLY : 0
+                    guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                        throw VMError.kvmMemoryError
+                    }
+                    return MemoryRegion.SubRegion(kvmRegion: kvmRegion)
+                } else {
+                    return subRegion
+                }
+            }
+        }
+    }
 
-    internal func _createMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool) throws -> MemoryRegion {
-        let memRegion = try MemoryRegion(size: UInt64(size), at: guestAddress, slot: memoryRegions.count)
+    internal func _createMemory(at guestAddress: UInt64, sizes: [UInt64], readOnly: Bool) throws -> MemoryRegion {
+        let nextSlot = memoryRegions.reduce(0, { $0 + $1.subRegions.count })
+        let memRegion = try MemoryRegion(sizes: sizes, at: guestAddress, slot: nextSlot)
 
-        var kvmRegion = memRegion.kvmRegion
-        guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            throw VMError.kvmMemoryError
+        for subRegion in memRegion.subRegions {
+            var kvmRegion = subRegion.kvmRegion
+            guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                throw VMError.kvmMemoryError
+            }
         }
         return memRegion
     }
 
     internal func _destroyMemory(region: MemoryRegion) throws {
-        var kvmRegion = region.kvmRegion
-        kvmRegion.memory_size = 0
-        guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
-            throw VMError.kvmMemoryError
+        for subRegion in region.subRegions {
+            var kvmRegion = subRegion.kvmRegion
+            kvmRegion.memory_size = 0
+            guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                throw VMError.kvmMemoryError
+            }
         }
     }
-
 
     /// This runs inside its own thread.
     internal func _createVCPU() throws -> VCPU {

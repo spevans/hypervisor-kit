@@ -194,7 +194,7 @@ extension VirtualMachine.VCPU {
                     switch access {
                         case .write:
                             // set the dirty bit for the page and ignore this vmexit
-                            if region.readOnly {
+                            if !region.isAddressWritable(gpa: gpa) {
                                 try skipInstruction()
                             } else {
                                 region.setWriteTo(address: gpa)

@@ -66,13 +66,16 @@ public final class VirtualMachine {
     /// - precondition: `size` is non-zero and is a multiple of the page size of the VM.
     /// - throws: `VMError.addMemoryFailure`.
     public func addMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool = false) throws -> MemoryRegion {
-        logger.trace("Adding \(size) bytes at address 0x\(String(guestAddress, radix: 16))")
+        try addMemory(at: guestAddress, sizes: [size], readOnly: readOnly)
+    }
+
+    public func addMemory(at guestAddress: UInt64, sizes: [UInt64], readOnly: Bool = false) throws -> MemoryRegion {
+        let totalSize = sizes.reduce(0, +)
+        logger.trace("Adding \(totalSize) bytes at address 0x\(String(guestAddress, radix: 16))")
 
         precondition(guestAddress & 0xfff == 0)
-        precondition(size > 0)
-        precondition(size & 0xfff == 0)
         do {
-            let memRegion = try _createMemory(at: guestAddress, size: size, readOnly: readOnly)
+            let memRegion = try _createMemory(at: guestAddress, sizes: sizes, readOnly: readOnly)
             memoryRegions.append(memRegion)
             logger.trace("Added memory")
             return memRegion

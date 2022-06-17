@@ -69,9 +69,31 @@ extension VirtualMachine {
         try hvError(hv_vm_destroy())
     }
 
+    public func setMemoryRegionProtection(gpa: PhysicalAddress, size: UInt64, readable: Bool, writable: Bool) throws {
+        if let memoryRegion = self.memoryRegion(containing: gpa) {
+            try memoryRegion.modifySubRegion(gpa: gpa, size: size) { (subRegion) -> MemoryRegion.SubRegion in
+                if subRegion.isReadable != readable || subRegion.isWritable != writable {
+                    var flags = HV_MEMORY_EXEC
+                    if readable {
+                        flags |= HV_MEMORY_READ
+                    }
+                    if writable {
+                        flags |= HV_MEMORY_WRITE
+                    }
+                    try hvError(hv_vm_protect(gpa.value, Int(size), hv_memory_flags_t(flags)))
+                    var newSubRegion = subRegion
+                    newSubRegion.isReadable = readable
+                    newSubRegion.isWritable = writable
+                    return newSubRegion
+                } else {
+                    return subRegion
+                }
+            }
+        }
+    }
 
-    internal func _createMemory(at guestAddress: UInt64, size: UInt64, readOnly: Bool) throws -> MemoryRegion {
-        return try MemoryRegion(size: size, at: guestAddress, readOnly: readOnly)
+    internal func _createMemory(at guestAddress: UInt64, sizes: [UInt64], readOnly: Bool) throws -> MemoryRegion {
+        return try MemoryRegion(sizes: sizes, at: guestAddress, readOnly: readOnly)
     }
 
     internal func _destroyMemory(region: MemoryRegion) throws {
