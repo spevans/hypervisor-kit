@@ -60,10 +60,20 @@ extension VirtualMachine {
     public func setMemoryRegionProtection(gpa: PhysicalAddress, size: UInt64, readable: Bool, writable: Bool) throws {
         if let memoryRegion = self.memoryRegion(containing: gpa) {
             try memoryRegion.modifySubRegion(gpa: gpa, size: size) { (subRegion) -> MemoryRegion.SubRegion in
+                logger.debug("Updating memory protection on \(subRegion.kvmRegion) to writable: \(writable)")
                 if subRegion.isWritable != writable {
                     var kvmRegion = subRegion.kvmRegion
+                    // TODO: Check if a memory region can be modified without a delete first. It seemed to fail without
+                    // the delete but it could be version specific.
+                    var deleteRegion = kvmRegion
+                    deleteRegion.memory_size = 0
+                    guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &deleteRegion) >= 0 else {
+                        logger.error("kvm: Error deleteing \(deleteRegion)")
+                        throw VMError.kvmMemoryError
+                    }
                     kvmRegion.flags = !writable ? MemoryRegion.KVM_MEM_READONLY : 0
                     guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                        logger.error("kvm: Error updating memory protection on \(kvmRegion)")
                         throw VMError.kvmMemoryError
                     }
                     return MemoryRegion.SubRegion(kvmRegion: kvmRegion)
@@ -81,6 +91,7 @@ extension VirtualMachine {
         for subRegion in memRegion.subRegions {
             var kvmRegion = subRegion.kvmRegion
             guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                logger.error("kvm: Error setting \(kvmRegion)")
                 throw VMError.kvmMemoryError
             }
         }
@@ -92,6 +103,7 @@ extension VirtualMachine {
             var kvmRegion = subRegion.kvmRegion
             kvmRegion.memory_size = 0
             guard ioctl3arg(vm_fd, _IOCTL_KVM_SET_USER_MEMORY_REGION, &kvmRegion) >= 0 else {
+                logger.error("kvm: Error destroying \(kvmRegion)")
                 throw VMError.kvmMemoryError
             }
         }
