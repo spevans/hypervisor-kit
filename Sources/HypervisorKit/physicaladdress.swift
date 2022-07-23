@@ -122,11 +122,11 @@ struct LogicalMemoryAccess {
     private let value: BitField32
     var rawValue: UInt32 { value.rawValue }
 
-    var scaling: Int? { (value[22] == false) ? 1 << Int(value[0...1]) : nil }
+    var scaling: Int? { value[22] ? nil : 1 << Int(value[0...1]) }
     var addressSize: Int { 16 << Int(value[7...9]) }    // 16, 32, 64
     var segmentRegister: SegmentRegister { SegmentRegister(rawValue: Int(value[15...17]))! }
-    var indexRegister: Register? { (value[22] == false) ? Register(rawValue: Int(value[18...21])) : nil }
-    var baseRegister: Register? { (value[27] == false) ? Register(rawValue: Int(value[23...26])) : nil }
+    var indexRegister: Register? { value[22] ? nil : Register(rawValue: Int(value[18...21])) }
+    var baseRegister: Register? { value[27] ? nil : Register(rawValue: Int(value[23...26])) }
 
 /*
     // FIXME: Take paging and GDT/LDT into account
@@ -147,7 +147,7 @@ struct LogicalMemoryAccess {
     init(addressSize: Int, segmentRegister: SegmentRegister, register: Register) {
         precondition([16, 32, 64].contains(addressSize))
 
-        var tmp = BitField32(0)
+        var tmp = BitField32()
         tmp[7...9] = UInt32(addressSize >> 5)
         tmp[15...17] = UInt32(segmentRegister.rawValue)
 

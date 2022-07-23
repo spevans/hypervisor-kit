@@ -311,7 +311,7 @@ public struct CPU {
             set { bits[16] = newValue }
         }
 
-        public var v8086Mode: Bool {
+        public var vm86Mode: Bool {
             get { bits[17] }
             set { bits[17] = newValue }
         }

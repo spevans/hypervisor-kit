@@ -40,8 +40,8 @@ extension VMCS {
         var codeSegment: Bool { bits[3] }
         var dataSegment: Bool { !codeSegment }
 
-        var systemDescriptor: Bool { bits[4] == false }
-        var codeOrDataDescriptor: Bool { !systemDescriptor }
+        var codeOrDataDescriptor: Bool { bits[4] }
+        var systemDescriptor: Bool { !codeOrDataDescriptor }
         var privilegeLevel: Int { Int(bits[5...6]) }
         var segmentPresent: Bool { bits[7] }
         var reserved1: Int { Int(bits[8...11]) }
@@ -213,12 +213,12 @@ extension VMCS {
 #endif
 
             // • If the “NMI exiting” VM-execution control is 0, the “virtual NMIs” VM-execution control must be 0.
-            if pinBased[3] == false && pinBased[5] {
+            if !pinBased[3] && pinBased[5] {
                 fatalError("NMI exiting = 0 but virtual NMIs = 1")
             }
 
             // • If the “virtual NMIs” VM-execution control is 0, the “NMI-window exiting” VM-execution control must be 0.
-            if pinBased[5] == false && primaryControls[22] {
+            if !pinBased[5] && primaryControls[22] {
                 fatalError("virtual NMIs = 0 but NMI-window exiting = 1")
             }
 
@@ -331,7 +331,7 @@ extension VMCS {
             // — The address should not set any bits beyond the processor’s physical-address width.
             let enablePML = (secondaryControls[17])
             if enablePML {
-                if !enableEPT  { fatalError("enablePML is 1 but enableEPT is 0") }
+                if !enableEPT { fatalError("enablePML is 1 but enableEPT is 0") }
                 let pmladdr = try self.pmlAddress().rawValue
                 if (pmladdr & 0x3ff) != 0 || pmladdr > maxCPUPhysicalAddress {
                     fatalError("enablePML is 1 but PML Address \(pmladdr.description) is invalid")
@@ -703,7 +703,7 @@ extension VMCS {
             // — The “IA-32e mode guest” VM-entry control is 0.
             // — Bit 17 of the CR4 field (corresponding to CR4.PCIDE) is 0.
             // — Bits 63:32 in the RIP field is 0.
-            if vmExitControls[9] == false {
+            if !vmExitControls[9] {
 #if false
                 if efer.ia32eModeActive == true { fatalError("VMExitControls.hostAddressSpaceSize == 0 but IA32_EFER.LMA == 1") }
 #endif
@@ -869,8 +869,8 @@ extension VMCS {
             // • The guest will be IA-32e mode if the “IA-32e mode guest” VM-entry control is 1. (This is possible only on processors that support Intel 64 architecture.)
             // • Any one of these registers is said to be usable if the unusable bit (bit 16) is 0 in the access-rights field for that register.
 
-            let rflags = BitField64(try self.guestRFlags().rawValue)
-            let vm86mode = rflags[17]
+            let rflags = try self.guestRFlags()
+            let vm86mode = rflags.vm86Mode
             let unrestrictedGuest = (secondaryControls[7])
             let ia32eModeGuest = vmEntryControls[9]
 
@@ -1182,7 +1182,7 @@ extension VMCS {
         // 26.3.1.4 Checks on Guest RIP and RFLAGS
         func checkGuestRIPandRFLAGS() throws {
             let rip = try self.guestRIP()
-            let rflags = try self.guestRFlags().rawValue
+            let rflags = try self.guestRFlags()
             let ia32eModeGuest = vmEntryControls[9]
 
             // The following checks are performed on fields in the guest-state area corresponding to RIP and RFLAGS:
@@ -1192,7 +1192,7 @@ extension VMCS {
             //    and the L bit in the access-rights field for CS is 1.1 (No check applies if the processor supports 64 linear-address bits.)
 
             let guestCSAccessRights = BitField32(try self.guestCSAccessRights())
-            if !ia32eModeGuest || guestCSAccessRights[13] == false {
+            if !ia32eModeGuest || !guestCSAccessRights[13] {
                 if rip & 0xffffffff_00000000 != 0 {
                     fatalError("RIP has bits set in 63:32 but IA32e-Mode is 0 or CS guest access rights L bit is 0")
                 }
@@ -1205,21 +1205,21 @@ extension VMCS {
             // — Reserved bits 63:22 (bits 31:22 on processors that do not support Intel 64 architecture), bit 15, bit 5 and
             // bit 3 must be 0 in the field, and reserved bit 1 must be 1.
 
-            if rflags & 0xFFFFFFFF_FFC0802A != 2 {
-                fatalError("RFLAGS [0x\(String(rflags, radix: 16))] has incorrects bits set to 0 or 1 ")
+            if rflags.rawValue & 0xFFFFFFFF_FFC0802A != 2 {
+                fatalError("RFLAGS [0x\(rflags.rawValue.hex())] has incorrects bits set to 0 or 1 ")
             }
 
             // — The VM flag (bit 17) must be 0 either if the “IA-32e mode guest” VM-entry control is 1 or if bit 0 in the CR0 field (corresponding to CR0.PE) is 0.
             let cr0 = try self.guestCR0()
             if ia32eModeGuest || !cr0.protectionEnable {
-                if BitField64(rflags)[17] { fatalError("IA32-e mode is 1 or CR0.PE is 0 but RFLAGS VM flag is set") }
+                if rflags.vm86Mode { fatalError("IA32-e mode is 1 or CR0.PE is 0 but RFLAGS VM flag is set") }
             }
 
             // — The IF flag (RFLAGS[bit 9]) must be 1 if the valid bit (bit 31) in the VM-entry interruption-information field is 1
             // and the interruption type (bits 10:8) is external interrupt.
             let interruptInfo = try self.vmEntryInterruptInfo()
             if interruptInfo.valid && (interruptInfo.interruptType == .external) {
-                if rflags.bit(9) == false { fatalError("IntInfoField is external interrupt but RFLAGS IF Flag is Clear") }
+                if rflags.interruptEnable == false { fatalError("IntInfoField is external interrupt but RFLAGS IF Flag is Clear") }
             }
         }
 
@@ -1228,7 +1228,7 @@ extension VMCS {
             let _guestActivityState = try self.guestActivityState()
             let guestInterruptibilityState = try self.guestInterruptibilityState()
             let interruptInfo = try self.vmEntryInterruptInfo()
-            let rflags = BitField64((try self.guestRFlags().rawValue))
+            let rflags = try self.guestRFlags()
 #if false
             let vmxMiscInfo = VMXMiscInfo()
 #endif
@@ -1313,7 +1313,7 @@ extension VMCS {
             }
 
             //— Bit 0 (blocking by STI) must be 0 if the IF flag (bit 9) is 0 in the RFLAGS field.
-            if  rflags[9] == false && guestInterruptibilityState.blockingBySTI {
+            if  !rflags.interruptEnable && guestInterruptibilityState.blockingBySTI {
                 fatalError("RFLAGS.IF == 0 but Guest Interruptability State.BlockingBySTI == 1")
             }
 
@@ -1375,10 +1375,10 @@ extension VMCS {
 
             if guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS || _guestActivityState == .hlt {
                 let debugCtl = BitField64(try self.guestIA32DebugCtl())
-                if rflags[8] && debugCtl[1] == false {
+                if rflags.trap && !debugCtl[1] {
                     if !pendingDebugExceptions.bs { fatalError("pendingDebugExceptions.BS must be 1 when RFLAGS.TF == 1 and IA32_DEBUGCTL.BTF == 0") }
                 }
-                if rflags[8] == false || debugCtl[1] {
+                if !rflags.trap || debugCtl[1] {
                     if pendingDebugExceptions.bs {  fatalError("pendingDebugExceptions.BS must be 0 when RFLAGS.TF == 0 or IA32_DEBUGCTL.BTF == 1") }
                 }
             }
@@ -1389,7 +1389,7 @@ extension VMCS {
             //   • The interruptibility-state field must not indicate blocking by MOV SS (bit 1 in that field must be 0).
 
             if pendingDebugExceptions.rtm {
-                if pendingDebugExceptions.bits[0...11] != 0 || pendingDebugExceptions.bits[13...15] != 0 || pendingDebugExceptions.bits[17...63] != 0 || pendingDebugExceptions.bits[12] == false {
+                if pendingDebugExceptions.bits[0...11] != 0 || pendingDebugExceptions.bits[13...15] != 0 || pendingDebugExceptions.bits[17...63] != 0 || !pendingDebugExceptions.bits[12] {
                     fatalError("PendingDebugExceptions.RTM is set and other bits are invalid")
                 }
                 if !CPU.capabilities.rtm { fatalError("PendingDebugExceptions.RTM is set but CPU does not support RTM") }

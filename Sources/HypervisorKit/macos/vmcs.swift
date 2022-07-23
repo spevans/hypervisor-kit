@@ -693,7 +693,7 @@ final class VMCS {
         }
 
         init(vector: UInt8, type: InterruptType, deliverErrorCode: Bool, valid: Bool = true) {
-            var _bits = BitField32(0)
+            var _bits = BitField32()
             _bits[0...7] = UInt32(vector)
             _bits[8...10] = UInt32(type.rawValue)
             _bits[11] = deliverErrorCode
