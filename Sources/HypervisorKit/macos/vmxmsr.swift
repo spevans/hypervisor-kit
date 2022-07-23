@@ -29,7 +29,7 @@ struct VMXAllowedBits {
     let allowedToBeZero: Bool
     let allowedToBeOne: Bool
 
-    init(_ bits :BitArray64, _ index: Int) {
+    init(_ bits :BitField64, _ index: Int) {
         // Note that bits allowed to be zero are set to 0 but these are flipped
         // to enable 'allowedToBeZero == true' if they are zero
         allowedToBeZero = !Bool(bits[index])
@@ -151,7 +151,7 @@ struct VMXPinBasedControls: VMXAllowedBitsP {
 
 
 struct VMXPrimaryProcessorBasedControls: VMXAllowedBitsP {
-    let bits: BitArray64
+    let bits: BitField64
     let low: UInt32
     let high: UInt32
 
@@ -161,7 +161,7 @@ struct VMXPrimaryProcessorBasedControls: VMXAllowedBitsP {
 
         low = UInt32(truncatingIfNeeded: value)
         high = UInt32(truncatingIfNeeded: (value >> 32))
-        bits = BitArray64(value)
+        bits = BitField64(value)
     }
 
     var intWindowExiting:           VMXAllowedBits { VMXAllowedBits(bits, 2)  }
@@ -312,7 +312,7 @@ struct VMXVMCSEnumeration {
 */
 
 struct VMXSecondaryProcessorBasedControls: VMXAllowedBitsP {
-    let bits: BitArray64
+    let bits: BitField64
     let low: UInt32
     let high: UInt32
 
@@ -322,7 +322,7 @@ struct VMXSecondaryProcessorBasedControls: VMXAllowedBitsP {
 
         low = UInt32(truncatingIfNeeded: value)
         high = UInt32(truncatingIfNeeded: (value >> 32))
-        bits = BitArray64(value)
+        bits = BitField64(value)
 
 //        (low, high) = CPU.readMSR(0x48B)
 //        bits = BitArray64(UInt64(high) << 32 | UInt64(low))

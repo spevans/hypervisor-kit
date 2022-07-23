@@ -11,7 +11,7 @@
 import BABAB
 
 struct VMXExit: Error {
-    let value: BitArray32
+    let value: BitField32
 
     var exitReason: VMXExitReason { VMXExitReason(rawValue: UInt16(value[0...15]))! }
     var vmExitInEnclaveMode: Bool { Bool(value[27]) }
@@ -20,7 +20,7 @@ struct VMXExit: Error {
     var vmEntryFailure: Bool { Bool(value[31]) }
 
     init(_ result: UInt32) {
-        value = BitArray32(result)
+        value = BitField32(result)
     }
 }
 

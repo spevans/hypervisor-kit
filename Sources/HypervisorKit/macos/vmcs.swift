@@ -678,26 +678,26 @@ final class VMCS {
             case otherEvent = 7
         }
 
-        private let bits: BitArray32
+        private let bits: BitField32
         var rawValue: UInt32 { bits.rawValue }
 
         var vector: UInt8 { UInt8(bits[0...7]) }
         var interruptType: InterruptType { InterruptType(rawValue: Int(bits[8...10]))! }
-        var deliverErrorCode: Bool { bits[11] == 1 }
+        var deliverErrorCode: Bool { bits[11] }
         var reserved: Int { Int(bits[12...30]) }
-        var valid: Bool { bits[31] == 1 }
+        var valid: Bool { bits[31] }
 
 
         init(_ rawValue: UInt32) {
-            bits = BitArray32(rawValue)
+            bits = BitField32(rawValue)
         }
 
         init(vector: UInt8, type: InterruptType, deliverErrorCode: Bool, valid: Bool = true) {
-            var _bits = BitArray32(0)
+            var _bits = BitField32(0)
             _bits[0...7] = UInt32(vector)
             _bits[8...10] = UInt32(type.rawValue)
-            _bits[11] = deliverErrorCode ? 1 : 0
-            _bits[31] = valid ? 1 : 0
+            _bits[11] = deliverErrorCode
+            _bits[31] = valid
             bits = _bits
         }
     }
@@ -792,18 +792,18 @@ final class VMCS {
             case otherEvent = 7
         }
 
-        private let bits: BitArray32
+        private let bits: BitField32
         var rawValue: UInt32 { bits.rawValue }
 
         var vector: UInt8 { UInt8(bits[0...7]) }
         var interruptType: InterruptType { InterruptType(rawValue: Int(bits[8...10]))! }
-        var errorCodeValid: Bool { bits[11] == 1}
-        var nmiUnblockingDueToIRET: Bool { bits[12] == 1 }
+        var errorCodeValid: Bool { bits[11] }
+        var nmiUnblockingDueToIRET: Bool { bits[12] }
         var reserved: Int { Int(bits[13...30]) }
-        var valid: Bool { bits[31] == 1 }
+        var valid: Bool { bits[31] }
 
         init(_ rawValue: UInt32) {
-            bits = BitArray32(rawValue)
+            bits = BitField32(rawValue)
         }
     }
 
@@ -977,38 +977,38 @@ final class VMCS {
     }
 
     struct InterruptibilityState {
-        private var bits: BitArray32
+        private var bits: BitField32
         var rawValue: UInt32 { bits.rawValue }
 
         var blockingBySTI: Bool {
-            get { bits[0] == 1 }
-            set { bits[0] = newValue ? 1 : 0 }
+            get { bits[0] }
+            set { bits[0] = newValue }
         }
 
         var blockingByMovSS: Bool {
-            get { bits[1] == 1 }
-            set { bits[1] = newValue ? 1 : 0 }
+            get { bits[1] }
+            set { bits[1] = newValue }
         }
 
         var blockingBySMI: Bool  {
-            get { bits[2] == 1 }
-            set { bits[2] = newValue ? 1 : 0 }
+            get { bits[2] }
+            set { bits[2] = newValue }
         }
 
         var blockingByNMI: Bool {
-            get { bits[3] == 1 }
-            set { bits[3] = newValue ? 1 : 0 }
+            get { bits[3] }
+            set { bits[3] = newValue }
         }
 
         var enclaveInterruption: Bool {
-            get { bits[4] == 1 }
-            set { bits[4] = newValue ? 1 : 0 }
+            get { bits[4] }
+            set { bits[4] = newValue }
         }
 
         var reserved: Int  { Int(bits[5...31]) }
 
         init(_ rawValue: UInt32) {
-            bits = BitArray32(rawValue)
+            bits = BitField32(rawValue)
         }
     }
 
@@ -1317,24 +1317,24 @@ final class VMCS {
     }
 
     struct PendingDebugExceptions {
-        let bits: BitArray64
+        let bits: BitField64
         var rawValue: UInt64 { bits.rawValue }
 
-        var b0: Bool { bits[0] == 1 }
-        var b1: Bool { bits[1] == 1 }
-        var b2: Bool { bits[2] == 1 }
-        var b3: Bool { bits[3] == 1 }
+        var b0: Bool { bits[0] }
+        var b1: Bool { bits[1] }
+        var b2: Bool { bits[2] }
+        var b3: Bool { bits[3] }
         var reserved1: Int { Int(bits[4...11]) }
-        var enabledBreakpoint: Bool { bits[12] == 1 }
+        var enabledBreakpoint: Bool { bits[12] }
         var reserved2: Int { Int(bits[13]) }
-        var bs: Bool { bits[14] == 1 }
+        var bs: Bool { bits[14] }
         var reserved3: Int { Int(bits[15]) }
-        var rtm: Bool { bits[16] == 1 }
+        var rtm: Bool { bits[16] }
         var reserved4: Int { Int(bits[17...63]) }
         var reserved: Int { reserved1 + reserved2 + reserved3 + reserved4 }
 
         init(_ rawValue: UInt64) {
-            bits = BitArray64(rawValue)
+            bits = BitField64(rawValue)
         }
     }
 

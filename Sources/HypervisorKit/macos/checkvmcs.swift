@@ -16,7 +16,7 @@ import BABAB
 extension VMCS {
 
     struct SegmentSelector {
-        let bits: BitArray16
+        let bits: BitField16
 
         var rpl: Int { Int(bits[0...1]) }
         var ti: Int { Int(bits[2]) }
@@ -26,37 +26,37 @@ extension VMCS {
         var realModeBaseAddress: UInt32 { UInt32(bits.rawValue) << 4 }
 
         init(_ rawValue: UInt16) {
-            bits = BitArray16(rawValue)
+            bits = BitField16(rawValue)
         }
     }
 
     struct AccessRights {
-        let bits: BitArray32
+        let bits: BitField32
         var rawValue: UInt32 { bits.rawValue }
 
         var segmentType: Int { Int(bits[0...3]) }
-        var accessed: Bool { bits[0] == 1 }
-        var readable: Bool { bits[1] == 1 }
-        var codeSegment: Bool { bits[3] == 1 }
+        var accessed: Bool { bits[0] }
+        var readable: Bool { bits[1] }
+        var codeSegment: Bool { bits[3] }
         var dataSegment: Bool { !codeSegment }
 
-        var systemDescriptor: Bool { bits[4] == 0 }
+        var systemDescriptor: Bool { bits[4] == false }
         var codeOrDataDescriptor: Bool { !systemDescriptor }
         var privilegeLevel: Int { Int(bits[5...6]) }
-        var segmentPresent: Bool { bits[7] == 1 }
+        var segmentPresent: Bool { bits[7] }
         var reserved1: Int { Int(bits[8...11]) }
-        var available: Bool { bits[12] == 1 }
-        var longModeActive: Bool { bits[13] == 1 }
+        var available: Bool { bits[12] }
+        var longModeActive: Bool { bits[13] }
         var operationSize: Int { Int(bits[14]) }
         var is16BitSegment: Bool { operationSize == 0 }
         var is32BitSegment: Bool { !is16BitSegment }
-        var granularity: Bool { bits[15] == 1 }
-        var unusable: Bool { bits[16] == 1 }
+        var granularity: Bool { bits[15] }
+        var unusable: Bool { bits[16] }
         var usable: Bool { !unusable }
         var reserved2: Int { Int(bits[17...31]) }
 
         init(_ rawValue: UInt32) {
-            bits = BitArray32(rawValue)
+            bits = BitField32(rawValue)
         }
     }
 
@@ -66,11 +66,11 @@ extension VMCS {
         // These are VMCS or MSR lookups so read once
 //        let maxPhysicalAddress = VMXBasicInfo().maxPhysicalAddress
         let maxCPUPhysicalAddress = CPU.capabilities.maxPhysicalAddress
-        let vmEntryControls = BitArray32(try self.vmEntryControls())
-        let vmExitControls = BitArray32(try self.vmExitControls())
-        let vmExecutionControls = BitArray32(try self.pinBasedVMExecControls())
-        let primaryControls = BitArray32(try self.primaryProcVMExecControls())
-        let secondaryControls = BitArray32(try self.secondaryProcVMExecControls())
+        let vmEntryControls = BitField32(try self.vmEntryControls())
+        let vmExitControls = BitField32(try self.vmExitControls())
+        let vmExecutionControls = BitField32(try self.pinBasedVMExecControls())
+        let primaryControls = BitField32(try self.primaryProcVMExecControls())
+        let secondaryControls = BitField32(try self.secondaryProcVMExecControls())
 //        let vmxFixedBits = VMXFixedBits()
 //        let vmxBasicInfo = VMXBasicInfo()
         let supports64Bit = true    // Should come from CPUID or LMA
@@ -90,7 +90,7 @@ extension VMCS {
         func checkVMExecutionControlFields() throws {
 
             // VM entries perform the following checks on the VM-execution control fields:1
-            let pinBased = BitArray32(try self.pinBasedVMExecControls())
+            let pinBased = BitField32(try self.pinBasedVMExecControls())
 
             let vmxPinBasedControls = VMXPinBasedControls()
             let vmxPrimaryProcessorBasedControls = VMXPrimaryProcessorBasedControls()
@@ -181,7 +181,7 @@ extension VMCS {
             // — Bits 11:0 of the address must be 0.
             // — The address should not set any bits beyond the processor’s physical-address width.
 #endif
-            let tprShadow = (primaryControls[21] != 0)
+            let tprShadow = (primaryControls[21])
 #if false
             if tprShadow {
                 let vAPICPage = try self.virtualAPICAddress()
@@ -213,12 +213,12 @@ extension VMCS {
 #endif
 
             // • If the “NMI exiting” VM-execution control is 0, the “virtual NMIs” VM-execution control must be 0.
-            if pinBased[3] == 0 && pinBased[5] != 0 {
+            if pinBased[3] == false && pinBased[5] {
                 fatalError("NMI exiting = 0 but virtual NMIs = 1")
             }
 
             // • If the “virtual NMIs” VM-execution control is 0, the “NMI-window exiting” VM-execution control must be 0.
-            if pinBased[5] == 0 && primaryControls[22] != 0 {
+            if pinBased[5] == false && primaryControls[22] {
                 fatalError("virtual NMIs = 0 but NMI-window exiting = 1")
             }
 
@@ -236,16 +236,16 @@ extension VMCS {
             // • If the “use TPR shadow” VM-execution control is 0, the following VM-execution controls must also be 0:
             // “virtualize x2APIC mode”, “APIC-register virtualization”, and “virtual-interrupt delivery”.7
 
-            let virtualizeAPICAccesses = (secondaryControls[0] != 0)
-            let virtualizeX2APIC = (secondaryControls[4] != 0)
-            let apicRegisterVirtualization = (secondaryControls[8] != 0)
-            let virtualInterruptDelivery = (secondaryControls[9] != 0)
+            let virtualizeAPICAccesses = (secondaryControls[0])
+            let virtualizeX2APIC = (secondaryControls[4])
+            let apicRegisterVirtualization = (secondaryControls[8])
+            let virtualInterruptDelivery = (secondaryControls[9])
 
-            let externalInterruptExiting = (pinBased[0] != 0)
-            let processPostedInterrupts = (pinBased[7] != 0)
+            let externalInterruptExiting = (pinBased[0])
+            let processPostedInterrupts = (pinBased[7])
 
 
-            let acknowledgeInterruptOnExit = (vmExitControls[15] != 0)
+            let acknowledgeInterruptOnExit = (vmExitControls[15])
 
             if !tprShadow {
                 if virtualizeX2APIC { fatalError("TPR Shadow is 0 but virtualise X2 APIC is 1") }
@@ -285,7 +285,7 @@ extension VMCS {
             }
 
             // • If the “enable VPID” VM-execution control is 1, the value of the VPID VM-execution control field must not be 0000H.
-            let enableVPID = (secondaryControls[5] != 0)
+            let enableVPID = (secondaryControls[5])
             if enableVPID {
                 if try self.vpid() == 0 {
                     fatalError("enable VPID is set but VPID == 0")
@@ -299,7 +299,7 @@ extension VMCS {
             // indicating that the processor does not support accessed and dirty flags for EPT.
             //— Reserved bits 11:7 and 63:N (where N is the processor’s physical-address width) must all be 0.
 
-            let enableEPT = (secondaryControls[1] != 0)
+            let enableEPT = (secondaryControls[1])
 #if false
             if enableEPT {
                 //print("EPTP enabled:", binary(self.eptp!))
@@ -313,7 +313,7 @@ extension VMCS {
                     fatalError("EPT enabled but page walk length (\(String(eptp[3...5])) is not 3")
                 }
                 if !eptCap.supportsEPTDirtyAccessedFlags {
-                    if eptp[6] != 0 { fatalError("EPT does not support Dirty/Accessed Flags but EPTP has bit 6 set") }
+                    if eptp[6] { fatalError("EPT does not support Dirty/Accessed Flags but EPTP has bit 6 set") }
                 }
                 var cpuMaxBits = Int(CPU.capabilities.maxPhyAddrBits)
                 while cpuMaxBits <= 63 {
@@ -329,7 +329,7 @@ extension VMCS {
             // the PML address must satisfy the following checks:
             // — Bits 11:0 of the address must be 0.
             // — The address should not set any bits beyond the processor’s physical-address width.
-            let enablePML = (secondaryControls[17] != 0)
+            let enablePML = (secondaryControls[17])
             if enablePML {
                 if !enableEPT  { fatalError("enablePML is 1 but enableEPT is 0") }
                 let pmladdr = try self.pmlAddress().rawValue
@@ -341,8 +341,8 @@ extension VMCS {
 
             // • If either the “unrestricted guest” VM-execution control or the “mode-based execute control for EPT” VM- execution control is 1,
             // the “enable EPT” VM-execution control must also be 1.
-            let unrestrictedGuest = (secondaryControls[7] != 0)
-            let modeBasedExecuteCtrlForEPT = (secondaryControls[22] != 0)
+            let unrestrictedGuest = (secondaryControls[7])
+            let modeBasedExecuteCtrlForEPT = (secondaryControls[22])
             if unrestrictedGuest && !enableEPT { fatalError("Unrestricted Guest is enabled but EPT is not") }
             if modeBasedExecuteCtrlForEPT && !enableEPT { fatalError("Mode Based Execute Control for EPT is enabled but EPT is not") }
 
@@ -350,7 +350,7 @@ extension VMCS {
             // In addition, the SPPTP VM-execution control field (see Table 24-10 in Section 24.6.21) must satisfy the following checks:
             // — Bits 11:0 of the address must be 0.
             // — The address should not set any bits beyond the processor’s physical-address width.
-            let subPageWritePermsForEPT = (secondaryControls[23] != 0)
+            let subPageWritePermsForEPT = (secondaryControls[23])
             if subPageWritePermsForEPT {
                 if !enableEPT { fatalError("Sub Page Write Permissions for EPT are enabled but EPT is not") }
                 let addr = try self.subPagePermissionTablePtr().value
@@ -368,11 +368,11 @@ extension VMCS {
             //  • The address must not set any bits beyond the processor’s physical-address width.
             //  If the “enable VM functions” processor-based VM-execution control is 0, no checks are performed on the VM-function controls.
 
-            let enableVMFunctions = (secondaryControls[13] != 0)
+            let enableVMFunctions = (secondaryControls[13])
             if enableVMFunctions {
-                let vmfuncs = BitArray64(try self.vmFunctionControls())
+                let vmfuncs = BitField64(try self.vmFunctionControls())
                 // FIXME Check reserved bits are clear
-                if vmfuncs[0] != 0 {
+                if vmfuncs[0] {
                     if !enableEPT { fatalError("EPTP switching is enabled but EPT is not") }
                 }
                 let addr = try self.eptpListAddress().value
@@ -384,7 +384,7 @@ extension VMCS {
             // • If the “VMCS shadowing” VM-execution control is 1, the VMREAD-bitmap and VMWRITE-bitmap addresses must each satisfy the following checks:
             // — Bits 11:0 of the address must be 0.
             // — The address must not set any bits beyond the processor’s physical-address width.
-            let enableVMCSShadowing = (secondaryControls[14] != 0)
+            let enableVMCSShadowing = (secondaryControls[14])
             if enableVMCSShadowing {
                 let addr1 =  try self.vmreadBitmapAddress().value
                 if (addr1 & 0x3ff) != 0 || addr1 > maxCPUPhysicalAddress {
@@ -399,7 +399,7 @@ extension VMCS {
             // • If the “EPT-violation #VE” VM-execution control is 1, the virtualization-exception information address must satisfy the following checks:
             // — Bits 11:0 of the address must be 0.
             // — The address must not set any bits beyond the processor’s physical-address width.
-            let enableEPTViolationExceptions = (secondaryControls[18] != 0)
+            let enableEPTViolationExceptions = (secondaryControls[18])
             if enableEPTViolationExceptions {
                 let addr = try self.vExceptionInfoAddress().value
                 if (addr & 0x3ff) != 0 || addr > maxCPUPhysicalAddress {
@@ -417,7 +417,7 @@ extension VMCS {
         }
 
         func checkVMExitControlFields() throws {
-            let pinBased = BitArray32(try self.pinBasedVMExecControls())
+            let pinBased = BitField32(try self.pinBasedVMExecControls())
 
             // • Reserved bits in the VM-exit controls must be set properly. Software may consult the VMX capability MSRs to determine the proper settings (see Appendix A.4).
             let vmxExitControls = VMXExitControls()
@@ -439,8 +439,8 @@ extension VMCS {
             }
 
             // • If the “activate VMX-preemption timer” VM-execution control is 0, the “save VMX-preemption timer value” VM- exit control must also be 0.
-            let activateVMXPreemptionTimer = (pinBased[6] != 0)
-            let saveVMXPreemptionTimerValue = (vmExitControls[22] != 0)
+            let activateVMXPreemptionTimer = (pinBased[6])
+            let saveVMXPreemptionTimerValue = (vmExitControls[22])
             if !activateVMXPreemptionTimer && saveVMXPreemptionTimerValue {
                 fatalError("Activate VMS Premetion Time is not set vut Save Time Value is set")
             }
@@ -480,8 +480,8 @@ extension VMCS {
 
 
         func checkVMEntryControlFields() throws {
-            let unrestrictedGuest = (secondaryControls[7] != 0)
-            let pinBased = BitArray32(try self.pinBasedVMExecControls())
+            let unrestrictedGuest = (secondaryControls[7])
+            let pinBased = BitField32(try self.pinBasedVMExecControls())
 
             // • Reserved bits in the VM-entry controls must be set properly. Software may consult the VMX capability MSRs to determine the proper settings (see Appendix A.5).
             let vmxEntryControls = VMXEntryControls()
@@ -503,8 +503,8 @@ extension VMCS {
             }
 
             // • If the “activate VMX-preemption timer” VM-execution control is 0, the “save VMX-preemption timer value” VM- exit control must also be 0.
-            let activateVMXPreemptionTimer = (pinBased[6] != 0)
-            let saveVMXPreemptionTimerValue = (vmExitControls[22] != 0)
+            let activateVMXPreemptionTimer = (pinBased[6])
+            let saveVMXPreemptionTimerValue = (vmExitControls[22])
             if !activateVMXPreemptionTimer && saveVMXPreemptionTimerValue {
                 fatalError("Activate VMS Premetion Time is not set vut Save Time Value is set")
             }
@@ -551,7 +551,7 @@ extension VMCS {
                 if vmEntryInterruptInfoField.reserved != 0 {
                     fatalError("VM Entry Int Info Field bits 12 to 30 are not zero")
                 }
-                if try vmEntryInterruptInfoField.deliverErrorCode && (BitArray32(self.vmEntryExceptionErrorCode())[15...31] != 0) {
+                if try vmEntryInterruptInfoField.deliverErrorCode && (BitField32(self.vmEntryExceptionErrorCode())[15...31] != 0) {
                     fatalError("Deliver Error Code bits is set but error code 15...31 sre not zero")
                 }
 #if false
@@ -581,7 +581,7 @@ extension VMCS {
             // TODO: Determine if in SMM
 
             // • The “entry to SMM” and “deactivate dual-monitor treatment” VM-entry controls cannot both be 1.
-            if (vmEntryControls[10] == 1) && (vmEntryControls[11] == 1) {
+            if vmEntryControls[10] && vmEntryControls[11] {
                 fatalError("The entry to SMM and deactivate dual-monitor treatment VM-entry controls cannot both be 1.")
             }
         }
@@ -668,7 +668,7 @@ extension VMCS {
             if try self.hostTRSelector() == 0 { fatalError("Host TR Selector cannot be 0x0000") }
 
             //• The selector field for SS cannot be 0000H if the “host address-space size” VM-exit control is 0.
-            if BitArray32(try self.vmExitControls())[9] == 0 {
+            if (try self.vmExitControls()).bit(9) == false {
                 if try self.hostSSSelector() == 0x0 { fatalError("Host address-space size VM-exit control is 0 but SS selector is 0x0000") }
             }
 
@@ -703,7 +703,7 @@ extension VMCS {
             // — The “IA-32e mode guest” VM-entry control is 0.
             // — Bit 17 of the CR4 field (corresponding to CR4.PCIDE) is 0.
             // — Bits 63:32 in the RIP field is 0.
-            if vmExitControls[9] == 0 {
+            if vmExitControls[9] == false {
 #if false
                 if efer.ia32eModeActive == true { fatalError("VMExitControls.hostAddressSpaceSize == 0 but IA32_EFER.LMA == 1") }
 #endif
@@ -804,8 +804,8 @@ extension VMCS {
 
             // — If the “load debug controls” VM-entry control is 1, bits 63:32 in the DR7 field must be 0. The first processors to support the virtual-machine
             // extensions supported only the 1-setting of this control and thus performed this check unconditionally (if they supported Intel 64 architecture).
-            if vmEntryControls[2] != 0 {
-                let dr7 = BitArray64(try self.guestDR7())
+            if vmEntryControls[2] {
+                let dr7 = BitField64(try self.guestDR7())
                 if dr7[32...63] != 0 {
                     fatalError("Load debug controls is set in VM Entry controls but DR7 has bits set in 63:32")
                 }
@@ -823,14 +823,14 @@ extension VMCS {
             }
 
             // • If the “load IA32_PERF_GLOBAL_CTRL” VM-entry control is 1, bits reserved in the IA32_PERF_GLOBAL_CTRL MSR must be 0 in the field for that register (see Figure 18-3).
-            if vmEntryControls[13] != 0 {
+            if vmEntryControls[13] {
                 // TODO
                 fatalError("Load IA32_PERF_GLOBAL_CTRL is set in VM Entry controls but, add checks for IA32_PERF_GLOBAL_CTRL MSR")
             }
 
             // • If the “load IA32_PAT” VM-entry control is 1, the value of the field for the IA32_PAT MSR must be one that could be written by WRMSR without fault at CPL 0.
             // Specifically, each of the 8 bytes in the field must have one of the values 0 (UC), 1 (WC), 4 (WT), 5 (WP), 6 (WB), or 7 (UC-).
-            if vmEntryControls[14] != 0 {
+            if vmEntryControls[14] {
                 // TODO
                 fatalError("Load IA32_PAT is set in VM Entry controls, add checks for IA32_PAT MSR")
             }
@@ -841,7 +841,7 @@ extension VMCS {
             // — Bit 10 (corresponding to IA32_EFER.LMA) must equal the value of the “IA-32e mode guest” VM-entry control.
             // It must also be identical to bit 8 (LME) if bit 31 in the CR0 field (corresponding to CR0.PG) is 1.5
 #if false
-            if vmEntryControls[15] != 0 {
+            if vmEntryControls[15] {
                 // TODO
                 fatalError("Load IA32_EFER is set in the VM Entry controls, add checks for the IA32_EFER MSR")
             }
@@ -849,13 +849,13 @@ extension VMCS {
             // • If the “load IA32_BNDCFGS” VM-entry control is 1, the following checks are performed on the field for the IA32_BNDCFGS MSR:
             // — Bits reserved in the IA32_BNDCFGS MSR must be 0.
             // — The linear address in bits 63:12 must be canonical.
-            if vmEntryControls[16] != 0 {
+            if vmEntryControls[16] {
                 // TODO
                 fatalError("Load IA32_BNDCFGS is set in the VM Entry controls, add checks for the IA32_BNDCFGS MSR")
             }
 
             // • If the “load IA32_RTIT_CTL” VM-entry control is 1, bits reserved in the IA32_RTIT_CTL MSR must be 0 in the field for that register (see Table 35-6).
-            if vmEntryControls[18] != 0 {
+            if vmEntryControls[18] {
                 // TODO
                 fatalError("Load IA32_RTIT_CTL is set in the VM Entry controls, add checks for the IA32_RTIT_CTL MSR")
             }
@@ -869,10 +869,10 @@ extension VMCS {
             // • The guest will be IA-32e mode if the “IA-32e mode guest” VM-entry control is 1. (This is possible only on processors that support Intel 64 architecture.)
             // • Any one of these registers is said to be usable if the unusable bit (bit 16) is 0 in the access-rights field for that register.
 
-            let rflags = BitArray64(try self.guestRFlags().rawValue)
-            let vm86mode = rflags[17] == 1
-            let unrestrictedGuest = (secondaryControls[7] != 0)
-            let ia32eModeGuest = vmEntryControls[9] != 0
+            let rflags = BitField64(try self.guestRFlags().rawValue)
+            let vm86mode = rflags[17]
+            let unrestrictedGuest = (secondaryControls[7])
+            let ia32eModeGuest = vmEntryControls[9]
 
             let csSelector = SegmentSelector(try self.guestCSSelector())
             let dsSelector = SegmentSelector(try self.guestDSSelector())
@@ -1071,12 +1071,12 @@ extension VMCS {
                 //      — Bit 15 (G). The following checks apply if the register is CS or if the register is usable:
                 //          • If any bit in the limit field in the range 11:0 is 0, G must be 0.
                 //          • If any bit in the limit field in the range 31:20 is 1, G must be 1.
-                let csLimit = BitArray32(try self.guestCSLimit())
-                let dsLimit = BitArray32(try self.guestDSLimit())
-                let esLimit = BitArray32(try self.guestESLimit())
-                let fsLimit = BitArray32(try self.guestFSLimit())
-                let gsLimit = BitArray32(try self.guestGSLimit())
-                let ssLimit = BitArray32(try self.guestCSLimit())
+                let csLimit = BitField32(try self.guestCSLimit())
+                let dsLimit = BitField32(try self.guestDSLimit())
+                let esLimit = BitField32(try self.guestESLimit())
+                let fsLimit = BitField32(try self.guestFSLimit())
+                let gsLimit = BitField32(try self.guestGSLimit())
+                let ssLimit = BitField32(try self.guestCSLimit())
 
                 if csLimit[0...11] != 4095 && csAccessRights.granularity { fatalError("CS: lower limit != 4095 and G bit not 0") }
                 if csLimit[20...31] != 0 && !csAccessRights.granularity { fatalError("CS: upper limit != 0 and G bit not 1") }
@@ -1130,7 +1130,7 @@ extension VMCS {
             //      • Bit 15 (G).
             //        — If any bit in the limit field in the range 11:0 is 0, G must be 0.
             //        — If any bit in the limit field in the range 31:20 is 1, G must be 1.
-            let trLimit = BitArray32(try self.guestTRLimit())
+            let trLimit = BitField32(try self.guestTRLimit())
             if trLimit[0...11] != 4095 && trAccessRights.granularity { fatalError("TR: lower limit != 4095 and G bit not 0") }
             if trLimit[20...31] != 0 && !trAccessRights.granularity { fatalError("TR: upper limit != 0 and G bit not 1") }
 
@@ -1154,7 +1154,7 @@ extension VMCS {
                 //      • Bit 15 (G).
                 //        — If any bit in the limit field in the range 11:0  is 0, G must be 0.
                 //        — If any bit in the limit field in the range 31:20 is 1, G must be 1.
-                let ldtrLimit = BitArray32(try self.guestLDTRLimit())
+                let ldtrLimit = BitField32(try self.guestLDTRLimit())
                 if ldtrLimit[0...11] != 4095 && ldtrAccessRights.granularity { fatalError("LDTR: lower limit != 4095 and G bit not 0") }
                 if ldtrLimit[20...31] != 0 && !ldtrAccessRights.granularity { fatalError("LDTR: upper limit != 0 and G bit not 1") }
             }
@@ -1170,11 +1170,11 @@ extension VMCS {
             if !checkCanonicalAddress(idtrBase) { fatalError("Guest IDTR Base address is not canonical 0x\(String(idtrBase, radix: 16))") }
 
             // • Bits 31:16 of each limit field must be 0.
-            if BitArray32(try self.guestGDTRLimit())[16...31] != 0 {
+            if BitField32(try self.guestGDTRLimit())[16...31] != 0 {
                 fatalError("Guest GDTR Limit has bits set in bits 16...31")
             }
 
-            if BitArray32(try self.guestIDTRLimit())[16...31] != 0 {
+            if BitField32(try self.guestIDTRLimit())[16...31] != 0 {
                 fatalError("Guest IDTR Limit has bits set in bits 16...31")
             }
         }
@@ -1183,7 +1183,7 @@ extension VMCS {
         func checkGuestRIPandRFLAGS() throws {
             let rip = try self.guestRIP()
             let rflags = try self.guestRFlags().rawValue
-            let ia32eModeGuest = vmEntryControls[9] != 0
+            let ia32eModeGuest = vmEntryControls[9]
 
             // The following checks are performed on fields in the guest-state area corresponding to RIP and RFLAGS:
             // • RIP. The following checks are performed on processors that support Intel 64 architecture:
@@ -1191,13 +1191,13 @@ extension VMCS {
             // — If the processor supports N < 64 linear-address bits, bits 63:N must be identical if the “IA-32e mode guest” VM-entry control is 1
             //    and the L bit in the access-rights field for CS is 1.1 (No check applies if the processor supports 64 linear-address bits.)
 
-            let guestCSAccessRights = BitArray32(try self.guestCSAccessRights())
-            if !ia32eModeGuest || guestCSAccessRights[13] == 0 {
+            let guestCSAccessRights = BitField32(try self.guestCSAccessRights())
+            if !ia32eModeGuest || guestCSAccessRights[13] == false {
                 if rip & 0xffffffff_00000000 != 0 {
                     fatalError("RIP has bits set in 63:32 but IA32e-Mode is 0 or CS guest access rights L bit is 0")
                 }
             }
-            if ia32eModeGuest || guestCSAccessRights[13] != 0 {
+            if ia32eModeGuest || guestCSAccessRights[13] {
                 if !checkCanonicalAddress(UInt64(rip)) { fatalError("IA32e guest mode is active or L bit is set in CS and RIP is not canonical") }
             }
 
@@ -1212,14 +1212,14 @@ extension VMCS {
             // — The VM flag (bit 17) must be 0 either if the “IA-32e mode guest” VM-entry control is 1 or if bit 0 in the CR0 field (corresponding to CR0.PE) is 0.
             let cr0 = try self.guestCR0()
             if ia32eModeGuest || !cr0.protectionEnable {
-                if BitArray64(rflags)[17] != 0 { fatalError("IA32-e mode is 1 or CR0.PE is 0 but RFLAGS VM flag is set") }
+                if BitField64(rflags)[17] { fatalError("IA32-e mode is 1 or CR0.PE is 0 but RFLAGS VM flag is set") }
             }
 
             // — The IF flag (RFLAGS[bit 9]) must be 1 if the valid bit (bit 31) in the VM-entry interruption-information field is 1
             // and the interruption type (bits 10:8) is external interrupt.
             let interruptInfo = try self.vmEntryInterruptInfo()
             if interruptInfo.valid && (interruptInfo.interruptType == .external) {
-                if BitArray64(rflags)[9] == 0 { fatalError("IntInfoField is external interrupt but RFLAGS IF Flag is Clear") }
+                if rflags.bit(9) == false { fatalError("IntInfoField is external interrupt but RFLAGS IF Flag is Clear") }
             }
         }
 
@@ -1228,7 +1228,7 @@ extension VMCS {
             let _guestActivityState = try self.guestActivityState()
             let guestInterruptibilityState = try self.guestInterruptibilityState()
             let interruptInfo = try self.vmEntryInterruptInfo()
-            let rflags = BitArray64((try self.guestRFlags().rawValue))
+            let rflags = BitField64((try self.guestRFlags().rawValue))
 #if false
             let vmxMiscInfo = VMXMiscInfo()
 #endif
@@ -1264,7 +1264,7 @@ extension VMCS {
 #if false
                     if !vmxMiscInfo.supportsActivityStateHLT { fatalError("GuestActivityState is HLT but CPU does not support it") }
 #endif
-                    if BitArray32(try self.guestSSAccessRights())[5...6] != 0 { fatalError("GuestActivityState is HLT but DPL in SS access-rights field is not 0") }
+                    if BitField32(try self.guestSSAccessRights())[5...6] != 0 { fatalError("GuestActivityState is HLT but DPL in SS access-rights field is not 0") }
                     if interruptInfo.valid {
                         switch interruptInfo.interruptType {
                             // OK
@@ -1313,7 +1313,7 @@ extension VMCS {
             }
 
             //— Bit 0 (blocking by STI) must be 0 if the IF flag (bit 9) is 0 in the RFLAGS field.
-            if  rflags[9] == 0 && guestInterruptibilityState.blockingBySTI {
+            if  rflags[9] == false && guestInterruptibilityState.blockingBySTI {
                 fatalError("RFLAGS.IF == 0 but Guest Interruptability State.BlockingBySTI == 1")
             }
 
@@ -1338,7 +1338,7 @@ extension VMCS {
             }
 
             // — Bit 2 (blocking by SMI) must be 1 if the “entry to SMM” VM-entry control is 1.
-            if vmEntryControls[10] == 1 && !guestInterruptibilityState.blockingBySMI {
+            if vmEntryControls[10] && !guestInterruptibilityState.blockingBySMI {
                 fatalError("Guest Interruptability State.blockingBySMI must be 1 when VM-entry control 'entry to SMM' is set")
             }
 
@@ -1348,7 +1348,7 @@ extension VMCS {
 
             // — Bit 3 (blocking by NMI) must be 0 if the “virtual NMIs” VM-execution control is 1, the valid bit (bit 31) in the VM-entry interruption-information field is 1,
             // and the interruption type (bits 10:8) in that field has value 2 (indicating NMI).
-            if (vmExecutionControls[5] == 1) && interruptInfo.valid && interruptInfo.interruptType == .nmi {
+            if vmExecutionControls[5] && interruptInfo.valid && interruptInfo.interruptType == .nmi {
                 if guestInterruptibilityState.blockingByNMI { fatalError("Guest Interruptability State.blockingByNMI must be 0 when vitual NMIs are enabled and interrupt type is NMI") }
             }
 
@@ -1374,11 +1374,11 @@ extension VMCS {
             // • Bit14(BS) must be 0 if the TF flag(bit8) in the RFLAGS field is 0 or the BTF flag(bit1) in the IA32_DEBUGCTL field is 1.
 
             if guestInterruptibilityState.blockingBySTI || guestInterruptibilityState.blockingByMovSS || _guestActivityState == .hlt {
-                let debugCtl = BitArray64(try self.guestIA32DebugCtl())
-                if rflags[8] == 1 && debugCtl[1] == 0 {
+                let debugCtl = BitField64(try self.guestIA32DebugCtl())
+                if rflags[8] && debugCtl[1] == false {
                     if !pendingDebugExceptions.bs { fatalError("pendingDebugExceptions.BS must be 1 when RFLAGS.TF == 1 and IA32_DEBUGCTL.BTF == 0") }
                 }
-                if rflags[8] == 0 || debugCtl[1] == 1 {
+                if rflags[8] == false || debugCtl[1] {
                     if pendingDebugExceptions.bs {  fatalError("pendingDebugExceptions.BS must be 0 when RFLAGS.TF == 0 or IA32_DEBUGCTL.BTF == 1") }
                 }
             }
@@ -1389,7 +1389,7 @@ extension VMCS {
             //   • The interruptibility-state field must not indicate blocking by MOV SS (bit 1 in that field must be 0).
 
             if pendingDebugExceptions.rtm {
-                if pendingDebugExceptions.bits[0...11] != 0 || pendingDebugExceptions.bits[13...15] != 0 || pendingDebugExceptions.bits[17...63] != 0 || pendingDebugExceptions.bits[12] != 1 {
+                if pendingDebugExceptions.bits[0...11] != 0 || pendingDebugExceptions.bits[13...15] != 0 || pendingDebugExceptions.bits[17...63] != 0 || pendingDebugExceptions.bits[12] == false {
                     fatalError("PendingDebugExceptions.RTM is set and other bits are invalid")
                 }
                 if !CPU.capabilities.rtm { fatalError("PendingDebugExceptions.RTM is set but CPU does not support RTM") }

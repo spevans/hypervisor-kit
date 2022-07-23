@@ -119,14 +119,14 @@ struct LogicalMemoryAccess {
     }
 
     // The bit layout is taken from the VM-Exit Instruction Information Field
-    private let value: BitArray32
+    private let value: BitField32
     var rawValue: UInt32 { value.rawValue }
 
-    var scaling: Int? { (value[22] == 0) ? 1 << Int(value[0...1]) : nil }
+    var scaling: Int? { (value[22] == false) ? 1 << Int(value[0...1]) : nil }
     var addressSize: Int { 16 << Int(value[7...9]) }    // 16, 32, 64
     var segmentRegister: SegmentRegister { SegmentRegister(rawValue: Int(value[15...17]))! }
-    var indexRegister: Register? { (value[22] == 0) ? Register(rawValue: Int(value[18...21])) : nil }
-    var baseRegister: Register? { (value[27] == 0) ? Register(rawValue: Int(value[23...26])) : nil }
+    var indexRegister: Register? { (value[22] == false) ? Register(rawValue: Int(value[18...21])) : nil }
+    var baseRegister: Register? { (value[27] == false) ? Register(rawValue: Int(value[23...26])) : nil }
 
 /*
     // FIXME: Take paging and GDT/LDT into account
@@ -147,21 +147,21 @@ struct LogicalMemoryAccess {
     init(addressSize: Int, segmentRegister: SegmentRegister, register: Register) {
         precondition([16, 32, 64].contains(addressSize))
 
-        var tmp = BitArray32(0)
+        var tmp = BitField32(0)
         tmp[7...9] = UInt32(addressSize >> 5)
         tmp[15...17] = UInt32(segmentRegister.rawValue)
 
         // No Index register
-        tmp[22] = 1
+        tmp[22] = true
 
         // Base Register
         tmp[23...26] = UInt32(register.rawValue)
-        tmp[27] = 0
+        tmp[27] = false
         value = tmp
     }
 
     init(rawValue: UInt32) {
-        value = BitArray32(rawValue)
+        value = BitField32(rawValue)
     }
 }
 

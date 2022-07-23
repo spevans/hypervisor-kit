@@ -17,14 +17,6 @@ extension UnsignedInteger {
     typealias Byte = UInt8
     typealias Word = UInt16
     typealias DWord = UInt32
-
-
-    func bit(_ bit: Int) -> Bool {
-        precondition(bit >= 0 && bit < MemoryLayout<Self>.size * 8,
-                     "Bit must be in range 0-\(MemoryLayout<Self>.size * 8 - 1)")
-        return self & Self(1 << UInt(bit)) != 0
-    }
-
 }
 
 extension Bool {
@@ -235,7 +227,7 @@ public struct CPU {
 
     public struct RFLAGS: CustomStringConvertible {
 
-        private(set) var bits: BitArray64
+        private(set) var bits: BitField64
         public var rawValue: UInt64 { bits.rawValue }
         public var description: String {
             var flags = ""
@@ -252,56 +244,56 @@ public struct CPU {
         }
 
         init() {
-            bits = BitArray64(2)    // bit 1 always set
+            bits = BitField64(2)    // bit 1 always set
         }
 
         init(_ value: UInt64) {
-            bits = BitArray64(value)
+            bits = BitField64(value)
         }
 
         public var carry: Bool {
-            get { bits[0] == 1 }
-            set { bits[0] = newValue ? 1 : 0 }
+            get { bits[0] }
+            set { bits[0] = newValue }
         }
 
         public var parity: Bool {
-            get { bits[2] == 1 }
-            set { bits[2] = newValue ? 1: 0 }
+            get { bits[2] }
+            set { bits[2] = newValue }
         }
 
         public var auxiliary: Bool {
-            get { bits[4] == 1 }
-            set { bits[4] = newValue ? 1 : 0 }
+            get { bits[4] }
+            set { bits[4] = newValue }
         }
 
         public var zero: Bool {
-            get { bits[6] == 1 }
-            set { bits[6] = newValue ? 1 : 0 }
+            get { bits[6] }
+            set { bits[6] = newValue }
         }
 
         public var sign: Bool {
-            get { bits[7] == 1 }
-            set { bits[7] = newValue ? 1 : 0 }
+            get { bits[7] }
+            set { bits[7] = newValue }
         }
 
         public var trap: Bool {
-            get { bits[8] == 1 }
-            set { bits[8] = newValue ? 1 : 0 }
+            get { bits[8] }
+            set { bits[8] = newValue }
         }
 
         public var interruptEnable: Bool {
-            get { bits[9] == 1 }
-            set { bits[9] = newValue ? 1 : 0 }
+            get { bits[9] }
+            set { bits[9] = newValue }
         }
 
         public var direction: Bool {
-            get { bits[10] == 1 }
-            set { bits[10] = newValue ? 1 : 0 }
+            get { bits[10] }
+            set { bits[10] = newValue }
         }
 
         public var overflow: Bool {
-            get { bits[11] == 1 }
-            set { bits[11] = newValue ? 1 : 0 }
+            get { bits[11] }
+            set { bits[11] = newValue }
         }
 
         public var iopl: Int {
@@ -310,48 +302,48 @@ public struct CPU {
         }
 
         public var nestedTask: Bool {
-            get { bits[14] == 1 }
-            set { bits[14] = newValue ? 1 : 0 }
+            get { bits[14] }
+            set { bits[14] = newValue }
         }
 
         public var resume: Bool {
-            get { bits[16] == 1 }
-            set { bits[16] = newValue ? 1 : 0 }
+            get { bits[16] }
+            set { bits[16] = newValue }
         }
 
         public var v8086Mode: Bool {
-            get { bits[17] == 1 }
-            set { bits[17] = newValue ? 1 : 0 }
+            get { bits[17] }
+            set { bits[17] = newValue }
         }
 
         public var alignmentCheck: Bool {
-            get { bits[18] == 1 }
-            set { bits[18] = newValue ? 1 : 0 }
+            get { bits[18] }
+            set { bits[18] = newValue }
         }
 
         public var virtualInterrupt: Bool {
-            get { bits[19] == 1 }
-            set { bits[19] = newValue ? 1 : 0 }
+            get { bits[19] }
+            set { bits[19] = newValue }
         }
 
         public var virtualInterruptPending: Bool {
-            get { bits[20] == 1 }
-            set { bits[20] = newValue ? 1 : 0 }
+            get { bits[20] }
+            set { bits[20] = newValue }
         }
 
         public var identification: Bool {
-            get { bits[21] == 1 }
-            set { bits[21] = newValue ? 1 : 0 }
+            get { bits[21] }
+            set { bits[21] = newValue }
         }
     }
 
 
     public struct CR0Register: CustomStringConvertible {
-        private(set) var bits: BitArray64
+        private(set) var bits: BitField64
         var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
-            bits = BitArray64(value)
+            bits = BitField64(value)
         }
 
         //    init() {
@@ -360,57 +352,57 @@ public struct CPU {
 
         public var protectionEnable: Bool {
             get { Bool(bits[0]) }
-            set { bits[0] = newValue ? 1 : 0 }
+            set { bits[0] = newValue }
         }
 
         public var monitorCoprocessor: Bool {
             get { Bool(bits[1]) }
-            set { bits[1] = newValue ? 1 : 0 }
+            set { bits[1] = newValue }
         }
 
         public var fpuEmulation: Bool {
             get { Bool(bits[2]) }
-            set { bits[2] = newValue ? 1 : 0 }
+            set { bits[2] = newValue }
         }
 
         public var taskSwitched: Bool {
             get { Bool(bits[3]) }
-            set { bits[3] = newValue ? 1 : 0 }
+            set { bits[3] = newValue }
         }
 
         public var extensionType: Bool {
             get { Bool(bits[4]) }
-            set { bits[4] = newValue ? 1 : 0 }
+            set { bits[4] = newValue }
         }
 
         public var numericError: Bool {
             get { Bool(bits[5]) }
-            set { bits[5] = newValue ? 1 : 0 }
+            set { bits[5] = newValue }
         }
 
         public var writeProtect: Bool {
             get { Bool(bits[16]) }
-            set { bits[16] = newValue ? 1 : 0 }
+            set { bits[16] = newValue }
         }
 
         public var alignmentMask: Bool {
             get { Bool(bits[18]) }
-            set { bits[18] = newValue ? 1 : 0 }
+            set { bits[18] = newValue }
         }
 
         public var notWriteThrough: Bool {
             get { Bool(bits[29]) }
-            set { bits[29] = newValue ? 1 : 0 }
+            set { bits[29] = newValue }
         }
 
         public var cacheDisable: Bool {
             get { Bool(bits[30]) }
-            set { bits[30] = newValue ? 1 : 0 }
+            set { bits[30] = newValue }
         }
 
         public var paging: Bool {
             get { Bool(bits[31]) }
-            set { bits[31] = newValue ? 1 : 0 }
+            set { bits[31] = newValue }
         }
 
         public var description: String {
@@ -432,11 +424,11 @@ public struct CPU {
 
 
     struct CR3Register {
-        private(set) var bits: BitArray64
+        private(set) var bits: BitField64
         var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
-            bits = BitArray64(value)
+            bits = BitField64(value)
         }
 
         //    init() {
@@ -445,12 +437,12 @@ public struct CPU {
 
         var pagelevelWriteThrough: Bool {
             get { Bool(bits[3]) }
-            set { bits[3] = newValue ? 1 : 0 }
+            set { bits[3] = newValue }
         }
 
         var pagelevelCacheDisable: Bool {
             get { Bool(bits[4]) }
-            set { bits[4] = newValue ? 1 : 0 }
+            set { bits[4] = newValue }
         }
 
         var pageDirectoryBase: PhysicalAddress {
@@ -458,18 +450,18 @@ public struct CPU {
             set {
                 precondition(newValue.isAligned(to: PAGE_SIZE))
                 bits[12...63] = 0  // clear current address
-                bits = BitArray64(UInt64(newValue.value) | value)
+                bits = BitField64(UInt64(newValue.value) | value)
             }
         }
     }
 
 
     struct CR4Register: CustomStringConvertible {
-        private(set) var bits: BitArray64
+        private(set) var bits: BitField64
         var value: UInt64 { bits.rawValue }
 
         init(_ value: UInt64) {
-            bits = BitArray64(value)
+            bits = BitField64(value)
         }
 
         //   init() {
@@ -478,102 +470,102 @@ public struct CPU {
 
         var vme: Bool {
             get { Bool(bits[0]) }
-            set { bits[0] = newValue ? 1 : 0 }
+            set { bits[0] = newValue }
         }
 
         var pvi: Bool {
             get { Bool(bits[1]) }
-            set { bits[1] = newValue ? 1 : 0 }
+            set { bits[1] = newValue }
         }
 
         var tsd: Bool {
             get { Bool(bits[2]) }
-            set { bits[2] = newValue ? 1 : 0 }
+            set { bits[2] = newValue }
         }
 
         var de: Bool {
             get { Bool(bits[3]) }
-            set { bits[3] = newValue ? 1 : 0 }
+            set { bits[3] = newValue }
         }
 
         var pse: Bool {
             get { Bool(bits[4]) }
-            set { bits[4] = newValue ? 1 : 0 }
+            set { bits[4] = newValue }
         }
 
         var pae: Bool {
             get { Bool(bits[5]) }
-            set { bits[5] = newValue ? 1 : 0 }
+            set { bits[5] = newValue }
         }
 
         var mce: Bool {
             get { Bool(bits[6]) }
-            set { bits[6] = newValue ? 1 : 0 }
+            set { bits[6] = newValue }
         }
 
         var pge: Bool {
             get { Bool(bits[7]) }
-            set { bits[7] = newValue ? 1 : 0 }
+            set { bits[7] = newValue }
         }
 
         var pce: Bool {
             get { Bool(bits[8]) }
-            set { bits[8] = newValue ? 1 : 0 }
+            set { bits[8] = newValue }
         }
 
         var osfxsr: Bool {
             get { Bool(bits[9]) }
-            set { bits[9] = newValue ? 1 : 0 }
+            set { bits[9] = newValue }
         }
 
         var osxmmxcpt: Bool {
             get { Bool(bits[10]) }
-            set { bits[10] = newValue ? 1 : 0 }
+            set { bits[10] = newValue }
         }
 
         var umip: Bool {
             get { Bool(bits[11]) }
-            set { bits[11] = newValue ? 1 : 0 }
+            set { bits[11] = newValue }
         }
 
         var vmxe: Bool {
             get { Bool(bits[13]) }
-            set { bits[13] = newValue ? 1 : 0 }
+            set { bits[13] = newValue }
         }
 
         var smxe: Bool {
             get { Bool(bits[14]) }
-            set { bits[14] = newValue ? 1 : 0 }
+            set { bits[14] = newValue }
         }
 
         var fsgsbase: Bool {
             get { Bool(bits[16]) }
-            set { bits[16] = newValue ? 1 : 0 }
+            set { bits[16] = newValue }
         }
 
         var pcide: Bool {
             get { Bool(bits[17]) }
-            set { bits[17] = newValue ? 1 : 0 }
+            set { bits[17] = newValue }
         }
 
         var osxsave: Bool {
             get { Bool(bits[18]) }
-            set { bits[18] = newValue ? 1 : 0 }
+            set { bits[18] = newValue }
         }
 
         var smep: Bool {
             get { Bool(bits[20]) }
-            set { bits[20] = newValue ? 1 : 0 }
+            set { bits[20] = newValue }
         }
 
         var smap: Bool {
             get { Bool(bits[21]) }
-            set { bits[21] = newValue ? 1 : 0 }
+            set { bits[21] = newValue }
         }
 
         var pke: Bool {
             get { Bool(bits[22]) }
-            set { bits[22] = newValue ? 1 : 0 }
+            set { bits[22] = newValue }
         }
 
         var description: String {

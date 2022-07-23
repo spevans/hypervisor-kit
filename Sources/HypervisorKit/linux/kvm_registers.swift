@@ -20,22 +20,22 @@ extension SegmentRegister {
         base = kvmSegment.base
         limit = kvmSegment.limit
 
-        var bitArray = BitArray32(0)
+        var bitArray = BitField32()
         bitArray[0...3] = UInt32(kvmSegment.type)
-        bitArray[4] = Int(kvmSegment.s)
+        bitArray[4] = Bool(kvmSegment.s)
         bitArray[5...6] = UInt32(kvmSegment.dpl)
-        bitArray[7] = Int(kvmSegment.present)
+        bitArray[7] = Bool(kvmSegment.present)
         bitArray[8...11] = 0 // reserverd
-        bitArray[12] = Int(kvmSegment.avl)
-        bitArray[13] = Int(kvmSegment.l)
-        bitArray[14] = Int(kvmSegment.db)
-        bitArray[15] = Int(kvmSegment.g)
-        bitArray[16] = 0 // usable
+        bitArray[12] = Bool(kvmSegment.avl)
+        bitArray[13] = Bool(kvmSegment.l)
+        bitArray[14] = Bool(kvmSegment.db)
+        bitArray[15] = Bool(kvmSegment.g)
+        bitArray[16] = false // usable
         accessRights = bitArray.rawValue
     }
 
     var kvmSegment: kvm_segment {
-        let bitArray = BitArray32(accessRights)
+        let bitArray = BitField32(accessRights)
         return kvm_segment(base: base,
                            limit: limit,
                            selector: selector,

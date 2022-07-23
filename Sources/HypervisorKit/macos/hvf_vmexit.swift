@@ -179,11 +179,11 @@ extension VirtualMachine.VCPU {
 
             case .eptViolation:
                 // Check for page access / write setting dirty bit
-                let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
+                let exitQ = BitField64(UInt64(try vmcs.exitQualification()))
                 let access: VMExit.MemoryViolation.Access
-                if exitQ[0] == 1 {
+                if exitQ[0] {
                     access = .read
-                } else if exitQ[2] == 1 {
+                } else if exitQ[2] {
                     access = .instructionFetch
                 } else {
                     access = .write
@@ -224,7 +224,7 @@ extension VirtualMachine.VCPU {
                             let registers = try readRegisters([.cs, .rip])
                             // Instruction fetch to MMIO - TODO - decide how to handle this properly.
                             let linear = registers.cs.base + registers.rip
-                            let addr = "CS:RIP: \(hexNum(registers.cs.selector)):\(hexNum(registers.rip)): \(hexNum(linear))"
+                            let addr = "CS:RIP: \(registers.cs.selector.hex()):\(registers.rip.hex()): \(linear.hex())"
                             vm.logger.error("EPT violation, instruction fetch on unmapped memory @ \(gpa), \(addr)")
                             try skipInstruction()
                             return nil
@@ -255,7 +255,7 @@ extension VirtualMachine.VCPU {
     }
 
     private func pioInstruction() throws {
-        let exitQ = BitArray64(UInt64(try vmcs.exitQualification()))
+        let exitQ = BitField64(UInt64(try vmcs.exitQualification()))
 
         let bitWidth = 8 * (UInt8(exitQ[0...2]) + 1)
         let isIn = Bool(exitQ[3])
@@ -265,7 +265,7 @@ extension VirtualMachine.VCPU {
         if isString {
             let isRep = Bool(exitQ[5])
 
-            let exitInfo = BitArray32(try vmcs.vmExitInstructionInfo())
+            let exitInfo = BitField32(try vmcs.vmExitInstructionInfo())
             let addressSize = 16 << exitInfo[7...9]
             let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
             try registers.registerCacheControl.readRegisters([.segmentRegisters, .rcx, .rflags])
