@@ -35,6 +35,13 @@ extension VirtualMachine {
         internal let vmcs: VMCS
         internal var exitCount: UInt64 = 0
         internal var hltState = false
+
+        internal var apicSVR: UInt32 = 0xff
+        internal var apicLoIcr: UInt32 = 0
+        internal var apicHiIcr: UInt32 = 0
+        internal var apicLint0: UInt32 = 0
+        internal var apicLint1: UInt32 = 0
+
 #elseif os(Linux)
         internal let vcpu_fd: Int32
         internal let kvmRunPtr: KVM_RUN_PTR

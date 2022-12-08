@@ -213,12 +213,12 @@ extension VirtualMachine.VCPU {
                     // Non memory region, treat as MMIO
                     switch access {
                         case .write:
-                            let write = VMExit.DataWrite(bitWidth: 8, value: 0)!
-                            return .mmioWriteOperation(gpa, write)
+                            try emulateInstruction()
+                            return nil
 
                         case .read:
-                            let read = VMExit.DataRead(bitWidth: 8)!
-                            return .mmioReadOperation(gpa, read)
+                            try emulateInstruction()
+                            return nil
 
                         case .instructionFetch:
                             let registers = try readRegisters([.cs, .rip])
