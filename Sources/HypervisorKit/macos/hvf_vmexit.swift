@@ -265,9 +265,10 @@ extension VirtualMachine.VCPU {
         if isString {
             let isRep = Bool(exitQ[5])
 
-            let exitInfo = BitField32(try vmcs.vmExitInstructionInfo())
-            let addressSize = 16 << exitInfo[7...9]
-            let segmentOverride = isIn ? .ds : LogicalMemoryAccess.SegmentRegister(rawValue: Int(exitInfo[15...17]))!
+            let exitInfo = try vmcs.vmExitInstructionInfo()
+            let lma = LogicalMemoryAccess(rawValue: exitInfo)
+            let segmentOverride = isIn ? .es : lma.segmentRegister
+            let addressSize = lma.addressSize
             try registers.registerCacheControl.readRegisters([.segmentRegisters, .rcx, .rflags])
 
             let segReg: SegmentRegister = {
