@@ -285,12 +285,14 @@ extension VMCS {
             }
 
             // • If the “enable VPID” VM-execution control is 1, the value of the VPID VM-execution control field must not be 0000H.
+#if false
             let enableVPID = (secondaryControls[5])
             if enableVPID {
                 if try self.vpid() == 0 {
                     fatalError("enable VPID is set but VPID == 0")
                 }
             }
+#endif
 
             // • If the “enable EPT” VM-execution control is 1, the EPTP VM-execution control field (see Table 24-8 in Section 24.6.11) must satisfy the following checks
             // — The EPT memory type (bits 2:0) must be a value supported by the processor as indicated in the IA32_VMX_EPT_VPID_CAP MSR (see Appendix A.10).
@@ -651,10 +653,10 @@ extension VMCS {
 
 
         func checkHostSegmentAndDescriptorTableRegisters() throws {
-
+#if false
             // The following checks are performed on fields in the host-state area that correspond to segment and descriptor- table registers:
             // • In the selector field for each of CS, SS, DS, ES, FS, GS and TR, the RPL (bits 1:0) and the TI flag (bit 2) must be 0.
-#if false
+
             if try self.hostCSSelector() & 0x3 != 0 { fatalError("Host CS Selector has RPL != 0 or TI flag is set") }
             if try self.hostSSSelector() & 0x3 != 0 { fatalError("Host SS Selector has RPL != 0 or TI flag is set") }
             if try self.hostDSSelector() & 0x3 != 0 { fatalError("Host DS Selector has RPL != 0 or TI flag is set") }
@@ -662,7 +664,7 @@ extension VMCS {
             if try self.hostFSSelector() & 0x3 != 0 { fatalError("Host FS Selector has RPL != 0 or TI flag is set") }
             if try self.hostGSSelector() & 0x3 != 0 { fatalError("Host GS Selector has RPL != 0 or TI flag is set") }
             if try self.hostTRSelector() & 0x3 != 0 { fatalError("Host TR Selector has RPL != 0 or TI flag is set") }
-#endif
+
             // • The selector fields for CS and TR cannot be 0000H.
             if try self.hostCSSelector() == 0 { fatalError("Host CS Selector cannot be 0x0000") }
             if try self.hostTRSelector() == 0 { fatalError("Host TR Selector cannot be 0x0000") }
@@ -678,6 +680,7 @@ extension VMCS {
             if !checkCanonicalAddress(UInt64(try self.hostGDTRBase())) { fatalError("GDTR base is not canonical ") }
             if !checkCanonicalAddress(UInt64(try self.hostIDTRBase())) { fatalError("IDTR base is not canonical ") }
             if !checkCanonicalAddress(UInt64(try self.hostTRBase()))   { fatalError("TR base is not canonical ") }
+#endif
         }
 
 
@@ -713,7 +716,9 @@ extension VMCS {
                 // • If the “host address-space size” VM-exit control is 1, the following must hold:
                 // — Bit 5 of the CR4 field (corresponding to CR4.PAE) is 1.
                 // — The RIP field contains a canonical address.
+#if false
                 if try self.hostCR4().pae == false { fatalError("VMExitControls.hostAddressSpaceSize == 1 but CR4.PAE != 1") }
+#endif
                 if !checkCanonicalAddress(UInt64(try self.guestRIP())) { fatalError("VMExitControls.hostAddressSpaceSize == 0 but RIP is not a canonical address") }
             }
             //On processors that do not support Intel 64 architecture, checks are performed to ensure that the “IA-32e mode guest” VM-entry control and the “host address-space size” VM-exit control are both 0.
@@ -1437,7 +1442,6 @@ extension VMCS {
         try checkGuestRIPandRFLAGS()
         try checkGuestNonRegisterState()
         checkGuestPDPTEntries()
-//        print("VMCS Fields OK")
     }
 }
 

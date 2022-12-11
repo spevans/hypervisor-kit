@@ -48,7 +48,9 @@ extension VirtualMachine.VCPU {
                     interruptibilityState.blockingBySTI = false
                     interruptibilityState.blockingByMovSS = false
                     try vmcs.guestInterruptibilityState(interruptibilityState)
-                    try vmcs.checkFieldsAreValid()
+                    if vm.logger.logLevel <= .debug {
+                        try vmcs.checkFieldsAreValid()
+                    }
                 }
             }
 
