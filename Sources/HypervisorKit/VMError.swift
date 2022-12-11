@@ -7,7 +7,7 @@
 //
 
 /// A type that enumerates errors thrown by `HypervisorKit`.
-public enum VMError: Error {
+public enum VMError: Error, CustomStringConvertible {
     // General
     /// Failed to initialise the VM subsystem.
     case vmCreateVMFailure
@@ -105,4 +105,11 @@ public enum VMError: Error {
     case hvDenied
     case hvUnsupported
     case hvUnknownError(UInt32)
+
+    public var description: String {
+        switch self {
+            case .hvDenied: return "No permission to use HVF"
+            default: return self.localizedDescription
+        }
+    }
 }

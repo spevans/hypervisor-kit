@@ -43,7 +43,7 @@ public final class VirtualMachine {
             try self._createVM()
             isShutdown = false
         } catch {
-            logger.debug("Cannot create VM: \(error)")
+            logger.error("Cannot create VM: \(error)")
             throw VMError.vmCreateVMFailure
         }
     }
